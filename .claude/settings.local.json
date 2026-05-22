@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm create *)",
+      "Bash(cp -r /tmp/lubriplan-card/* /c/Users/ferga/Documents/lubriplan-card/)",
+      "Bash(cp -r /tmp/lubriplan-card/.gitignore /c/Users/ferga/Documents/lubriplan-card/)",
+      "Bash(npm install *)",
+      "Bash(node *)"
+    ]
+  }
+}

@@ -1,0 +1,285 @@
+import { useEffect, useRef, useState } from 'react'
+import { FRECUENCIAS, METODOS } from '../data/equipos'
+
+export default function BottomSheet({ punto, onClose }) {
+  const sheetRef = useRef(null)
+  const startYRef = useRef(null)
+  const [dragging, setDragging] = useState(false)
+  const [translateY, setTranslateY] = useState(0)
+
+  useEffect(() => {
+    const onKeyDown = (e) => {
+      if (e.key === 'Escape') onClose()
+    }
+    window.addEventListener('keydown', onKeyDown)
+    return () => window.removeEventListener('keydown', onKeyDown)
+  }, [onClose])
+
+  const handleTouchStart = (e) => {
+    startYRef.current = e.touches[0].clientY
+    setDragging(true)
+  }
+
+  const handleTouchMove = (e) => {
+    if (!dragging || startYRef.current === null) return
+    const delta = e.touches[0].clientY - startYRef.current
+    if (delta > 0) setTranslateY(delta)
+  }
+
+  const handleTouchEnd = () => {
+    setDragging(false)
+    if (translateY > 80) {
+      onClose()
+    } else {
+      setTranslateY(0)
+    }
+  }
+
+  if (!punto) return null
+
+  const freq = FRECUENCIAS[punto.frecuencia]
+  const metodo = METODOS[punto.metodo]
+
+  return (
+    <>
+      {/* Overlay */}
+      <div
+        className="animate-fade-in"
+        onClick={onClose}
+        style={{
+          position: 'absolute',
+          inset: 0,
+          background: 'rgba(0,0,0,0.6)',
+          zIndex: 40,
+        }}
+      />
+
+      {/* Sheet */}
+      <div
+        ref={sheetRef}
+        className="animate-slide-up"
+        onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleTouchEnd}
+        style={{
+          position: 'absolute',
+          bottom: 0,
+          left: 0,
+          right: 0,
+          height: '65%',
+          background: '#131820',
+          borderRadius: '24px 24px 0 0',
+          zIndex: 50,
+          display: 'flex',
+          flexDirection: 'column',
+          overflow: 'hidden',
+          transform: `translateY(${translateY}px)`,
+          transition: dragging ? 'none' : 'transform 0.2s ease',
+          borderTop: '1px solid #2A3448',
+        }}
+      >
+        {/* Drag handle */}
+        <div
+          style={{
+            display: 'flex',
+            justifyContent: 'center',
+            padding: '14px 0 10px',
+            flexShrink: 0,
+          }}
+        >
+          <div
+            style={{
+              width: 40,
+              height: 4,
+              borderRadius: 2,
+              background: '#2A3448',
+            }}
+          />
+        </div>
+
+        {/* Scrollable content */}
+        <div
+          style={{
+            flex: 1,
+            overflowY: 'auto',
+            padding: '8px 24px 40px',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: 20,
+          }}
+        >
+          {/* Header */}
+          <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12, justifyContent: 'space-between' }}>
+            <h2
+              style={{
+                fontFamily: "'DM Sans', sans-serif",
+                fontSize: 20,
+                fontWeight: 700,
+                color: '#E8EDF5',
+                lineHeight: 1.3,
+                flex: 1,
+              }}
+            >
+              {punto.nombre}
+            </h2>
+            <button
+              onClick={onClose}
+              style={{
+                background: '#1C2230',
+                border: 'none',
+                borderRadius: 10,
+                width: 36,
+                height: 36,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                cursor: 'pointer',
+                flexShrink: 0,
+                color: '#7A8BA8',
+              }}
+            >
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                <path d="M2 2L12 12M12 2L2 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+              </svg>
+            </button>
+          </div>
+
+          {/* Frequency badge */}
+          <div
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: 8,
+              background: freq.bg,
+              border: `1px solid ${freq.color}30`,
+              borderRadius: 10,
+              padding: '8px 14px',
+              alignSelf: 'flex-start',
+            }}
+          >
+            <div style={{ width: 10, height: 10, borderRadius: '50%', background: freq.color }} />
+            <span
+              style={{
+                color: freq.color,
+                fontSize: 14,
+                fontWeight: 700,
+                fontFamily: "'DM Sans', sans-serif",
+              }}
+            >
+              {freq.label}
+            </span>
+          </div>
+
+          {/* Info rows */}
+          <div
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              gap: 0,
+              background: '#1C2230',
+              borderRadius: 14,
+              overflow: 'hidden',
+              border: '1px solid #2A3448',
+            }}
+          >
+            <InfoRow
+              icon={
+                <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+                  <path d="M3 9C3 6 6 3 9 3s6 3 6 6-3 6-6 6-6-3-6-6z" stroke="#F4A020" strokeWidth="1.4" />
+                  <path d="M9 6v4M9 12h.01" stroke="#F4A020" strokeWidth="1.4" strokeLinecap="round" />
+                </svg>
+              }
+              label="Lubricante"
+              value={punto.lubricante}
+              last={false}
+            />
+
+            {punto.cantidad > 0 && (
+              <InfoRow
+                icon={
+                  <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+                    <path d="M9 2L13 8H5L9 2Z" stroke="#F4A020" strokeWidth="1.4" strokeLinejoin="round" />
+                    <rect x="6" y="8" width="6" height="8" rx="1" stroke="#F4A020" strokeWidth="1.4" />
+                  </svg>
+                }
+                label="Cantidad"
+                value={`${punto.cantidad} ${punto.unidad}`}
+                last={false}
+              />
+            )}
+
+            <InfoRow
+              icon={
+                <span style={{ fontSize: 17 }}>{metodo?.icon || '🔧'}</span>
+              }
+              label="Método"
+              value={metodo?.label || punto.metodo}
+              last={true}
+            />
+          </div>
+
+          {/* Technical notes */}
+          {punto.notas && (
+            <div
+              style={{
+                background: '#0A0C0F',
+                borderRadius: 14,
+                padding: '14px 16px',
+                border: '1px solid #2A3448',
+              }}
+            >
+              <div
+                style={{
+                  fontSize: 11,
+                  fontWeight: 700,
+                  letterSpacing: 1.5,
+                  color: '#7A8BA8',
+                  textTransform: 'uppercase',
+                  marginBottom: 8,
+                }}
+              >
+                Notas técnicas
+              </div>
+              <p
+                style={{
+                  fontSize: 14,
+                  color: '#B8C5D8',
+                  lineHeight: 1.6,
+                  fontFamily: "'DM Sans', sans-serif",
+                }}
+              >
+                {punto.notas}
+              </p>
+            </div>
+          )}
+        </div>
+      </div>
+    </>
+  )
+}
+
+function InfoRow({ icon, label, value, last }) {
+  return (
+    <div
+      style={{
+        display: 'flex',
+        alignItems: 'center',
+        gap: 14,
+        padding: '14px 16px',
+        borderBottom: last ? 'none' : '1px solid #2A3448',
+      }}
+    >
+      <div style={{ width: 20, display: 'flex', justifyContent: 'center', flexShrink: 0 }}>
+        {icon}
+      </div>
+      <div style={{ flex: 1 }}>
+        <div style={{ fontSize: 11, color: '#7A8BA8', fontWeight: 600, letterSpacing: 0.8, textTransform: 'uppercase', marginBottom: 3 }}>
+          {label}
+        </div>
+        <div style={{ fontSize: 15, color: '#E8EDF5', fontWeight: 500, fontFamily: "'DM Sans', sans-serif" }}>
+          {value}
+        </div>
+      </div>
+    </div>
+  )
+}
