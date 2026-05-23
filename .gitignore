@@ -12,6 +12,10 @@ dist
 dist-ssr
 *.local
 
+# Lock file generado en Windows tiene binarios win32 incompatibles con Linux (Railway)
+# El servidor de deploy genera su propio lock file con npm install
+package-lock.json
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
