@@ -4,6 +4,7 @@ import AdminLayout from '../components/AdminLayout'
 import ConfirmModal from '../components/ConfirmModal'
 import QRModal from '../components/QRModal'
 import { useAdmin } from '../context/AdminContext'
+import { convertToBase64 } from '../../utils/imageUtils'
 
 const FRECUENCIAS = [
   { value: 'DAILY', label: 'Diaria', color: '#EF4444' },
@@ -161,6 +162,7 @@ export default function EditorCarta() {
   const [selectedId, setSelectedId] = useState(null)
   const [showQR, setShowQR] = useState(false)
   const [dragOver, setDragOver] = useState(false)
+  const [imgError, setImgError] = useState(null)
   const imgRef = useRef(null)
   const fileInputRef = useRef(null)
 
@@ -211,11 +213,16 @@ export default function EditorCarta() {
     setSelectedId(null)
   }, [id, actualizarPuntos])
 
-  const handleFileLoad = (file) => {
+  const handleFileLoad = async (file) => {
     if (!file || !file.type.startsWith('image/')) return
-    const url = URL.createObjectURL(file)
-    setImagenUrl(url)
-    actualizarImagenEquipo(id, url)
+    setImgError(null)
+    try {
+      const base64 = await convertToBase64(file)
+      setImagenUrl(base64)
+      actualizarImagenEquipo(id, base64)
+    } catch (err) {
+      setImgError('La imagen no debe superar 2MB. Usa una foto más pequeña.')
+    }
   }
 
   const handleSaveAll = () => {
@@ -308,20 +315,25 @@ export default function EditorCarta() {
         }}>
           <div style={{
             padding: '10px 16px', borderBottom: '1px solid #1E2535', flexShrink: 0,
-            display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+            display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8,
           }}>
             <span style={{ color: '#7A8BA8', fontSize: 12, textTransform: 'uppercase', letterSpacing: 0.5 }}>
               {imagenUrl ? 'Clic en la imagen para agregar un punto' : 'Imagen del equipo'}
             </span>
-            {imagenUrl && (
-              <button onClick={() => fileInputRef.current?.click()} style={{
-                padding: '4px 12px', borderRadius: 6, border: '1px solid #2A3346',
-                background: 'transparent', color: '#7A8BA8', cursor: 'pointer', fontSize: 12,
-                fontFamily: "'DM Sans', sans-serif",
-              }}>
-                Cambiar
-              </button>
-            )}
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              {imgError && imagenUrl && (
+                <span style={{ color: '#EF4444', fontSize: 11 }}>{imgError}</span>
+              )}
+              {imagenUrl && (
+                <button onClick={() => { setImgError(null); fileInputRef.current?.click() }} style={{
+                  padding: '4px 12px', borderRadius: 6, border: '1px solid #2A3346',
+                  background: 'transparent', color: '#7A8BA8', cursor: 'pointer', fontSize: 12,
+                  fontFamily: "'DM Sans', sans-serif",
+                }}>
+                  Cambiar
+                </button>
+              )}
+            </div>
           </div>
 
           <div style={{ flex: 1, position: 'relative', overflow: 'hidden' }}>
@@ -336,20 +348,26 @@ export default function EditorCarta() {
                   display: 'flex', flexDirection: 'column',
                   alignItems: 'center', justifyContent: 'center', gap: 12,
                   cursor: 'pointer', borderRadius: 8,
-                  border: `2px dashed ${dragOver ? '#F4A020' : '#2A3346'}`,
+                  border: `2px dashed ${imgError ? '#EF4444' : dragOver ? '#F4A020' : '#2A3346'}`,
                   background: dragOver ? 'rgba(244,160,32,0.05)' : 'transparent',
                   transition: 'border-color 0.2s, background 0.2s',
                 }}
               >
-                <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke={dragOver ? '#F4A020' : '#4A5568'} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke={imgError ? '#EF4444' : dragOver ? '#F4A020' : '#4A5568'} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
                   <rect x="3" y="3" width="18" height="18" rx="2" /><circle cx="8.5" cy="8.5" r="1.5" />
                   <polyline points="21 15 16 10 5 21" />
                 </svg>
                 <div style={{ textAlign: 'center' }}>
-                  <div style={{ color: '#E8EDF5', fontSize: 14, fontWeight: 500, marginBottom: 4 }}>
-                    Arrastrá la foto del equipo aquí
-                  </div>
-                  <div style={{ color: '#4A5568', fontSize: 12 }}>o hacé clic para seleccionar</div>
+                  {imgError ? (
+                    <div style={{ color: '#EF4444', fontSize: 13, fontWeight: 600, maxWidth: 220 }}>{imgError}</div>
+                  ) : (
+                    <>
+                      <div style={{ color: '#E8EDF5', fontSize: 14, fontWeight: 500, marginBottom: 4 }}>
+                        Arrastrá la foto del equipo aquí
+                      </div>
+                      <div style={{ color: '#4A5568', fontSize: 12 }}>o hacé clic para seleccionar (máx. 2MB)</div>
+                    </>
+                  )}
                 </div>
               </div>
             ) : (

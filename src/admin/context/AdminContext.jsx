@@ -17,14 +17,14 @@ export function AdminProvider({ children }) {
   const [isLoggedIn, setIsLoggedIn] = useState(() => !!localStorage.getItem(SESSION_KEY))
   const [equipos, setEquipos] = useState(() => {
     try {
-      const saved = localStorage.getItem('lubriplan_equipos')
-      if (saved) return JSON.parse(saved).map(e => ({ ...e, imagenUrl: null }))
+      const saved = localStorage.getItem('masterlub_equipos')
+      if (saved) return JSON.parse(saved)
     } catch {}
     return equiposInicial.map(e => ({ ...e, activo: true, imagenUrl: null }))
   })
   const [tecnicos, setTecnicos] = useState(() => {
     try {
-      const saved = localStorage.getItem('lubriplan_tecnicos')
+      const saved = localStorage.getItem('masterlub_tecnicos')
       if (saved) return JSON.parse(saved)
     } catch {}
     return TECNICOS_INICIALES
@@ -32,14 +32,18 @@ export function AdminProvider({ children }) {
 
   useEffect(() => {
     try {
-      localStorage.setItem('lubriplan_equipos', JSON.stringify(equipos.map(e => ({ ...e, imagenUrl: null }))))
-    } catch {}
+      localStorage.setItem('masterlub_equipos', JSON.stringify(equipos))
+    } catch {
+      console.error('Error guardando equipos en localStorage')
+    }
   }, [equipos])
 
   useEffect(() => {
     try {
-      localStorage.setItem('lubriplan_tecnicos', JSON.stringify(tecnicos))
-    } catch {}
+      localStorage.setItem('masterlub_tecnicos', JSON.stringify(tecnicos))
+    } catch {
+      console.error('Error guardando técnicos en localStorage')
+    }
   }, [tecnicos])
 
   const login = useCallback((email, password) => {
