@@ -1,8 +1,6 @@
 import { useState, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { equipos } from '../data/equipos'
-
-const AREAS = ['Todas', ...Array.from(new Set(equipos.map(e => e.area)))]
+import { useAdmin } from '../admin/context/AdminContext'
 
 function EquipoCard({ equipo, onClick }) {
   return (
@@ -92,17 +90,24 @@ function EquipoCard({ equipo, onClick }) {
 
 export default function EquiposScreen() {
   const navigate = useNavigate()
+  const { equipos } = useAdmin()
   const [busqueda, setBusqueda] = useState('')
   const [areaActiva, setAreaActiva] = useState('Todas')
 
+  const AREAS = useMemo(
+    () => ['Todas', ...Array.from(new Set(equipos.map(e => e.area)))],
+    [equipos]
+  )
+
   const equiposFiltrados = useMemo(() => {
     return equipos.filter(e => {
+      if (e.activo === false) return false
       const matchArea = areaActiva === 'Todas' || e.area === areaActiva
       const q = busqueda.toLowerCase()
       const matchBusqueda = !q || e.nombre.toLowerCase().includes(q) || e.area.toLowerCase().includes(q)
       return matchArea && matchBusqueda
     })
-  }, [busqueda, areaActiva])
+  }, [equipos, busqueda, areaActiva])
 
   return (
     <div
@@ -139,7 +144,7 @@ export default function EquiposScreen() {
             LUBRIPLAN
           </div>
           <div style={{ fontSize: 12, color: '#7A8BA8', marginTop: 2 }}>
-            {equipos.length} equipos disponibles
+            {equipos.filter(e => e.activo !== false).length} equipos disponibles
           </div>
         </div>
         <button

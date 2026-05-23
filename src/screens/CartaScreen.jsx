@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { equipos, FRECUENCIAS } from '../data/equipos'
+import { FRECUENCIAS } from '../data/equipos'
+import { useAdmin } from '../admin/context/AdminContext'
 import EquipoSVG from '../components/EquipoSVG'
 import BottomSheet from '../components/BottomSheet'
 
@@ -67,6 +68,7 @@ function Leyenda() {
 export default function CartaScreen() {
   const { id } = useParams()
   const navigate = useNavigate()
+  const { equipos } = useAdmin()
   const [puntoActivo, setPuntoActivo] = useState(null)
 
   const equipo = equipos.find(e => e.id === id)
@@ -233,7 +235,10 @@ export default function CartaScreen() {
               padding: '10px',
             }}
           >
-            <EquipoSVG tipo={equipo.imagen} />
+            {equipo.imagenUrl
+              ? <img src={equipo.imagenUrl} alt={equipo.nombre} style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+              : <EquipoSVG tipo={equipo.imagen} />
+            }
           </div>
 
           {equipo.puntos.map((punto, i) => (
