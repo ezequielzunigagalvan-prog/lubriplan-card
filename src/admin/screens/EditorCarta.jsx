@@ -253,6 +253,20 @@ export default function EditorCarta() {
         }}>
           ← Volver a equipos
         </button>
+
+        {equipo.codigo && (
+          <div style={{
+            display: 'flex', alignItems: 'center', gap: 8,
+            padding: '7px 14px', borderRadius: 8,
+            background: 'rgba(244,160,32,0.1)', border: '1px solid rgba(244,160,32,0.25)',
+          }}>
+            <span style={{ color: '#7A8BA8', fontSize: 11, textTransform: 'uppercase', letterSpacing: 0.5 }}>Código</span>
+            <span style={{ color: '#F4A020', fontFamily: 'monospace', fontSize: 15, fontWeight: 700, letterSpacing: 2 }}>
+              {equipo.codigo}
+            </span>
+          </div>
+        )}
+
         <div style={{ flex: 1 }} />
         <button onClick={() => setShowQR(true)} style={{
           padding: '9px 16px', borderRadius: 8,

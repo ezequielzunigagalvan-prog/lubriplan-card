@@ -165,7 +165,19 @@ export default function CartaScreen() {
           >
             {equipo.nombre}
           </h1>
-          <p style={{ fontSize: 12, color: '#7A8BA8', marginTop: 2 }}>{equipo.area}</p>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 2 }}>
+            {equipo.codigo && (
+              <span style={{
+                fontFamily: 'monospace', fontSize: 11, fontWeight: 700,
+                color: '#F4A020', letterSpacing: 1,
+                background: 'rgba(244,160,32,0.1)', borderRadius: 4,
+                padding: '1px 6px',
+              }}>
+                {equipo.codigo}
+              </span>
+            )}
+            <p style={{ fontSize: 12, color: '#7A8BA8', margin: 0 }}>{equipo.area}</p>
+          </div>
         </div>
 
         <button

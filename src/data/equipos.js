@@ -18,6 +18,7 @@ export const METODOS = {
 export const equipos = [
   {
     id: 'kaeser-sk19',
+    codigo: 'CMP-001',
     nombre: 'Compresor de tornillo KAESER SK-19',
     area: 'Sala de compresores',
     imagen: 'compresor',
@@ -87,6 +88,7 @@ export const equipos = [
   },
   {
     id: 'grundfos-cr15',
+    codigo: 'BOM-001',
     nombre: 'Bomba centrífuga Grundfos CR-15',
     area: 'Sala de bombas',
     imagen: 'bomba',
@@ -132,6 +134,7 @@ export const equipos = [
   },
   {
     id: 'sew-r97',
+    codigo: 'RED-001',
     nombre: 'Reductor SEW R97',
     area: 'Línea de producción A',
     imagen: 'reductor',
@@ -189,6 +192,7 @@ export const equipos = [
   },
   {
     id: 'weg-w22',
+    codigo: 'MOT-001',
     nombre: 'Motoreductor WEG W22',
     area: 'Línea de producción B',
     imagen: 'motor',
@@ -222,6 +226,7 @@ export const equipos = [
   },
   {
     id: 'siemens-ventilador',
+    codigo: 'VEN-001',
     nombre: 'Ventilador industrial Siemens',
     area: 'Cuarto de enfriamiento',
     imagen: 'ventilador',
@@ -267,6 +272,7 @@ export const equipos = [
   },
   {
     id: 'banda-transportadora',
+    codigo: 'BAN-001',
     nombre: 'Banda transportadora principal',
     area: 'Almacén',
     imagen: 'banda',
@@ -348,6 +354,7 @@ export const equipos = [
   },
   {
     id: 'ge-turbina',
+    codigo: 'TUR-001',
     nombre: 'Turbina de vapor GE',
     area: 'Sala de turbinas',
     imagen: 'turbina',
@@ -453,6 +460,7 @@ export const equipos = [
   },
   {
     id: 'lightnin-agitador',
+    codigo: 'AGI-001',
     nombre: 'Agitador industrial Lightnin',
     area: 'Planta química',
     imagen: 'agitador',

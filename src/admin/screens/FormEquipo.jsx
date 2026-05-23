@@ -27,6 +27,7 @@ export default function FormEquipo() {
   const equipo = isEditing ? equipos.find(e => e.id === id) : null
 
   const [form, setForm] = useState({
+    codigo: equipo?.codigo || '',
     nombre: equipo?.nombre || '',
     area: equipo?.area || '',
     descripcion: equipo?.descripcion || '',
@@ -43,6 +44,7 @@ export default function FormEquipo() {
   const handleSubmit = (e) => {
     e.preventDefault()
     const errs = {}
+    if (!form.codigo.trim()) errs.codigo = 'El código es requerido'
     if (!form.nombre.trim()) errs.nombre = 'El nombre es requerido'
     if (!form.area.trim()) errs.area = 'El área es requerida'
     if (Object.keys(errs).length > 0) { setErrores(errs); return }
@@ -72,6 +74,23 @@ export default function FormEquipo() {
           border: '1px solid #1E2535', padding: '32px 28px',
         }}>
           <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+            <Field label="Código del equipo *" error={errores.codigo}>
+              <input
+                type="text"
+                value={form.codigo}
+                onChange={set('codigo')}
+                placeholder="Ej: CMP-001"
+                style={{
+                  ...inputStyle(!!errores.codigo),
+                  fontFamily: 'monospace',
+                  fontSize: 15,
+                  letterSpacing: 2,
+                  textTransform: 'uppercase',
+                }}
+                onInput={e => { e.target.value = e.target.value.toUpperCase() }}
+              />
+            </Field>
+
             <Field label="Nombre del equipo *" error={errores.nombre}>
               <input
                 type="text"

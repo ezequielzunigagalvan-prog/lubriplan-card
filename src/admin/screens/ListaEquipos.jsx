@@ -85,7 +85,7 @@ export default function ListaEquipos() {
           <table style={{ width: '100%', borderCollapse: 'collapse' }}>
             <thead>
               <tr style={{ borderBottom: '1px solid #1E2535' }}>
-                {['Equipo', 'Área', 'Puntos', 'Estado', 'Acciones'].map(h => (
+                {['Código', 'Equipo', 'Área', 'Puntos', 'Estado', 'Acciones'].map(h => (
                   <th key={h} style={{
                     padding: '12px 20px', textAlign: 'left',
                     color: '#4A5568', fontSize: 11, fontWeight: 600,
@@ -107,6 +107,14 @@ export default function ListaEquipos() {
                   borderBottom: i < filtrados.length - 1 ? '1px solid #1E2535' : 'none',
                   background: i % 2 === 0 ? 'transparent' : 'rgba(255,255,255,0.015)',
                 }}>
+                  <td style={{ padding: '13px 20px' }}>
+                    <span style={{
+                      fontFamily: 'monospace', fontSize: 13, fontWeight: 700,
+                      color: '#F4A020', letterSpacing: 1,
+                    }}>
+                      {e.codigo || '—'}
+                    </span>
+                  </td>
                   <td style={{ padding: '13px 20px' }}>
                     <div style={{ color: '#E8EDF5', fontSize: 14, fontWeight: 500 }}>{e.nombre}</div>
                   </td>
