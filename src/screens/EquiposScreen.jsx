@@ -115,6 +115,7 @@ export default function EquiposScreen() {
         display: 'flex',
         flexDirection: 'column',
         height: '100%',
+        minHeight: 0,
         background: '#0A0C0F',
         overflow: 'hidden',
       }}
@@ -252,6 +253,7 @@ export default function EquiposScreen() {
       <div
         style={{
           flex: 1,
+          minHeight: 0,
           overflowY: 'auto',
           padding: '4px 20px 32px',
           display: 'flex',

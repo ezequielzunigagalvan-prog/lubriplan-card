@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useCallback } from 'react'
+import { createContext, useContext, useState, useCallback, useEffect } from 'react'
 import { equipos as equiposInicial } from '../../data/equipos'
 
 const ADMIN_EMAIL = 'admin@lubriplan.com'
@@ -15,10 +15,32 @@ const AdminContext = createContext(null)
 
 export function AdminProvider({ children }) {
   const [isLoggedIn, setIsLoggedIn] = useState(() => !!localStorage.getItem(SESSION_KEY))
-  const [equipos, setEquipos] = useState(() =>
-    equiposInicial.map(e => ({ ...e, activo: true, imagenUrl: null }))
-  )
-  const [tecnicos, setTecnicos] = useState(TECNICOS_INICIALES)
+  const [equipos, setEquipos] = useState(() => {
+    try {
+      const saved = localStorage.getItem('lubriplan_equipos')
+      if (saved) return JSON.parse(saved).map(e => ({ ...e, imagenUrl: null }))
+    } catch {}
+    return equiposInicial.map(e => ({ ...e, activo: true, imagenUrl: null }))
+  })
+  const [tecnicos, setTecnicos] = useState(() => {
+    try {
+      const saved = localStorage.getItem('lubriplan_tecnicos')
+      if (saved) return JSON.parse(saved)
+    } catch {}
+    return TECNICOS_INICIALES
+  })
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('lubriplan_equipos', JSON.stringify(equipos.map(e => ({ ...e, imagenUrl: null }))))
+    } catch {}
+  }, [equipos])
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('lubriplan_tecnicos', JSON.stringify(tecnicos))
+    } catch {}
+  }, [tecnicos])
 
   const login = useCallback((email, password) => {
     if (email === ADMIN_EMAIL && password === ADMIN_PASSWORD) {
