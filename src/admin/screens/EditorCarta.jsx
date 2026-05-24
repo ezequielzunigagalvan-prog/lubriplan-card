@@ -163,6 +163,8 @@ export default function EditorCarta() {
   const [showQR, setShowQR] = useState(false)
   const [dragOver, setDragOver] = useState(false)
   const [imgError, setImgError] = useState(null)
+  const [selectMode, setSelectMode] = useState(false)
+  const [checkedIds, setCheckedIds] = useState(new Set())
   const imgRef = useRef(null)
   const fileInputRef = useRef(null)
 
@@ -212,6 +214,30 @@ export default function EditorCarta() {
     })
     setSelectedId(null)
   }, [id, actualizarPuntos])
+
+  const handleDeleteChecked = useCallback(() => {
+    setPuntos(prev => {
+      const nuevos = prev
+        .filter(p => !checkedIds.has(p.id))
+        .map((p, i) => ({ ...p, numero: i + 1 }))
+      actualizarPuntos(id, nuevos)
+      return nuevos
+    })
+    setCheckedIds(new Set())
+    setSelectMode(false)
+  }, [id, actualizarPuntos, checkedIds])
+
+  const toggleCheck = useCallback((puntoId) => {
+    setCheckedIds(prev => {
+      const next = new Set(prev)
+      next.has(puntoId) ? next.delete(puntoId) : next.add(puntoId)
+      return next
+    })
+  }, [])
+
+  const toggleSelectAll = useCallback(() => {
+    setCheckedIds(prev => prev.size === puntos.length ? new Set() : new Set(puntos.map(p => p.id)))
+  }, [puntos])
 
   const handleFileLoad = async (file) => {
     if (!file || !file.type.startsWith('image/')) return
@@ -424,7 +450,7 @@ export default function EditorCarta() {
           border: '1px solid #1E2535',
           display: 'flex', flexDirection: 'column', overflow: 'hidden',
         }}>
-          {selectedPunto ? (
+          {selectedPunto && !selectMode ? (
             <PuntoForm
               punto={selectedPunto}
               onSave={handleSavePunto}
@@ -433,14 +459,58 @@ export default function EditorCarta() {
             />
           ) : (
             <>
+              {/* Panel header */}
               <div style={{
-                padding: '12px 16px', borderBottom: '1px solid #1E2535', flexShrink: 0,
-                color: '#7A8BA8', fontSize: 12, textTransform: 'uppercase', letterSpacing: 0.5,
+                padding: '10px 12px 10px 16px', borderBottom: '1px solid #1E2535', flexShrink: 0,
+                display: 'flex', alignItems: 'center', justifyContent: 'space-between',
               }}>
-                Puntos de lubricación ({puntos.length})
+                {selectMode ? (
+                  <>
+                    <button
+                      onClick={toggleSelectAll}
+                      style={{
+                        background: 'none', border: 'none', color: '#7A8BA8',
+                        fontSize: 12, cursor: 'pointer', padding: 0,
+                        fontFamily: "'DM Sans', sans-serif",
+                      }}
+                    >
+                      {checkedIds.size === puntos.length ? 'Deseleccionar todo' : 'Seleccionar todo'}
+                    </button>
+                    <button
+                      onClick={() => { setSelectMode(false); setCheckedIds(new Set()) }}
+                      style={{
+                        background: 'none', border: 'none', color: '#7A8BA8',
+                        fontSize: 12, cursor: 'pointer', padding: '4px 8px',
+                        fontFamily: "'DM Sans', sans-serif",
+                      }}
+                    >
+                      Cancelar
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <span style={{ color: '#7A8BA8', fontSize: 12, textTransform: 'uppercase', letterSpacing: 0.5 }}>
+                      Puntos ({puntos.length})
+                    </span>
+                    {puntos.length > 0 && (
+                      <button
+                        onClick={() => { setSelectMode(true); setSelectedId(null) }}
+                        style={{
+                          background: 'none', border: '1px solid #2A3346',
+                          borderRadius: 6, color: '#7A8BA8',
+                          fontSize: 11, cursor: 'pointer', padding: '3px 10px',
+                          fontFamily: "'DM Sans', sans-serif",
+                        }}
+                      >
+                        Seleccionar
+                      </button>
+                    )}
+                  </>
+                )}
               </div>
 
-              <div style={{ flex: 1, overflowY: 'auto' }}>
+              {/* Points list */}
+              <div style={{ flex: 1, overflowY: 'auto', minHeight: 0 }}>
                 {puntos.length === 0 ? (
                   <div style={{
                     display: 'flex', flexDirection: 'column',
@@ -455,58 +525,104 @@ export default function EditorCarta() {
                     </div>
                   </div>
                 ) : (
-                  puntos.map((p, i) => (
-                    <div
-                      key={p.id}
-                      onClick={() => setSelectedId(p.id)}
-                      style={{
-                        display: 'flex', alignItems: 'center', gap: 12,
-                        padding: '11px 16px', cursor: 'pointer',
-                        borderBottom: i < puntos.length - 1 ? '1px solid #1E2535' : 'none',
-                        background: p.id === selectedId ? 'rgba(244,160,32,0.05)' : 'transparent',
-                        transition: 'background 0.1s',
-                      }}
-                    >
-                      <div style={{
-                        width: 26, height: 26, borderRadius: '50%',
-                        background: frecColor(p.frecuencia),
-                        display: 'flex', alignItems: 'center', justifyContent: 'center',
-                        flexShrink: 0, fontSize: 11, fontWeight: 700, color: '#fff',
-                      }}>
-                        {p.numero}
-                      </div>
-                      <div style={{ flex: 1, minWidth: 0 }}>
-                        <div style={{
-                          color: p.nombre ? '#E8EDF5' : '#4A5568',
-                          fontSize: 13, fontWeight: 500,
-                          overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
-                        }}>
-                          {p.nombre || 'Sin nombre'}
-                        </div>
-                        <div style={{ color: '#4A5568', fontSize: 11 }}>
-                          {FRECUENCIAS.find(f => f.value === p.frecuencia)?.label}
-                        </div>
-                      </div>
-                      <button
-                        onClick={e => { e.stopPropagation(); handleDeletePunto(p.id) }}
-                        style={{ background: 'none', border: 'none', color: '#4A5568', cursor: 'pointer', padding: 4, display: 'flex' }}
+                  puntos.map((p, i) => {
+                    const isChecked = checkedIds.has(p.id)
+                    return (
+                      <div
+                        key={p.id}
+                        onClick={() => selectMode ? toggleCheck(p.id) : setSelectedId(p.id)}
+                        style={{
+                          display: 'flex', alignItems: 'center', gap: 12,
+                          padding: '11px 16px', cursor: 'pointer',
+                          borderBottom: i < puntos.length - 1 ? '1px solid #1E2535' : 'none',
+                          background: isChecked
+                            ? 'rgba(239,68,68,0.07)'
+                            : p.id === selectedId && !selectMode
+                              ? 'rgba(244,160,32,0.05)'
+                              : 'transparent',
+                          transition: 'background 0.1s',
+                        }}
                       >
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></svg>
-                      </button>
-                    </div>
-                  ))
+                        {selectMode ? (
+                          <div style={{
+                            width: 20, height: 20, borderRadius: 5, flexShrink: 0,
+                            border: `2px solid ${isChecked ? '#EF4444' : '#2A3346'}`,
+                            background: isChecked ? '#EF4444' : 'transparent',
+                            display: 'flex', alignItems: 'center', justifyContent: 'center',
+                            transition: 'all 0.1s',
+                          }}>
+                            {isChecked && (
+                              <svg width="11" height="11" viewBox="0 0 12 12" fill="none">
+                                <path d="M2 6l3 3 5-5" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                              </svg>
+                            )}
+                          </div>
+                        ) : (
+                          <div style={{
+                            width: 26, height: 26, borderRadius: '50%',
+                            background: frecColor(p.frecuencia),
+                            display: 'flex', alignItems: 'center', justifyContent: 'center',
+                            flexShrink: 0, fontSize: 11, fontWeight: 700, color: '#fff',
+                          }}>
+                            {p.numero}
+                          </div>
+                        )}
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                          <div style={{
+                            color: p.nombre ? '#E8EDF5' : '#4A5568',
+                            fontSize: 13, fontWeight: 500,
+                            overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+                          }}>
+                            {p.nombre || 'Sin nombre'}
+                          </div>
+                          <div style={{ color: '#4A5568', fontSize: 11 }}>
+                            {FRECUENCIAS.find(f => f.value === p.frecuencia)?.label}
+                          </div>
+                        </div>
+                        {!selectMode && (
+                          <button
+                            onClick={e => { e.stopPropagation(); handleDeletePunto(p.id) }}
+                            style={{ background: 'none', border: 'none', color: '#4A5568', cursor: 'pointer', padding: 4, display: 'flex' }}
+                          >
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></svg>
+                          </button>
+                        )}
+                      </div>
+                    )
+                  })
                 )}
               </div>
 
+              {/* Footer */}
               <div style={{ padding: 14, borderTop: '1px solid #1E2535', flexShrink: 0 }}>
-                <button onClick={() => setShowQR(true)} style={{
-                  width: '100%', padding: '10px', borderRadius: 8,
-                  border: '1px solid #2A3346', background: 'transparent',
-                  color: '#7A8BA8', cursor: 'pointer', fontSize: 13,
-                  fontFamily: "'DM Sans', sans-serif",
-                }}>
-                  Generar QR
-                </button>
+                {selectMode ? (
+                  <button
+                    onClick={handleDeleteChecked}
+                    disabled={checkedIds.size === 0}
+                    style={{
+                      width: '100%', padding: '10px', borderRadius: 8, border: 'none',
+                      background: checkedIds.size > 0 ? '#EF4444' : '#1E2535',
+                      color: checkedIds.size > 0 ? '#fff' : '#4A5568',
+                      cursor: checkedIds.size > 0 ? 'pointer' : 'not-allowed',
+                      fontSize: 13, fontWeight: 700,
+                      fontFamily: "'DM Sans', sans-serif",
+                      transition: 'background 0.15s',
+                    }}
+                  >
+                    {checkedIds.size > 0
+                      ? `Eliminar ${checkedIds.size} punto${checkedIds.size !== 1 ? 's' : ''}`
+                      : 'Seleccioná puntos para eliminar'}
+                  </button>
+                ) : (
+                  <button onClick={() => setShowQR(true)} style={{
+                    width: '100%', padding: '10px', borderRadius: 8,
+                    border: '1px solid #2A3346', background: 'transparent',
+                    color: '#7A8BA8', cursor: 'pointer', fontSize: 13,
+                    fontFamily: "'DM Sans', sans-serif",
+                  }}>
+                    Generar QR
+                  </button>
+                )}
               </div>
             </>
           )}
