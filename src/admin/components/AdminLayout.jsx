@@ -2,16 +2,6 @@ import { useState } from 'react'
 import { NavLink, useNavigate } from 'react-router-dom'
 import { useAdmin } from '../context/AdminContext'
 
-function LogoMark() {
-  return (
-    <svg viewBox="0 0 64 64" fill="none" style={{ width: 32, height: 32, flexShrink: 0 }}>
-      <rect width="64" height="64" rx="10" fill="#F4A020" />
-      <path d="M16 48V20h10c4 0 7 1 9 3s3 5 3 9c0 4-1 7-3 9s-5 3-9 3H16z" fill="#0A0C0F" />
-      <path d="M22 42V26h4c2 0 3 .5 4 1.5S31 30 31 32c0 3-.5 5-1.5 6.5S27 40 25 40h-1v2h-2z" fill="#F4A020" />
-      <rect x="38" y="20" width="6" height="28" fill="#0A0C0F" />
-    </svg>
-  )
-}
 
 const NAV_ITEMS = [
   {
@@ -103,7 +93,7 @@ export default function AdminLayout({ children, titulo }) {
           height: 64, display: 'flex', alignItems: 'center', gap: 12,
           padding: '0 20px', borderBottom: '1px solid #1E2535', flexShrink: 0,
         }}>
-          <LogoMark />
+          <img src="/logo.jpeg" alt="LubriPlan" style={{ width: 36, height: 36, borderRadius: '50%', objectFit: 'cover', flexShrink: 0 }} />
           <div>
             <div style={{ color: '#F4A020', fontFamily: "'Bebas Neue', sans-serif", fontSize: 18, letterSpacing: 2, lineHeight: 1 }}>LUBRIPLAN</div>
             <div style={{ color: '#4A5568', fontSize: 10, letterSpacing: 1, textTransform: 'uppercase', marginTop: 2 }}>Admin</div>

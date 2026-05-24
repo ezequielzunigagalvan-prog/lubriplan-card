@@ -1,7 +1,6 @@
 import { useState, useCallback, useEffect } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
-
-const PIN_CORRECTO = '1234'
+import { useAdmin } from '../admin/context/AdminContext'
 
 const KEYS = [
   ['1', '2', '3'],
@@ -10,17 +9,6 @@ const KEYS = [
   ['', '0', 'DEL'],
 ]
 
-function LogoMark() {
-  return (
-    <svg viewBox="0 0 64 64" fill="none" className="w-16 h-16">
-      <rect width="64" height="64" rx="12" fill="#F4A020" />
-      <path d="M16 48V20h10c4 0 7 1 9 3s3 5 3 9c0 4-1 7-3 9s-5 3-9 3H16z" fill="#0A0C0F" />
-      <path d="M22 42V26h4c2 0 3 .5 4 1.5S31 30 31 32c0 3-.5 5-1.5 6.5S27 40 25 40h-1v2h-2z" fill="#F4A020" />
-      <rect x="38" y="20" width="6" height="28" fill="#0A0C0F" />
-    </svg>
-  )
-}
-
 export default function PinScreen() {
   const [pin, setPin] = useState('')
   const [error, setError] = useState(false)
@@ -28,6 +16,7 @@ export default function PinScreen() {
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
   const equipoParam = searchParams.get('equipo')
+  const { tecnicos } = useAdmin()
 
   const handleKey = useCallback((key) => {
     if (error) setError(false)
@@ -41,7 +30,8 @@ export default function PinScreen() {
     const newPin = pin + key
 
     if (newPin.length === 4) {
-      if (newPin === PIN_CORRECTO) {
+      const pinValido = tecnicos.some(t => t.activo && t.pin === newPin)
+      if (pinValido) {
         if (equipoParam) {
           navigate(`/carta/${equipoParam}`)
         } else {
@@ -60,7 +50,7 @@ export default function PinScreen() {
     } else {
       setPin(newPin)
     }
-  }, [pin, error, navigate, equipoParam])
+  }, [pin, error, navigate, equipoParam, tecnicos])
 
   useEffect(() => {
     const handler = (e) => {
@@ -76,33 +66,13 @@ export default function PinScreen() {
       className="flex flex-col items-center justify-between h-full"
       style={{ background: '#0A0C0F', padding: '48px 24px 36px' }}
     >
-      {/* Logo + title */}
+      {/* Logo */}
       <div className="flex flex-col items-center gap-4">
-        <LogoMark />
-        <div className="flex flex-col items-center gap-1">
-          <span
-            style={{
-              fontFamily: "'Bebas Neue', sans-serif",
-              fontSize: 32,
-              letterSpacing: 4,
-              color: '#F4A020',
-              lineHeight: 1,
-            }}
-          >
-            LUBRIPLAN
-          </span>
-          <span
-            style={{
-              fontFamily: "'DM Sans', sans-serif",
-              fontSize: 13,
-              letterSpacing: 3,
-              color: '#7A8BA8',
-              textTransform: 'uppercase',
-            }}
-          >
-            Cartas de lubricación
-          </span>
-        </div>
+        <img
+          src="/logo.jpeg"
+          alt="LubriPlan Card"
+          style={{ width: 120, height: 120, borderRadius: '50%', objectFit: 'cover' }}
+        />
       </div>
 
       {/* PIN indicator + error */}
