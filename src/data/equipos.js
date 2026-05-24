@@ -1,8 +1,11 @@
 export const FRECUENCIAS = {
   DAILY: { label: 'Diario', color: '#EF4444', bg: '#3F1010' },
   WEEKLY: { label: 'Semanal', color: '#F97316', bg: '#3F1E08' },
+  BIWEEKLY: { label: 'Quincenal', color: '#FB923C', bg: '#3A1E08' },
   MONTHLY: { label: 'Mensual', color: '#EAB308', bg: '#3A3006' },
+  BIMONTHLY: { label: 'Bimestral', color: '#A3E635', bg: '#1A2E06' },
   QUARTERLY: { label: 'Trimestral', color: '#22C55E', bg: '#0A2E18' },
+  SEMIANNUAL: { label: 'Semestral', color: '#06B6D4', bg: '#062A35' },
   ANNUAL: { label: 'Anual', color: '#3B82F6', bg: '#0C1E3F' },
 }
 

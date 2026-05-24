@@ -1,7 +1,7 @@
 import { QRCodeSVG } from 'qrcode.react'
 
 export default function QRModal({ equipoId, equipoNombre, onClose }) {
-  const url = `https://card.lubriplan.com?equipo=${equipoId}`
+  const url = `${window.location.origin}/?equipo=${equipoId}`
   return (
     <div style={{
       position: 'fixed', inset: 0, zIndex: 300,

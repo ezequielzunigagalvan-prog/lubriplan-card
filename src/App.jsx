@@ -10,6 +10,7 @@ import ListaEquipos from './admin/screens/ListaEquipos'
 import FormEquipo from './admin/screens/FormEquipo'
 import EditorCarta from './admin/screens/EditorCarta'
 import GestionTecnicos from './admin/screens/GestionTecnicos'
+import GestionLubricantes from './admin/screens/GestionLubricantes'
 
 export default function App() {
   return (
@@ -31,6 +32,7 @@ export default function App() {
           <Route path="/admin/equipos/:id/editar" element={<ProtectedRoute><FormEquipo /></ProtectedRoute>} />
           <Route path="/admin/equipos/:id/carta" element={<ProtectedRoute><EditorCarta /></ProtectedRoute>} />
           <Route path="/admin/tecnicos" element={<ProtectedRoute><GestionTecnicos /></ProtectedRoute>} />
+          <Route path="/admin/lubricantes" element={<ProtectedRoute><GestionLubricantes /></ProtectedRoute>} />
 
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>

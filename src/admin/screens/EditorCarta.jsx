@@ -6,11 +6,16 @@ import QRModal from '../components/QRModal'
 import { useAdmin } from '../context/AdminContext'
 import { convertToBase64 } from '../../utils/imageUtils'
 
+const LUBRICANTES_DATALIST_ID = 'lubricantes-list'
+
 const FRECUENCIAS = [
   { value: 'DAILY', label: 'Diaria', color: '#EF4444' },
   { value: 'WEEKLY', label: 'Semanal', color: '#F97316' },
+  { value: 'BIWEEKLY', label: 'Quincenal', color: '#FB923C' },
   { value: 'MONTHLY', label: 'Mensual', color: '#EAB308' },
+  { value: 'BIMONTHLY', label: 'Bimestral', color: '#A3E635' },
   { value: 'QUARTERLY', label: 'Trimestral', color: '#22C55E' },
+  { value: 'SEMIANNUAL', label: 'Semestral', color: '#06B6D4' },
   { value: 'ANNUAL', label: 'Anual', color: '#3B82F6' },
 ]
 
@@ -32,7 +37,7 @@ const inputStyle = {
   fontFamily: "'DM Sans', sans-serif",
 }
 
-function PuntoForm({ punto, onSave, onDelete, onClose }) {
+function PuntoForm({ punto, onSave, onDelete, onClose, lubricantes }) {
   const [form, setForm] = useState({
     nombre: punto?.nombre || '',
     lubricante: punto?.lubricante || '',
@@ -73,8 +78,19 @@ function PuntoForm({ punto, onSave, onDelete, onClose }) {
         </div>
         <div>
           <label style={labelStyle}>Lubricante</label>
-          <input type="text" value={form.lubricante} onChange={set('lubricante')}
-            placeholder="Ej: Shell Omala 220" style={inputStyle} />
+          <input
+            type="text"
+            list={LUBRICANTES_DATALIST_ID}
+            value={form.lubricante}
+            onChange={set('lubricante')}
+            placeholder="Ej: Shell Omala 220"
+            style={inputStyle}
+          />
+          <datalist id={LUBRICANTES_DATALIST_ID}>
+            {(lubricantes || []).map(l => (
+              <option key={l.id} value={l.nombre} />
+            ))}
+          </datalist>
         </div>
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
           <div>
@@ -151,7 +167,7 @@ function PuntoForm({ punto, onSave, onDelete, onClose }) {
 
 export default function EditorCarta() {
   const { id } = useParams()
-  const { equipos, actualizarPuntos, actualizarImagenEquipo } = useAdmin()
+  const { equipos, actualizarPuntos, actualizarImagenEquipo, lubricantes } = useAdmin()
   const navigate = useNavigate()
   const equipo = equipos.find(e => e.id === id)
 
@@ -456,6 +472,7 @@ export default function EditorCarta() {
               onSave={handleSavePunto}
               onDelete={handleDeletePunto}
               onClose={() => setSelectedId(null)}
+              lubricantes={lubricantes}
             />
           ) : (
             <>
