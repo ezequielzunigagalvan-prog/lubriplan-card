@@ -3,6 +3,7 @@ import { QRCodeSVG, QRCodeCanvas } from 'qrcode.react'
 
 export default function QRModal({ equipoId, equipoNombre, onClose }) {
   const url = `${window.location.origin}/?equipo=${equipoId}`
+  const isLocalhost = ['localhost', '127.0.0.1'].includes(window.location.hostname)
   const canvasRef = useRef(null)
 
   const handleDownload = () => {
@@ -49,13 +50,13 @@ export default function QRModal({ equipoId, equipoNombre, onClose }) {
     }}>
       <div style={{
         background: '#1A1F2B', borderRadius: 12, padding: '32px 28px',
-        maxWidth: 360, width: '100%', border: '1px solid #2A3346',
+        maxWidth: 380, width: '100%', border: '1px solid #2A3346',
         textAlign: 'center',
       }}>
         <h3 style={{ color: '#E8EDF5', fontSize: 16, fontWeight: 600, margin: '0 0 4px' }}>Código QR</h3>
-        <p style={{ color: '#7A8BA8', fontSize: 13, margin: '0 0 24px' }}>{equipoNombre}</p>
+        <p style={{ color: '#7A8BA8', fontSize: 13, margin: '0 0 20px' }}>{equipoNombre}</p>
 
-        {/* Canvas oculto para descarga/impresión */}
+        {/* Canvas oculto para descarga/impresión en alta resolución */}
         <div ref={canvasRef} style={{ display: 'none' }}>
           <QRCodeCanvas value={url} size={400} />
         </div>
@@ -68,9 +69,24 @@ export default function QRModal({ equipoId, equipoNombre, onClose }) {
           <QRCodeSVG value={url} size={200} />
         </div>
 
-        <p style={{ color: '#4A5568', fontSize: 11, margin: '0 0 20px', wordBreak: 'break-all' }}>{url}</p>
+        <p style={{ color: '#4A5568', fontSize: 11, margin: '0 0 12px', wordBreak: 'break-all' }}>{url}</p>
 
-        {/* Botones de acción */}
+        {/* Aviso cuando corre en localhost */}
+        {isLocalhost && (
+          <div style={{
+            background: 'rgba(234,179,8,0.08)', border: '1px solid rgba(234,179,8,0.25)',
+            borderRadius: 8, padding: '10px 14px', marginBottom: 16, textAlign: 'left',
+          }}>
+            <p style={{ color: '#EAB308', fontSize: 12, margin: 0, fontWeight: 600, marginBottom: 4 }}>
+              Solo funciona en este dispositivo
+            </p>
+            <p style={{ color: '#7A8BA8', fontSize: 11, margin: 0, lineHeight: 1.5 }}>
+              El QR apunta a <strong>localhost</strong>. Para usarlo en otro dispositivo, desplegá la app en un servidor con dominio real.
+            </p>
+          </div>
+        )}
+
+        {/* Botones descarga / impresión */}
         <div style={{ display: 'flex', gap: 8, marginBottom: 10 }}>
           <button onClick={handleDownload} style={{
             flex: 1, padding: '10px', borderRadius: 8,

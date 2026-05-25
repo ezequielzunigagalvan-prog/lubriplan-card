@@ -6,7 +6,7 @@ import EquipoSVG from '../components/EquipoSVG'
 import BottomSheet from '../components/BottomSheet'
 
 function PuntoMarcador({ punto, index, onClick }) {
-  const freq = FRECUENCIAS[punto.frecuencia]
+  const freq = FRECUENCIAS[punto.frecuencia] || { color: '#7A8BA8', bg: '#1E2535', label: punto.frecuencia }
   return (
     <button
       onClick={onClick}
@@ -271,7 +271,7 @@ export default function CartaScreen() {
           </h2>
 
           {equipo.puntos.map((punto, i) => {
-            const freq = FRECUENCIAS[punto.frecuencia]
+            const freq = FRECUENCIAS[punto.frecuencia] || { color: '#7A8BA8', bg: '#1E2535', label: punto.frecuencia }
             return (
               <button
                 key={punto.id}

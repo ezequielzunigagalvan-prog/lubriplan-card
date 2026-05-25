@@ -4,6 +4,9 @@ import { equipos as equiposInicial } from '../../data/equipos'
 const ADMIN_EMAIL = 'admin@lubriplan.com'
 const ADMIN_PASSWORD = 'admin123'
 const SESSION_KEY = 'adminSession'
+const EQUIPOS_KEY = 'masterlub_equipos'
+const TECNICOS_KEY = 'masterlub_tecnicos'
+const LUBRICANTES_KEY = 'masterlub_lubricantes'
 
 const TECNICOS_INICIALES = [
   { id: 't1', nombre: 'Juan Pérez', pin: '1234', activo: true, ultimaConsulta: '2026-05-20' },
@@ -20,55 +23,87 @@ const LUBRICANTES_INICIALES = [
   { id: 'lub6', nombre: 'SKF LGMT 2', tipo: 'Grasa rodamientos', viscosidad: 'NLGI 2' },
 ]
 
+// Images are stored in separate localStorage keys so the main equipos key stays small
+function imgKey(id) { return `masterlub_img_${id}` }
+
+function cargarEquipos() {
+  try {
+    const saved = localStorage.getItem(EQUIPOS_KEY)
+    if (saved) {
+      const lista = JSON.parse(saved)
+      return lista.map(e => ({ ...e, imagenUrl: localStorage.getItem(imgKey(e.id)) || null }))
+    }
+  } catch {}
+  return equiposInicial.map(e => ({ ...e, activo: true, imagenUrl: null }))
+}
+
+function persistirEquipos(equipos) {
+  try {
+    // Strip imagenUrl from the main key so it stays lightweight
+    const sinImagen = equipos.map(({ imagenUrl, ...e }) => e)
+    localStorage.setItem(EQUIPOS_KEY, JSON.stringify(sinImagen))
+  } catch (err) {
+    console.error('Error guardando equipos:', err)
+  }
+  // Each image in its own key — failure here doesn't break the equipo list
+  equipos.forEach(e => {
+    const key = imgKey(e.id)
+    if (e.imagenUrl) {
+      try { localStorage.setItem(key, e.imagenUrl) } catch {}
+    } else {
+      localStorage.removeItem(key)
+    }
+  })
+}
+
 const AdminContext = createContext(null)
 
 export function AdminProvider({ children }) {
   const [isLoggedIn, setIsLoggedIn] = useState(() => !!localStorage.getItem(SESSION_KEY))
-  const [equipos, setEquipos] = useState(() => {
-    try {
-      const saved = localStorage.getItem('masterlub_equipos')
-      if (saved) return JSON.parse(saved)
-    } catch {}
-    return equiposInicial.map(e => ({ ...e, activo: true, imagenUrl: null }))
-  })
+
+  const [equipos, setEquipos] = useState(cargarEquipos)
+
   const [tecnicos, setTecnicos] = useState(() => {
     try {
-      const saved = localStorage.getItem('masterlub_tecnicos')
+      const saved = localStorage.getItem(TECNICOS_KEY)
       if (saved) return JSON.parse(saved)
     } catch {}
     return TECNICOS_INICIALES
   })
+
   const [lubricantes, setLubricantes] = useState(() => {
     try {
-      const saved = localStorage.getItem('masterlub_lubricantes')
+      const saved = localStorage.getItem(LUBRICANTES_KEY)
       if (saved) return JSON.parse(saved)
     } catch {}
     return LUBRICANTES_INICIALES
   })
 
+  // Persist on every state change
+  useEffect(() => { persistirEquipos(equipos) }, [equipos])
   useEffect(() => {
-    try {
-      localStorage.setItem('masterlub_equipos', JSON.stringify(equipos))
-    } catch {
-      console.error('Error guardando equipos en localStorage')
-    }
-  }, [equipos])
-
-  useEffect(() => {
-    try {
-      localStorage.setItem('masterlub_tecnicos', JSON.stringify(tecnicos))
-    } catch {
-      console.error('Error guardando técnicos en localStorage')
-    }
+    try { localStorage.setItem(TECNICOS_KEY, JSON.stringify(tecnicos)) } catch {}
   }, [tecnicos])
-
   useEffect(() => {
-    try {
-      localStorage.setItem('masterlub_lubricantes', JSON.stringify(lubricantes))
-    } catch {
-      console.error('Error guardando lubricantes en localStorage')
-    }
+    try { localStorage.setItem(LUBRICANTES_KEY, JSON.stringify(lubricantes)) } catch {}
   }, [lubricantes])
+
+  // Cross-tab sync: when another tab writes to localStorage, update this tab's state
+  useEffect(() => {
+    const handler = (e) => {
+      if (e.key === EQUIPOS_KEY && e.newValue) {
+        try {
+          const lista = JSON.parse(e.newValue)
+          setEquipos(lista.map(eq => ({ ...eq, imagenUrl: localStorage.getItem(imgKey(eq.id)) || null })))
+        } catch {}
+      }
+      if (e.key === TECNICOS_KEY && e.newValue) {
+        try { setTecnicos(JSON.parse(e.newValue)) } catch {}
+      }
+    }
+    window.addEventListener('storage', handler)
+    return () => window.removeEventListener('storage', handler)
+  }, [])
 
   const login = useCallback((email, password) => {
     if (email === ADMIN_EMAIL && password === ADMIN_PASSWORD) {
@@ -86,26 +121,46 @@ export function AdminProvider({ children }) {
 
   const crearEquipo = useCallback((datos) => {
     const id = `equipo-${Date.now()}`
-    setEquipos(prev => [...prev, {
-      id, puntos: [], vencidos: 0, imagen: 'motor', activo: true, imagenUrl: null, ...datos,
-    }])
+    const nuevo = { id, puntos: [], vencidos: 0, imagen: 'motor', activo: true, imagenUrl: null, ...datos }
+    setEquipos(prev => {
+      const next = [...prev, nuevo]
+      persistirEquipos(next)
+      return next
+    })
     return id
   }, [])
 
   const editarEquipo = useCallback((id, datos) => {
-    setEquipos(prev => prev.map(e => e.id === id ? { ...e, ...datos } : e))
+    setEquipos(prev => {
+      const next = prev.map(e => e.id === id ? { ...e, ...datos } : e)
+      persistirEquipos(next)
+      return next
+    })
   }, [])
 
   const eliminarEquipo = useCallback((id) => {
-    setEquipos(prev => prev.filter(e => e.id !== id))
+    localStorage.removeItem(imgKey(id))
+    setEquipos(prev => {
+      const next = prev.filter(e => e.id !== id)
+      persistirEquipos(next)
+      return next
+    })
   }, [])
 
   const actualizarPuntos = useCallback((equipoId, puntos) => {
-    setEquipos(prev => prev.map(e => e.id === equipoId ? { ...e, puntos } : e))
+    setEquipos(prev => {
+      const next = prev.map(e => e.id === equipoId ? { ...e, puntos } : e)
+      persistirEquipos(next)
+      return next
+    })
   }, [])
 
   const actualizarImagenEquipo = useCallback((equipoId, imagenUrl) => {
-    setEquipos(prev => prev.map(e => e.id === equipoId ? { ...e, imagenUrl } : e))
+    setEquipos(prev => {
+      const next = prev.map(e => e.id === equipoId ? { ...e, imagenUrl } : e)
+      persistirEquipos(next)
+      return next
+    })
   }, [])
 
   const crearLubricante = useCallback((datos) => {
