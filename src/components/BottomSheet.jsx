@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { FRECUENCIAS, METODOS } from '../data/equipos'
 
-export default function BottomSheet({ punto, onClose }) {
+export default function BottomSheet({ punto, globalIndex, onClose }) {
   const sheetRef = useRef(null)
   const startYRef = useRef(null)
   const [dragging, setDragging] = useState(false)
@@ -110,18 +110,32 @@ export default function BottomSheet({ punto, onClose }) {
         >
           {/* Header */}
           <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12, justifyContent: 'space-between' }}>
-            <h2
-              style={{
-                fontFamily: "'DM Sans', sans-serif",
-                fontSize: 20,
-                fontWeight: 700,
-                color: '#E8EDF5',
-                lineHeight: 1.3,
-                flex: 1,
-              }}
-            >
-              {punto.nombre}
-            </h2>
+            <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12, flex: 1, minWidth: 0 }}>
+              {globalIndex != null && (
+                <div style={{
+                  width: 36, height: 36, borderRadius: '50%',
+                  background: freq?.color || '#F4A020',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  fontFamily: "'Bebas Neue', sans-serif",
+                  fontSize: 18, color: '#0A0C0F', fontWeight: 700,
+                  flexShrink: 0, marginTop: 2,
+                }}>
+                  {globalIndex + 1}
+                </div>
+              )}
+              <h2
+                style={{
+                  fontFamily: "'DM Sans', sans-serif",
+                  fontSize: 20,
+                  fontWeight: 700,
+                  color: '#E8EDF5',
+                  lineHeight: 1.3,
+                  flex: 1,
+                }}
+              >
+                {punto.nombre}
+              </h2>
+            </div>
             <button
               onClick={onClose}
               style={{
