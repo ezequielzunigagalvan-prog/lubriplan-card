@@ -1,6 +1,12 @@
+import { useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import AdminLayout from '../components/AdminLayout'
 import { useAdmin } from '../context/AdminContext'
+
+const PALETTE = [
+  '#F4A020', '#22C55E', '#3B82F6', '#A855F7',
+  '#EF4444', '#06B6D4', '#FB923C', '#EC4899',
+]
 
 function StatCard({ label, value, color, icon }) {
   return (
@@ -27,13 +33,75 @@ function StatCard({ label, value, color, icon }) {
   )
 }
 
+function AreaCard({ area, count, puntos, color, onClick }) {
+  return (
+    <button
+      onClick={onClick}
+      style={{
+        display: 'flex',
+        alignItems: 'center',
+        gap: 14,
+        background: '#111418',
+        border: '1px solid #1E2535',
+        borderRadius: 10,
+        padding: '14px 18px',
+        cursor: 'pointer',
+        textAlign: 'left',
+        transition: 'border-color 0.15s, background 0.15s',
+        width: '100%',
+      }}
+      onMouseEnter={e => {
+        e.currentTarget.style.borderColor = color + '60'
+        e.currentTarget.style.background = color + '08'
+      }}
+      onMouseLeave={e => {
+        e.currentTarget.style.borderColor = '#1E2535'
+        e.currentTarget.style.background = '#111418'
+      }}
+    >
+      {/* Color strip */}
+      <div style={{
+        width: 4, height: 40, borderRadius: 2,
+        background: color, flexShrink: 0,
+      }} />
+
+      {/* Text */}
+      <div style={{ flex: 1, minWidth: 0 }}>
+        <div style={{
+          color: '#E8EDF5', fontSize: 13, fontWeight: 600,
+          overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+          fontFamily: "'DM Sans', sans-serif",
+        }}>
+          {area}
+        </div>
+        <div style={{ color: '#7A8BA8', fontSize: 12, marginTop: 2, fontFamily: "'DM Sans', sans-serif" }}>
+          {count} equipo{count !== 1 ? 's' : ''} · {puntos} punto{puntos !== 1 ? 's' : ''}
+        </div>
+      </div>
+
+      <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+        <path d="M5 3l4 4-4 4" stroke={color} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+      </svg>
+    </button>
+  )
+}
+
 export default function DashboardAdmin() {
   const { equipos, tecnicos } = useAdmin()
   const navigate = useNavigate()
 
   const totalPuntos = equipos.reduce((acc, e) => acc + (e.puntos?.length || 0), 0)
   const tecnicosActivos = tecnicos.filter(t => t.activo).length
-  const equiposConVencidos = equipos.filter(e => (e.vencidos || 0) > 0).length
+
+  const areaGroups = useMemo(() => {
+    const map = {}
+    equipos.forEach(e => {
+      if (!map[e.area]) map[e.area] = { count: 0, puntos: 0 }
+      map[e.area].count++
+      map[e.area].puntos += e.puntos?.length || 0
+    })
+    return Object.entries(map).map(([area, stats]) => ({ area, ...stats }))
+  }, [equipos])
 
   return (
     <AdminLayout titulo="Dashboard">
@@ -42,27 +110,39 @@ export default function DashboardAdmin() {
         <div style={{
           display: 'grid',
           gridTemplateColumns: 'repeat(auto-fit, minmax(210px, 1fr))',
-          gap: 16, marginBottom: 32,
+          gap: 16, marginBottom: 28,
         }}>
           <StatCard label="Equipos registrados" value={equipos.length} color="#F4A020" icon={
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="3" /><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83" /></svg>
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <circle cx="12" cy="12" r="3" />
+              <path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83" />
+            </svg>
+          } />
+          <StatCard label="Áreas" value={areaGroups.length} color="#06B6D4" icon={
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <rect x="3" y="10" width="18" height="11" rx="2" />
+              <path d="M3 12L12 5l9 7" />
+            </svg>
           } />
           <StatCard label="Puntos de lubricación" value={totalPuntos} color="#3B82F6" icon={
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" /><circle cx="12" cy="10" r="3" /></svg>
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
+              <circle cx="12" cy="10" r="3" />
+            </svg>
           } />
           <StatCard label="Técnicos activos" value={tecnicosActivos} color="#22C55E" icon={
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75" /></svg>
-          } />
-          <StatCard label="Equipos con vencidos" value={equiposConVencidos} color="#EF4444" icon={
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10" /><line x1="12" y1="8" x2="12" y2="12" /><line x1="12" y1="16" x2="12.01" y2="16" /></svg>
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+              <circle cx="9" cy="7" r="4" />
+              <path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75" />
+            </svg>
           } />
         </div>
 
         {/* Content row */}
-        <div style={{ display: 'flex', gap: 20, alignItems: 'flex-start', flexWrap: 'wrap' }}>
-          {/* Equipos table */}
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 340px', gap: 20, alignItems: 'flex-start' }}>
+          {/* Áreas */}
           <div style={{
-            flex: '1 1 500px',
             background: '#111418', borderRadius: 12,
             border: '1px solid #1E2535', overflow: 'hidden',
           }}>
@@ -70,67 +150,135 @@ export default function DashboardAdmin() {
               padding: '16px 24px', borderBottom: '1px solid #1E2535',
               display: 'flex', alignItems: 'center', justifyContent: 'space-between',
             }}>
-              <h2 style={{ color: '#E8EDF5', fontSize: 15, fontWeight: 600, margin: 0 }}>Cartas recientes</h2>
+              <h2 style={{ color: '#E8EDF5', fontSize: 15, fontWeight: 600, margin: 0 }}>
+                Equipos por área
+              </h2>
               <button onClick={() => navigate('/admin/equipos')} style={{
                 background: 'none', border: 'none', color: '#F4A020', cursor: 'pointer', fontSize: 13,
+                fontFamily: "'DM Sans', sans-serif",
               }}>
-                Ver todos →
+                Gestionar →
               </button>
             </div>
-            <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-              <thead>
-                <tr style={{ borderBottom: '1px solid #1E2535' }}>
-                  {['Equipo', 'Área', 'Puntos', 'Vencidos', ''].map(h => (
-                    <th key={h} style={{
-                      padding: '10px 20px', textAlign: 'left',
-                      color: '#4A5568', fontSize: 11, fontWeight: 600,
-                      textTransform: 'uppercase', letterSpacing: 0.5,
-                    }}>{h}</th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {equipos.slice(0, 6).map((e, i) => (
-                  <tr key={e.id} style={{
-                    borderBottom: i < 5 ? '1px solid #1E2535' : 'none',
-                    background: i % 2 === 0 ? 'transparent' : 'rgba(255,255,255,0.01)',
-                  }}>
-                    <td style={{ padding: '12px 20px', color: '#E8EDF5', fontSize: 14 }}>{e.nombre}</td>
-                    <td style={{ padding: '12px 20px', color: '#7A8BA8', fontSize: 13 }}>{e.area}</td>
-                    <td style={{ padding: '12px 20px', color: '#7A8BA8', fontSize: 13 }}>{e.puntos?.length || 0}</td>
-                    <td style={{ padding: '12px 20px' }}>
-                      <span style={{ color: e.vencidos > 0 ? '#EF4444' : '#22C55E', fontSize: 13, fontWeight: 600 }}>
-                        {e.vencidos || 0}
-                      </span>
-                    </td>
-                    <td style={{ padding: '12px 20px' }}>
-                      <button onClick={() => navigate(`/admin/equipos/${e.id}/carta`)} style={{
-                        background: 'none', border: 'none', color: '#F4A020', cursor: 'pointer', fontSize: 12,
-                      }}>
-                        Ver →
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+            <div style={{ padding: '12px 16px', display: 'flex', flexDirection: 'column', gap: 8 }}>
+              {areaGroups.map(({ area, count, puntos }, idx) => (
+                <AreaCard
+                  key={area}
+                  area={area}
+                  count={count}
+                  puntos={puntos}
+                  color={PALETTE[idx % PALETTE.length]}
+                  onClick={() => navigate(`/admin/equipos`)}
+                />
+              ))}
+            </div>
           </div>
 
-          {/* CTA */}
-          <button
-            onClick={() => navigate('/admin/equipos/nuevo')}
-            style={{
-              flex: '0 0 auto',
-              background: '#F4A020', color: '#0A0C0F',
-              border: 'none', borderRadius: 10,
-              padding: '14px 28px',
-              fontSize: 14, fontWeight: 700,
-              cursor: 'pointer', whiteSpace: 'nowrap',
-              letterSpacing: 0.3,
-            }}
-          >
-            + Agregar equipo
-          </button>
+          {/* Right column */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+            {/* Quick actions */}
+            <div style={{
+              background: '#111418', borderRadius: 12,
+              border: '1px solid #1E2535',
+              padding: '16px 20px',
+            }}>
+              <h3 style={{ color: '#7A8BA8', fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 14, margin: '0 0 14px' }}>
+                Acciones rápidas
+              </h3>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                <button
+                  onClick={() => navigate('/admin/equipos/nuevo')}
+                  style={{
+                    padding: '11px 16px', borderRadius: 8, border: 'none',
+                    background: '#F4A020', color: '#0A0C0F',
+                    fontSize: 13, fontWeight: 700, cursor: 'pointer',
+                    fontFamily: "'DM Sans', sans-serif", textAlign: 'left',
+                  }}
+                >
+                  + Agregar equipo
+                </button>
+                <button
+                  onClick={() => navigate('/admin/equipos')}
+                  style={{
+                    padding: '11px 16px', borderRadius: 8,
+                    border: '1px solid #2A3346', background: 'transparent',
+                    color: '#E8EDF5', fontSize: 13, cursor: 'pointer',
+                    fontFamily: "'DM Sans', sans-serif", textAlign: 'left',
+                  }}
+                >
+                  Ver todos los equipos →
+                </button>
+                <button
+                  onClick={() => navigate('/admin/tecnicos')}
+                  style={{
+                    padding: '11px 16px', borderRadius: 8,
+                    border: '1px solid #2A3346', background: 'transparent',
+                    color: '#E8EDF5', fontSize: 13, cursor: 'pointer',
+                    fontFamily: "'DM Sans', sans-serif", textAlign: 'left',
+                  }}
+                >
+                  Gestionar técnicos →
+                </button>
+                <button
+                  onClick={() => navigate('/admin/lubricantes')}
+                  style={{
+                    padding: '11px 16px', borderRadius: 8,
+                    border: '1px solid #2A3346', background: 'transparent',
+                    color: '#E8EDF5', fontSize: 13, cursor: 'pointer',
+                    fontFamily: "'DM Sans', sans-serif", textAlign: 'left',
+                  }}
+                >
+                  Biblioteca de lubricantes →
+                </button>
+              </div>
+            </div>
+
+            {/* Recent equipment */}
+            <div style={{
+              background: '#111418', borderRadius: 12,
+              border: '1px solid #1E2535', overflow: 'hidden',
+            }}>
+              <div style={{ padding: '14px 20px', borderBottom: '1px solid #1E2535' }}>
+                <h3 style={{ color: '#E8EDF5', fontSize: 14, fontWeight: 600, margin: 0 }}>
+                  Últimos equipos
+                </h3>
+              </div>
+              {equipos.slice(-5).reverse().map((e, i, arr) => (
+                <button
+                  key={e.id}
+                  onClick={() => navigate(`/admin/equipos/${e.id}/carta`)}
+                  style={{
+                    display: 'flex', alignItems: 'center', gap: 10,
+                    width: '100%', padding: '11px 20px',
+                    borderBottom: i < arr.length - 1 ? '1px solid #1E2535' : 'none',
+                    background: 'transparent', border: 'none',
+                    cursor: 'pointer', textAlign: 'left',
+                    transition: 'background 0.1s',
+                  }}
+                  onMouseEnter={ev => ev.currentTarget.style.background = 'rgba(255,255,255,0.02)'}
+                  onMouseLeave={ev => ev.currentTarget.style.background = 'transparent'}
+                >
+                  {e.codigo && (
+                    <span style={{
+                      fontFamily: 'monospace', fontSize: 11, fontWeight: 700,
+                      color: '#F4A020', letterSpacing: 1,
+                      background: 'rgba(244,160,32,0.1)', borderRadius: 4,
+                      padding: '2px 6px', flexShrink: 0,
+                    }}>
+                      {e.codigo}
+                    </span>
+                  )}
+                  <span style={{
+                    color: '#E8EDF5', fontSize: 13,
+                    overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+                    fontFamily: "'DM Sans', sans-serif",
+                  }}>
+                    {e.nombre}
+                  </span>
+                </button>
+              ))}
+            </div>
+          </div>
         </div>
       </div>
     </AdminLayout>
