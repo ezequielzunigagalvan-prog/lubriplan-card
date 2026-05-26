@@ -35,7 +35,7 @@ export default function PinScreen() {
         if (equipoParam) {
           navigate(`/carta/${equipoParam}`)
         } else {
-          navigate('/equipos')
+          navigate('/areas')
         }
       } else {
         if (window.navigator.vibrate) window.navigator.vibrate([100, 50, 100])

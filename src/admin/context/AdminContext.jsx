@@ -23,36 +23,52 @@ const LUBRICANTES_INICIALES = [
   { id: 'lub6', nombre: 'SKF LGMT 2', tipo: 'Grasa rodamientos', viscosidad: 'NLGI 2' },
 ]
 
-// Images are stored in separate localStorage keys so the main equipos key stays small
+// Legacy single-image key
 function imgKey(id) { return `masterlub_img_${id}` }
+// New multi-image key — stores full [{id, url, flechas}] array
+function imgsKey(id) { return `masterlub_imgs_${id}` }
+
+function cargarImagenes(equipoId) {
+  try {
+    const raw = localStorage.getItem(imgsKey(equipoId))
+    if (raw) return JSON.parse(raw)
+  } catch {}
+  // Migrate from old single-image format
+  const oldUrl = localStorage.getItem(imgKey(equipoId))
+  if (oldUrl) return [{ id: 'img-legacy', url: oldUrl, flechas: [] }]
+  return []
+}
 
 function cargarEquipos() {
   try {
     const saved = localStorage.getItem(EQUIPOS_KEY)
     if (saved) {
       const lista = JSON.parse(saved)
-      return lista.map(e => ({ ...e, imagenUrl: localStorage.getItem(imgKey(e.id)) || null }))
+      return lista.map(e => {
+        const imagenes = cargarImagenes(e.id)
+        return { ...e, imagenes, imagenUrl: imagenes[0]?.url || null }
+      })
     }
   } catch {}
-  return equiposInicial.map(e => ({ ...e, activo: true, imagenUrl: null }))
+  return equiposInicial.map(e => ({ ...e, activo: true, imagenUrl: null, imagenes: [] }))
 }
 
 function persistirEquipos(equipos) {
   try {
-    // Strip imagenUrl from the main key so it stays lightweight
-    const sinImagen = equipos.map(({ imagenUrl, ...e }) => e)
+    const sinImagen = equipos.map(({ imagenUrl, imagenes, ...e }) => e)
     localStorage.setItem(EQUIPOS_KEY, JSON.stringify(sinImagen))
   } catch (err) {
     console.error('Error guardando equipos:', err)
   }
-  // Each image in its own key — failure here doesn't break the equipo list
   equipos.forEach(e => {
-    const key = imgKey(e.id)
-    if (e.imagenUrl) {
-      try { localStorage.setItem(key, e.imagenUrl) } catch {}
-    } else {
-      localStorage.removeItem(key)
-    }
+    try {
+      const imgs = e.imagenes || []
+      if (imgs.length > 0) {
+        localStorage.setItem(imgsKey(e.id), JSON.stringify(imgs))
+      } else {
+        localStorage.removeItem(imgsKey(e.id))
+      }
+    } catch {}
   })
 }
 
@@ -79,7 +95,6 @@ export function AdminProvider({ children }) {
     return LUBRICANTES_INICIALES
   })
 
-  // Persist on every state change
   useEffect(() => { persistirEquipos(equipos) }, [equipos])
   useEffect(() => {
     try { localStorage.setItem(TECNICOS_KEY, JSON.stringify(tecnicos)) } catch {}
@@ -88,13 +103,15 @@ export function AdminProvider({ children }) {
     try { localStorage.setItem(LUBRICANTES_KEY, JSON.stringify(lubricantes)) } catch {}
   }, [lubricantes])
 
-  // Cross-tab sync: when another tab writes to localStorage, update this tab's state
   useEffect(() => {
     const handler = (e) => {
       if (e.key === EQUIPOS_KEY && e.newValue) {
         try {
           const lista = JSON.parse(e.newValue)
-          setEquipos(lista.map(eq => ({ ...eq, imagenUrl: localStorage.getItem(imgKey(eq.id)) || null })))
+          setEquipos(lista.map(eq => {
+            const imagenes = cargarImagenes(eq.id)
+            return { ...eq, imagenes, imagenUrl: imagenes[0]?.url || null }
+          }))
         } catch {}
       }
       if (e.key === TECNICOS_KEY && e.newValue) {
@@ -121,7 +138,7 @@ export function AdminProvider({ children }) {
 
   const crearEquipo = useCallback((datos) => {
     const id = `equipo-${Date.now()}`
-    const nuevo = { id, puntos: [], vencidos: 0, imagen: 'motor', activo: true, imagenUrl: null, ...datos }
+    const nuevo = { id, puntos: [], vencidos: 0, imagen: 'motor', activo: true, imagenUrl: null, imagenes: [], ...datos }
     setEquipos(prev => {
       const next = [...prev, nuevo]
       persistirEquipos(next)
@@ -140,6 +157,7 @@ export function AdminProvider({ children }) {
 
   const eliminarEquipo = useCallback((id) => {
     localStorage.removeItem(imgKey(id))
+    localStorage.removeItem(imgsKey(id))
     setEquipos(prev => {
       const next = prev.filter(e => e.id !== id)
       persistirEquipos(next)
@@ -155,9 +173,28 @@ export function AdminProvider({ children }) {
     })
   }, [])
 
+  // Legacy single-image update — kept for backwards compat
   const actualizarImagenEquipo = useCallback((equipoId, imagenUrl) => {
     setEquipos(prev => {
-      const next = prev.map(e => e.id === equipoId ? { ...e, imagenUrl } : e)
+      const next = prev.map(e => {
+        if (e.id !== equipoId) return e
+        const imagenes = imagenUrl
+          ? [{ id: 'img-legacy', url: imagenUrl, flechas: [] }]
+          : []
+        return { ...e, imagenes, imagenUrl }
+      })
+      persistirEquipos(next)
+      return next
+    })
+  }, [])
+
+  // Multi-image update — replaces the full imagenes array
+  const actualizarImagenesEquipo = useCallback((equipoId, imagenes) => {
+    setEquipos(prev => {
+      const next = prev.map(e => {
+        if (e.id !== equipoId) return e
+        return { ...e, imagenes, imagenUrl: imagenes[0]?.url || null }
+      })
       persistirEquipos(next)
       return next
     })
@@ -194,7 +231,8 @@ export function AdminProvider({ children }) {
   return (
     <AdminContext.Provider value={{
       isLoggedIn, login, logout,
-      equipos, crearEquipo, editarEquipo, eliminarEquipo, actualizarPuntos, actualizarImagenEquipo,
+      equipos, crearEquipo, editarEquipo, eliminarEquipo,
+      actualizarPuntos, actualizarImagenEquipo, actualizarImagenesEquipo,
       tecnicos, crearTecnico, editarTecnico, eliminarTecnico, toggleTecnico,
       lubricantes, crearLubricante, editarLubricante, eliminarLubricante,
     }}>

@@ -1,0 +1,494 @@
+import { useMemo, useState, useRef } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { useAdmin } from '../admin/context/AdminContext'
+
+const PALETTE = [
+  '#F4A020',
+  '#22C55E',
+  '#3B82F6',
+  '#A855F7',
+  '#EF4444',
+  '#06B6D4',
+  '#FB923C',
+  '#EC4899',
+]
+
+function BuildingIcon({ color, size = 26 }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 26 26" fill="none">
+      <rect x="3" y="12" width="20" height="11" rx="2" stroke={color} strokeWidth="1.5" />
+      <path d="M3 14L13 6l10 8" stroke={color} strokeWidth="1.5" strokeLinejoin="round" />
+      <rect x="10" y="17" width="6" height="6" rx="1" stroke={color} strokeWidth="1.4" />
+      <rect x="5" y="16" width="3" height="3" rx="0.5" fill={color + '55'} stroke={color} strokeWidth="1.2" />
+      <rect x="18" y="16" width="3" height="3" rx="0.5" fill={color + '55'} stroke={color} strokeWidth="1.2" />
+    </svg>
+  )
+}
+
+function GearIcon({ color, size = 26 }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 26 26" fill="none">
+      <circle cx="13" cy="13" r="4" stroke={color} strokeWidth="1.5" />
+      <path
+        d="M13 2v3M13 21v3M2 13h3M21 13h3M4.9 4.9l2.1 2.1M18.9 18.9l2.1 2.1M4.9 21.1l2.1-2.1M18.9 7.1l2.1-2.1"
+        stroke={color}
+        strokeWidth="1.5"
+        strokeLinecap="round"
+      />
+    </svg>
+  )
+}
+
+function ChevronRight({ color = '#7A8BA8' }) {
+  return (
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+      <path d="M6 4l4 4-4 4" stroke={color} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  )
+}
+
+function AreaCard({ area, count, color, onClick }) {
+  const ref = useRef(null)
+
+  function handlePointerDown() {
+    if (ref.current) {
+      ref.current.style.borderColor = color
+      ref.current.style.background = '#1C2230'
+    }
+  }
+
+  function handlePointerUp() {
+    if (ref.current) {
+      ref.current.style.borderColor = '#2A3448'
+      ref.current.style.background = '#131820'
+    }
+  }
+
+  return (
+    <button
+      ref={ref}
+      onClick={onClick}
+      onPointerDown={handlePointerDown}
+      onPointerUp={handlePointerUp}
+      onPointerLeave={handlePointerUp}
+      style={{
+        display: 'flex',
+        flexDirection: 'column',
+        background: '#131820',
+        border: '1px solid #2A3448',
+        borderRadius: 16,
+        overflow: 'hidden',
+        cursor: 'pointer',
+        textAlign: 'left',
+        transition: 'border-color 0.15s, background 0.15s',
+        padding: 0,
+      }}
+    >
+      {/* Colored folder tab strip */}
+      <div
+        style={{
+          height: 4,
+          background: `linear-gradient(90deg, ${color}, ${color}99)`,
+          width: '100%',
+          flexShrink: 0,
+        }}
+      />
+
+      {/* Card body */}
+      <div
+        style={{
+          padding: '16px 14px 14px',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: 12,
+          flex: 1,
+        }}
+      >
+        {/* Icon circle */}
+        <div
+          style={{
+            width: 46,
+            height: 46,
+            borderRadius: 12,
+            background: color + '18',
+            border: `1px solid ${color}35`,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}
+        >
+          <BuildingIcon color={color} />
+        </div>
+
+        {/* Area name */}
+        <div style={{ flex: 1 }}>
+          <div
+            style={{
+              fontFamily: "'DM Sans', sans-serif",
+              fontWeight: 600,
+              fontSize: 14,
+              color: '#E8EDF5',
+              lineHeight: 1.35,
+              marginBottom: 4,
+            }}
+          >
+            {area}
+          </div>
+          <div
+            style={{
+              fontSize: 12,
+              color: '#7A8BA8',
+              fontFamily: "'DM Sans', sans-serif",
+            }}
+          >
+            {count} equipo{count !== 1 ? 's' : ''}
+          </div>
+        </div>
+
+        {/* Footer row */}
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+          }}
+        >
+          <div
+            style={{
+              display: 'flex',
+              gap: 4,
+              alignItems: 'center',
+            }}
+          >
+            {Array.from({ length: Math.min(count, 4) }).map((_, i) => (
+              <div
+                key={i}
+                style={{
+                  width: 6,
+                  height: 6,
+                  borderRadius: '50%',
+                  background: color,
+                  opacity: 0.6 + i * 0.1,
+                }}
+              />
+            ))}
+            {count > 4 && (
+              <span style={{ fontSize: 11, color: color, marginLeft: 2 }}>+{count - 4}</span>
+            )}
+          </div>
+          <ChevronRight color={color + 'AA'} />
+        </div>
+      </div>
+    </button>
+  )
+}
+
+function EquipoResultado({ equipo, onClick }) {
+  return (
+    <button
+      onClick={onClick}
+      style={{
+        display: 'flex',
+        alignItems: 'center',
+        gap: 12,
+        width: '100%',
+        background: '#131820',
+        border: '1px solid #2A3448',
+        borderRadius: 14,
+        padding: '13px 16px',
+        cursor: 'pointer',
+        textAlign: 'left',
+        transition: 'border-color 0.15s',
+      }}
+      onPointerDown={e => { e.currentTarget.style.borderColor = '#F4A020'; e.currentTarget.style.background = '#1C2230' }}
+      onPointerUp={e => { e.currentTarget.style.borderColor = '#2A3448'; e.currentTarget.style.background = '#131820' }}
+      onPointerLeave={e => { e.currentTarget.style.borderColor = '#2A3448'; e.currentTarget.style.background = '#131820' }}
+    >
+      <div
+        style={{
+          flexShrink: 0,
+          background: 'rgba(244,160,32,0.12)',
+          border: '1px solid rgba(244,160,32,0.25)',
+          borderRadius: 8,
+          padding: '5px 8px',
+          fontFamily: 'monospace',
+          fontSize: 12,
+          fontWeight: 700,
+          color: '#F4A020',
+          letterSpacing: 1,
+          minWidth: 62,
+          textAlign: 'center',
+        }}
+      >
+        {equipo.codigo || '—'}
+      </div>
+      <div style={{ flex: 1, minWidth: 0 }}>
+        <div style={{
+          fontSize: 14, fontWeight: 600, color: '#E8EDF5',
+          overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+          fontFamily: "'DM Sans', sans-serif",
+        }}>
+          {equipo.nombre}
+        </div>
+        <div style={{ fontSize: 12, color: '#7A8BA8', marginTop: 1 }}>{equipo.area}</div>
+      </div>
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+        <path d="M6 4l4 4-4 4" stroke="#7A8BA8" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+      </svg>
+    </button>
+  )
+}
+
+export default function AreasScreen() {
+  const navigate = useNavigate()
+  const { equipos } = useAdmin()
+  const [busquedaRapida, setBusquedaRapida] = useState('')
+  const [busquedaArea, setBusquedaArea] = useState('')
+  const searchRef = useRef(null)
+
+  const equiposActivos = useMemo(
+    () => equipos.filter(e => e.activo !== false),
+    [equipos]
+  )
+
+  const areas = useMemo(() => {
+    const map = {}
+    equiposActivos.forEach(e => {
+      map[e.area] = (map[e.area] || 0) + 1
+    })
+    return Object.entries(map).map(([nombre, count]) => ({ nombre, count }))
+  }, [equiposActivos])
+
+  const areasFiltradas = useMemo(() => {
+    if (!busquedaArea.trim()) return areas
+    const q = busquedaArea.toLowerCase()
+    return areas.filter(a => a.nombre.toLowerCase().includes(q))
+  }, [areas, busquedaArea])
+
+  // Quick equipment search by code or name
+  const resultadosRapidos = useMemo(() => {
+    const q = busquedaRapida.trim().toLowerCase()
+    if (!q) return []
+    return equiposActivos.filter(e =>
+      e.codigo?.toLowerCase().includes(q) ||
+      e.nombre.toLowerCase().includes(q)
+    ).slice(0, 8)
+  }, [equiposActivos, busquedaRapida])
+
+  const modoRapido = busquedaRapida.trim().length > 0
+
+  return (
+    <div
+      style={{
+        display: 'flex',
+        flexDirection: 'column',
+        height: '100%',
+        minHeight: 0,
+        background: '#0A0C0F',
+        overflow: 'hidden',
+      }}
+    >
+      {/* Header */}
+      <div
+        style={{
+          padding: '52px 20px 16px',
+          background: '#0A0C0F',
+          borderBottom: '1px solid #2A3448',
+          flexShrink: 0,
+        }}
+      >
+        <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between' }}>
+          <div>
+            <div
+              style={{
+                fontFamily: "'Bebas Neue', sans-serif",
+                fontSize: 24,
+                letterSpacing: 3,
+                color: '#F4A020',
+                lineHeight: 1,
+              }}
+            >
+              LUBRIPLAN
+            </div>
+            <div style={{ fontSize: 12, color: '#7A8BA8', marginTop: 4 }}>
+              {areas.length} área{areas.length !== 1 ? 's' : ''} · {equiposActivos.length} equipos
+            </div>
+          </div>
+          <button
+            onClick={() => navigate('/')}
+            style={{
+              background: '#131820',
+              border: '1px solid #2A3448',
+              borderRadius: 10,
+              padding: '10px 16px',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: 6,
+              color: '#7A8BA8',
+              fontSize: 13,
+              fontWeight: 500,
+              fontFamily: "'DM Sans', sans-serif",
+            }}
+          >
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+              <path d="M2 8H14M2 8L6 4M2 8L6 12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+            Salir
+          </button>
+        </div>
+
+        {/* Quick search input */}
+        <div style={{ marginTop: 18, position: 'relative' }}>
+          <svg
+            width="17" height="17" viewBox="0 0 17 17" fill="none"
+            style={{ position: 'absolute', left: 14, top: '50%', transform: 'translateY(-50%)', zIndex: 1 }}
+          >
+            <circle cx="7.5" cy="7.5" r="5" stroke={modoRapido ? '#F4A020' : '#7A8BA8'} strokeWidth="1.5" />
+            <path d="M11.5 11.5L15 15" stroke={modoRapido ? '#F4A020' : '#7A8BA8'} strokeWidth="1.5" strokeLinecap="round" />
+          </svg>
+          <input
+            ref={searchRef}
+            type="text"
+            placeholder="Buscar por código o nombre de equipo..."
+            value={busquedaRapida}
+            onChange={e => setBusquedaRapida(e.target.value)}
+            style={{
+              width: '100%',
+              height: 48,
+              background: '#131820',
+              border: `1px solid ${modoRapido ? '#F4A02060' : '#2A3448'}`,
+              borderRadius: 12,
+              paddingLeft: 42,
+              paddingRight: busquedaRapida ? 40 : 16,
+              color: '#E8EDF5',
+              fontSize: 15,
+              fontFamily: "'DM Sans', sans-serif",
+              outline: 'none',
+              boxSizing: 'border-box',
+              transition: 'border-color 0.15s',
+            }}
+          />
+          {busquedaRapida && (
+            <button
+              onClick={() => setBusquedaRapida('')}
+              style={{
+                position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)',
+                background: 'none', border: 'none', color: '#7A8BA8',
+                cursor: 'pointer', fontSize: 18, lineHeight: 1, padding: 4,
+              }}
+            >
+              ×
+            </button>
+          )}
+        </div>
+      </div>
+
+      {/* Scrollable content */}
+      <div
+        style={{
+          flex: 1,
+          minHeight: 0,
+          overflowY: 'auto',
+          padding: '16px 20px 32px',
+        }}
+      >
+        {modoRapido ? (
+          /* Quick search results */
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+            <div style={{ fontSize: 12, color: '#7A8BA8', marginBottom: 4 }}>
+              {resultadosRapidos.length > 0
+                ? `${resultadosRapidos.length} resultado${resultadosRapidos.length !== 1 ? 's' : ''} — toca para ver la carta`
+                : 'Sin resultados'}
+            </div>
+            {resultadosRapidos.length === 0 ? (
+              <div
+                style={{
+                  display: 'flex', flexDirection: 'column',
+                  alignItems: 'center', gap: 12, paddingTop: 40, color: '#7A8BA8',
+                }}
+              >
+                <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
+                  <circle cx="24" cy="24" r="20" stroke="#2A3448" strokeWidth="2" />
+                  <path d="M24 16v10M24 32h.01" stroke="#7A8BA8" strokeWidth="2" strokeLinecap="round" />
+                </svg>
+                <span style={{ fontSize: 14 }}>
+                  Sin equipos para "{busquedaRapida}"
+                </span>
+              </div>
+            ) : (
+              resultadosRapidos.map(e => (
+                <EquipoResultado
+                  key={e.id}
+                  equipo={e}
+                  onClick={() => navigate(`/carta/${e.id}`)}
+                />
+              ))
+            )}
+          </div>
+        ) : (
+          /* Normal areas grid */
+          <div>
+            {/* Area search */}
+            <div style={{ position: 'relative', marginBottom: 16 }}>
+              <svg
+                width="15" height="15" viewBox="0 0 15 15" fill="none"
+                style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)' }}
+              >
+                <circle cx="6.5" cy="6.5" r="4.5" stroke="#7A8BA8" strokeWidth="1.3" />
+                <path d="M10 10L13 13" stroke="#7A8BA8" strokeWidth="1.3" strokeLinecap="round" />
+              </svg>
+              <input
+                type="text"
+                placeholder="Filtrar áreas..."
+                value={busquedaArea}
+                onChange={e => setBusquedaArea(e.target.value)}
+                style={{
+                  width: '100%',
+                  height: 40,
+                  background: '#131820',
+                  border: '1px solid #2A3448',
+                  borderRadius: 10,
+                  paddingLeft: 36,
+                  paddingRight: 12,
+                  color: '#E8EDF5',
+                  fontSize: 13,
+                  fontFamily: "'DM Sans', sans-serif",
+                  outline: 'none',
+                  boxSizing: 'border-box',
+                }}
+              />
+            </div>
+
+            {areasFiltradas.length === 0 ? (
+              <div
+                style={{
+                  display: 'flex', flexDirection: 'column',
+                  alignItems: 'center', gap: 12, paddingTop: 40, color: '#7A8BA8',
+                }}
+              >
+                <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
+                  <circle cx="24" cy="24" r="20" stroke="#2A3448" strokeWidth="2" />
+                  <path d="M24 16v10M24 32h.01" stroke="#7A8BA8" strokeWidth="2" strokeLinecap="round" />
+                </svg>
+                <span style={{ fontSize: 15 }}>Sin áreas para "{busquedaArea}"</span>
+              </div>
+            ) : (
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+                {areasFiltradas.map(({ nombre, count }, idx) => (
+                  <AreaCard
+                    key={nombre}
+                    area={nombre}
+                    count={count}
+                    color={PALETTE[idx % PALETTE.length]}
+                    onClick={() => navigate(`/equipos?area=${encodeURIComponent(nombre)}`)}
+                  />
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}

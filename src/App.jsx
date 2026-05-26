@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import PinScreen from './screens/PinScreen'
+import AreasScreen from './screens/AreasScreen'
 import EquiposScreen from './screens/EquiposScreen'
 import CartaScreen from './screens/CartaScreen'
 import { AdminProvider } from './admin/context/AdminContext'
@@ -17,9 +18,10 @@ export default function App() {
     <BrowserRouter>
       <AdminProvider>
         <Routes>
-          {/* Técnico routes — sin cambios */}
+          {/* Técnico routes */}
           <Route path="/" element={<PinScreen />} />
           <Route path="/pin" element={<PinScreen />} />
+          <Route path="/areas" element={<AreasScreen />} />
           <Route path="/equipos" element={<EquiposScreen />} />
           <Route path="/carta/:id" element={<CartaScreen />} />
 

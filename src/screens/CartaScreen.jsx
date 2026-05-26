@@ -70,6 +70,7 @@ export default function CartaScreen() {
   const navigate = useNavigate()
   const { equipos } = useAdmin()
   const [puntoActivo, setPuntoActivo] = useState(null)
+  const [imgActivaIdx, setImgActivaIdx] = useState(0)
 
   const equipo = equipos.find(e => e.id === id)
 
@@ -90,7 +91,7 @@ export default function CartaScreen() {
         <span style={{ fontSize: 48 }}>⚙️</span>
         <p style={{ fontSize: 16 }}>Equipo no encontrado</p>
         <button
-          onClick={() => navigate('/equipos')}
+          onClick={() => navigate(-1)}
           style={{
             background: '#F4A020',
             color: '#0A0C0F',
@@ -102,11 +103,28 @@ export default function CartaScreen() {
             fontSize: 15,
           }}
         >
-          Volver a equipos
+          Volver
         </button>
       </div>
     )
   }
+
+  // Normalize images: support both new multi-image format and legacy single imagenUrl
+  const imagenes = equipo.imagenes?.length > 0
+    ? equipo.imagenes
+    : equipo.imagenUrl
+      ? [{ id: 'legacy', url: equipo.imagenUrl, flechas: [] }]
+      : []
+
+  const imgActiva = imagenes[imgActivaIdx] || null
+  const flechas = imgActiva?.flechas || []
+
+  // Points for the active image (or global points for legacy/SVG mode)
+  const puntosDeLaImagen = imagenes.length === 0
+    ? equipo.puntos
+    : equipo.puntos.filter(p =>
+        imgActiva && (p.imagenId === imgActiva.id || (!p.imagenId && imgActivaIdx === 0))
+      )
 
   return (
     <div
@@ -132,7 +150,7 @@ export default function CartaScreen() {
         }}
       >
         <button
-          onClick={() => navigate('/equipos')}
+          onClick={() => navigate(-1)}
           style={{
             background: '#131820',
             border: '1px solid #2A3448',
@@ -225,30 +243,172 @@ export default function CartaScreen() {
             border: '1px solid #2A3448',
             borderRadius: 16,
             overflow: 'hidden',
-            paddingTop: '68%',
           }}
         >
+          {/* Image carousel tabs (only when multiple images) */}
+          {imagenes.length > 1 && (
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 6,
+                padding: '10px 12px 8px',
+                borderBottom: '1px solid #2A3448',
+                overflowX: 'auto',
+                scrollbarWidth: 'none',
+              }}
+            >
+              {imagenes.map((img, i) => (
+                <button
+                  key={img.id}
+                  onClick={() => setImgActivaIdx(i)}
+                  style={{
+                    flexShrink: 0,
+                    padding: '4px 12px',
+                    borderRadius: 20,
+                    border: `1px solid ${i === imgActivaIdx ? '#F4A020' : '#2A3448'}`,
+                    background: i === imgActivaIdx ? '#F4A020' : 'transparent',
+                    color: i === imgActivaIdx ? '#0A0C0F' : '#7A8BA8',
+                    fontSize: 12,
+                    fontWeight: i === imgActivaIdx ? 700 : 400,
+                    cursor: 'pointer',
+                    fontFamily: "'DM Sans', sans-serif",
+                  }}
+                >
+                  Foto {i + 1}
+                </button>
+              ))}
+            </div>
+          )}
+
+          {/* Image area */}
           <div
             style={{
-              position: 'absolute',
-              inset: 0,
-              padding: '10px',
+              position: 'relative',
+              paddingTop: '68%',
             }}
           >
-            {equipo.imagenUrl
-              ? <img src={equipo.imagenUrl} alt={equipo.nombre} style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
-              : <EquipoSVG tipo={equipo.imagen} />
-            }
+            <div
+              style={{
+                position: 'absolute',
+                inset: 0,
+                padding: '10px',
+              }}
+            >
+              {imgActiva
+                ? <img src={imgActiva.url} alt={equipo.nombre} style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+                : <EquipoSVG tipo={equipo.imagen} />
+              }
+            </div>
+
+            {/* SVG overlay for arrows/lines */}
+            {flechas.length > 0 && (
+              <svg
+                style={{
+                  position: 'absolute',
+                  inset: 0,
+                  width: '100%',
+                  height: '100%',
+                  pointerEvents: 'none',
+                  overflow: 'visible',
+                }}
+              >
+                <defs>
+                  <marker id="arrow-view" markerWidth="7" markerHeight="5" refX="7" refY="2.5" orient="auto">
+                    <polygon points="0 0, 7 2.5, 0 5" fill="#F4A020" />
+                  </marker>
+                </defs>
+                {flechas.map(f => (
+                  <line
+                    key={f.id}
+                    x1={`${f.x1}%`} y1={`${f.y1}%`}
+                    x2={`${f.x2}%`} y2={`${f.y2}%`}
+                    stroke="#F4A020"
+                    strokeWidth="2"
+                    strokeDasharray={f.tipo === 'linea' ? '6 4' : undefined}
+                    markerEnd={f.tipo === 'flecha' ? 'url(#arrow-view)' : undefined}
+                    opacity="0.85"
+                  />
+                ))}
+              </svg>
+            )}
+
+            {/* Point markers for this image */}
+            {puntosDeLaImagen.map((punto, i) => (
+              <PuntoMarcador
+                key={punto.id}
+                punto={punto}
+                index={equipo.puntos.indexOf(punto)}
+                onClick={() => setPuntoActivo(punto)}
+              />
+            ))}
           </div>
 
-          {equipo.puntos.map((punto, i) => (
-            <PuntoMarcador
-              key={punto.id}
-              punto={punto}
-              index={i}
-              onClick={() => setPuntoActivo(punto)}
-            />
-          ))}
+          {/* Carousel prev/next (when multiple images) */}
+          {imagenes.length > 1 && (
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                padding: '8px 12px 10px',
+                borderTop: '1px solid #2A3448',
+              }}
+            >
+              <button
+                onClick={() => setImgActivaIdx(i => Math.max(0, i - 1))}
+                disabled={imgActivaIdx === 0}
+                style={{
+                  display: 'flex', alignItems: 'center', gap: 4,
+                  background: 'none', border: 'none',
+                  color: imgActivaIdx === 0 ? '#2A3448' : '#7A8BA8',
+                  cursor: imgActivaIdx === 0 ? 'default' : 'pointer',
+                  fontSize: 13, padding: '4px 8px',
+                  fontFamily: "'DM Sans', sans-serif",
+                }}
+              >
+                <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                  <path d="M9 2L5 7l4 5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+                Anterior
+              </button>
+
+              {/* Dots */}
+              <div style={{ display: 'flex', gap: 6 }}>
+                {imagenes.map((_, i) => (
+                  <button
+                    key={i}
+                    onClick={() => setImgActivaIdx(i)}
+                    style={{
+                      width: i === imgActivaIdx ? 16 : 6,
+                      height: 6, borderRadius: 3,
+                      background: i === imgActivaIdx ? '#F4A020' : '#2A3448',
+                      border: 'none', cursor: 'pointer', padding: 0,
+                      transition: 'width 0.2s, background 0.2s',
+                    }}
+                  />
+                ))}
+              </div>
+
+              <button
+                onClick={() => setImgActivaIdx(i => Math.min(imagenes.length - 1, i + 1))}
+                disabled={imgActivaIdx === imagenes.length - 1}
+                style={{
+                  display: 'flex', alignItems: 'center', gap: 4,
+                  background: 'none', border: 'none',
+                  color: imgActivaIdx === imagenes.length - 1 ? '#2A3448' : '#7A8BA8',
+                  cursor: imgActivaIdx === imagenes.length - 1 ? 'default' : 'pointer',
+                  fontSize: 13, padding: '4px 8px',
+                  fontFamily: "'DM Sans', sans-serif",
+                }}
+              >
+                Siguiente
+                <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                  <path d="M5 2l4 5-4 5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              </button>
+            </div>
+          )}
         </div>
 
         {/* Legend */}
@@ -272,6 +432,7 @@ export default function CartaScreen() {
 
           {equipo.puntos.map((punto, i) => {
             const freq = FRECUENCIAS[punto.frecuencia] || { color: '#7A8BA8', bg: '#1E2535', label: punto.frecuencia }
+            const isVisible = puntosDeLaImagen.some(p => p.id === punto.id) || imagenes.length === 0
             return (
               <button
                 key={punto.id}
@@ -286,7 +447,8 @@ export default function CartaScreen() {
                   padding: '12px 14px',
                   cursor: 'pointer',
                   textAlign: 'left',
-                  transition: 'border-color 0.15s',
+                  transition: 'border-color 0.15s, opacity 0.15s',
+                  opacity: imagenes.length > 1 && !isVisible ? 0.35 : 1,
                 }}
                 onPointerDown={e => e.currentTarget.style.borderColor = freq.color}
                 onPointerUp={e => e.currentTarget.style.borderColor = '#2A3448'}
