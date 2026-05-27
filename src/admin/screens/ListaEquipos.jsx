@@ -309,7 +309,7 @@ export default function ListaEquipos() {
       {confirmId && (
         <ConfirmModal
           titulo="Eliminar equipo"
-          mensaje={`¿Seguro que querés eliminar "${equipoAEliminar?.nombre}"? Se perderán todos sus puntos de lubricación.`}
+          mensaje={`¿Seguro que quieres eliminar "${equipoAEliminar?.nombre}"? Se perderán todos sus puntos de lubricación.`}
           onConfirm={() => { eliminarEquipo(confirmId); setConfirmId(null) }}
           onCancel={() => setConfirmId(null)}
         />

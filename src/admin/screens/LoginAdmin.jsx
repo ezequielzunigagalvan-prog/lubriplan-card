@@ -34,7 +34,7 @@ export default function LoginAdmin() {
       if (ok) {
         navigate('/admin/dashboard', { replace: true })
       } else {
-        setError('Credenciales incorrectas. Verificá email y contraseña.')
+        setError('Credenciales incorrectas. Verifica email y contraseña.')
         setLoading(false)
       }
     }, 300)

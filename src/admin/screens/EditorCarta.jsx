@@ -153,7 +153,7 @@ function PuntoForm({ punto, onSave, onDelete, onClose, lubricantes }) {
       {confirmDelete && (
         <ConfirmModal
           titulo="Eliminar punto"
-          mensaje={`¿Seguro que querés eliminar "${punto?.nombre || `Punto #${punto?.numero}`}"?`}
+          mensaje={`¿Seguro que quieres eliminar "${punto?.nombre || `Punto #${punto?.numero}`}"?`}
           onConfirm={() => { onDelete(punto.id); setConfirmDelete(false) }}
           onCancel={() => setConfirmDelete(false)}
         />

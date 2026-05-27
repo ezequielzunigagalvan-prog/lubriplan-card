@@ -118,10 +118,11 @@ function PuntoRow({ punto, globalIndex, onClick }) {
 export default function CartaScreen() {
   const { id } = useParams()
   const navigate = useNavigate()
-  const { equipos } = useAdmin()
+  const { equipos, editarTecnico } = useAdmin()
 
   const heroRef = useRef(null)
   const imgElRef = useRef(null)
+  const swipeStartX = useRef(null)
   const [puntoActivo, setPuntoActivo] = useState(null)
   const [imgActivaIdx, setImgActivaIdx] = useState(0)
   const [imgRect, setImgRect] = useState(null)
@@ -129,6 +130,15 @@ export default function CartaScreen() {
 
   // Reset imgRect when switching images
   useEffect(() => { setImgRect(null) }, [imgActivaIdx])
+
+  // Register technician's last activity
+  useEffect(() => {
+    const tecId = sessionStorage.getItem('tecnicoActivoId')
+    if (tecId) {
+      editarTecnico(tecId, { ultimaConsulta: new Date().toISOString().split('T')[0] })
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [id])
 
   const calcImgRect = useCallback((imgEl) => {
     const container = heroRef.current
@@ -158,6 +168,21 @@ export default function CartaScreen() {
       calcImgRect(img)
     }
   }, [imgActivaIdx, imgRect, calcImgRect])
+
+  // Swipe horizontal para navegar imágenes
+  const handleHeroTouchStart = useCallback((e) => {
+    swipeStartX.current = e.touches[0].clientX
+  }, [])
+
+  const handleHeroTouchEnd = useCallback((e) => {
+    if (swipeStartX.current === null) return
+    const dx = e.changedTouches[0].clientX - swipeStartX.current
+    if (Math.abs(dx) > 50) {
+      if (dx < 0) setImgActivaIdx(i => Math.min(i + 1, imagenes.length - 1))
+      else setImgActivaIdx(i => Math.max(0, i - 1))
+    }
+    swipeStartX.current = null
+  }, [imagenes.length])
 
   const equipo = equipos.find(e => e.id === id)
 
@@ -204,6 +229,12 @@ export default function CartaScreen() {
         )
       )
 
+  // Auto-open list when there are no images
+  useEffect(() => {
+    if (imagenes.length === 0) setListaAbierta(true)
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [equipo.id])
+
   // Only frequencies actually present in this equipo
   const frecuenciasPresentes = useMemo(() => {
     const present = new Set(equipo.puntos.map(p => p.frecuencia))
@@ -222,13 +253,18 @@ export default function CartaScreen() {
       {/* ══════════════════════════════════════════
           HERO IMAGE SECTION
       ══════════════════════════════════════════ */}
-      <div ref={heroRef} style={{
-        position: 'relative',
-        flexShrink: 0,
-        height: '58vh',
-        minHeight: 290,
-        background: '#0D1117',
-      }}>
+      <div
+        ref={heroRef}
+        onTouchStart={handleHeroTouchStart}
+        onTouchEnd={handleHeroTouchEnd}
+        style={{
+          position: 'relative',
+          flexShrink: 0,
+          height: '58vh',
+          minHeight: 290,
+          background: '#0D1117',
+        }}
+      >
 
         {/* Image / SVG */}
         <div style={{ position: 'absolute', inset: 0 }}>
@@ -554,7 +590,7 @@ export default function CartaScreen() {
               fontSize: 12, color: '#4A5568',
               fontFamily: "'DM Sans', sans-serif",
             }}>
-              Tocá un punto en la imagen o desplegá la lista
+              Toca un punto en la imagen o despliega la lista
             </div>
           )}
         </div>

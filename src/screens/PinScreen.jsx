@@ -30,8 +30,9 @@ export default function PinScreen() {
     const newPin = pin + key
 
     if (newPin.length === 4) {
-      const pinValido = tecnicos.some(t => t.activo && t.pin === newPin)
-      if (pinValido) {
+      const tecnico = tecnicos.find(t => t.activo && t.pin === newPin)
+      if (tecnico) {
+        sessionStorage.setItem('tecnicoActivoId', tecnico.id)
         if (equipoParam) {
           navigate(`/carta/${equipoParam}`)
         } else {

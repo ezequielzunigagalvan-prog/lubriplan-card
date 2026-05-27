@@ -229,7 +229,7 @@ export default function GestionTecnicos() {
       {confirmId && (
         <ConfirmModal
           titulo="Eliminar técnico"
-          mensaje={`¿Seguro que querés eliminar a "${tecnicoAEliminar?.nombre}"? El PIN ${tecnicoAEliminar?.pin} dejará de funcionar.`}
+          mensaje={`¿Seguro que quieres eliminar a "${tecnicoAEliminar?.nombre}"? El PIN ${tecnicoAEliminar?.pin} dejará de funcionar.`}
           onConfirm={() => { eliminarTecnico(confirmId); setConfirmId(null) }}
           onCancel={() => setConfirmId(null)}
         />

@@ -1,6 +1,50 @@
 import { useEffect, useRef, useState } from 'react'
 import { FRECUENCIAS, METODOS } from '../data/equipos'
 
+function MetodoIcon({ metodo }) {
+  const icons = {
+    grasa: (
+      <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+        <path d="M14.5 3.5a3 3 0 0 1-3.5 4.5L6 13a2 2 0 1 1-1.5-1.5l5-5a3 3 0 0 1 4.5-3.5l-2 2 1.5 1.5 2-2z" stroke="#F4A020" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
+      </svg>
+    ),
+    aceite: (
+      <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+        <path d="M9 2L13 8H5L9 2Z" stroke="#F4A020" strokeWidth="1.4" strokeLinejoin="round" />
+        <rect x="6" y="8" width="6" height="8" rx="1" stroke="#F4A020" strokeWidth="1.4" />
+      </svg>
+    ),
+    circulacion: (
+      <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+        <path d="M3 9a6 6 0 0 1 11-3.3" stroke="#F4A020" strokeWidth="1.4" strokeLinecap="round" />
+        <path d="M15 9a6 6 0 0 1-11 3.3" stroke="#F4A020" strokeWidth="1.4" strokeLinecap="round" />
+        <path d="M13.7 5.7l.3 2.3-2.3.3" stroke="#F4A020" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
+        <path d="M4.3 12.3l-.3-2.3 2.3-.3" stroke="#F4A020" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
+      </svg>
+    ),
+    inmersion: (
+      <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+        <path d="M9 3C7 6 5 8 5 10.5a4 4 0 0 0 8 0C13 8 11 6 9 3z" stroke="#F4A020" strokeWidth="1.4" strokeLinejoin="round" />
+        <path d="M6.5 11.5a2.5 2.5 0 0 0 3 1.5" stroke="#F4A020" strokeWidth="1.2" strokeLinecap="round" />
+      </svg>
+    ),
+    niebla: (
+      <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+        <path d="M3 7h12M4 10h10M6 13h6" stroke="#F4A020" strokeWidth="1.4" strokeLinecap="round" />
+        <path d="M6 4c0-1 1-2 3-2s3.5 1 3.5 3c1.5 0 2.5 1 2.5 2H4C4 5.5 5 4 6 4z" stroke="#F4A020" strokeWidth="1.3" strokeLinejoin="round" />
+      </svg>
+    ),
+    spray: (
+      <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+        <rect x="3" y="9" width="7" height="7" rx="1.5" stroke="#F4A020" strokeWidth="1.4" />
+        <path d="M7 9V6h5v3" stroke="#F4A020" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
+        <path d="M12 6h1.5M12 9h2M12 7.5h1.5" stroke="#F4A020" strokeWidth="1.2" strokeLinecap="round" />
+      </svg>
+    ),
+  }
+  return icons[metodo] || icons.grasa
+}
+
 export default function BottomSheet({ punto, globalIndex, onClose }) {
   const sheetRef = useRef(null)
   const startYRef = useRef(null)
@@ -223,9 +267,7 @@ export default function BottomSheet({ punto, globalIndex, onClose }) {
             )}
 
             <InfoRow
-              icon={
-                <span style={{ fontSize: 17 }}>{metodo?.icon || '🔧'}</span>
-              }
+              icon={<MetodoIcon metodo={punto.metodo} />}
               label="Método"
               value={metodo?.label || punto.metodo}
               last={true}

@@ -490,6 +490,7 @@ function DemoEquipo() {
                       key={p.id}
                       onMouseEnter={() => setActiveId(p.id)}
                       onMouseLeave={() => setActiveId(null)}
+                      onClick={() => setActiveId(activeId === p.id ? null : p.id)}
                       style={{
                         display: 'flex', alignItems: 'center', gap: 10,
                         background: 'none', border: '1px solid #1E2535',

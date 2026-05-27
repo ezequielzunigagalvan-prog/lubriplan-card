@@ -293,7 +293,7 @@ export default function GestionLubricantes() {
       {confirmId && (
         <ConfirmModal
           titulo="Eliminar lubricante"
-          mensaje={`¿Seguro que querés eliminar "${lubAEliminar?.nombre}"?`}
+          mensaje={`¿Seguro que quieres eliminar "${lubAEliminar?.nombre}"?`}
           onConfirm={() => { eliminarLubricante(confirmId); setConfirmId(null) }}
           onCancel={() => setConfirmId(null)}
         />

@@ -1,9 +1,16 @@
 import { createContext, useContext, useState, useCallback, useEffect } from 'react'
 import { equipos as equiposInicial } from '../../data/equipos'
 
-const ADMIN_EMAIL = 'admin@lubriplan.com'
-const ADMIN_PASSWORD = 'admin123'
+const CREDS_KEY = 'lubriplan_admin_creds'
 const SESSION_KEY = 'adminSession'
+
+function getCredenciales() {
+  try {
+    const saved = localStorage.getItem(CREDS_KEY)
+    if (saved) return JSON.parse(saved)
+  } catch {}
+  return { email: 'admin@lubriplan.com', password: 'admin123' }
+}
 const EQUIPOS_KEY = 'masterlub_equipos'
 const TECNICOS_KEY = 'masterlub_tecnicos'
 const LUBRICANTES_KEY = 'masterlub_lubricantes'
@@ -123,12 +130,17 @@ export function AdminProvider({ children }) {
   }, [])
 
   const login = useCallback((email, password) => {
-    if (email === ADMIN_EMAIL && password === ADMIN_PASSWORD) {
+    const creds = getCredenciales()
+    if (email === creds.email && password === creds.password) {
       localStorage.setItem(SESSION_KEY, JSON.stringify({ email, ts: Date.now() }))
       setIsLoggedIn(true)
       return true
     }
     return false
+  }, [])
+
+  const cambiarCredenciales = useCallback((email, password) => {
+    localStorage.setItem(CREDS_KEY, JSON.stringify({ email, password }))
   }, [])
 
   const logout = useCallback(() => {
@@ -204,7 +216,7 @@ export function AdminProvider({ children }) {
 
   return (
     <AdminContext.Provider value={{
-      isLoggedIn, login, logout,
+      isLoggedIn, login, logout, cambiarCredenciales,
       equipos, crearEquipo, editarEquipo, eliminarEquipo,
       actualizarPuntos, actualizarImagenEquipo, actualizarImagenesEquipo,
       tecnicos, crearTecnico, editarTecnico, eliminarTecnico, toggleTecnico,

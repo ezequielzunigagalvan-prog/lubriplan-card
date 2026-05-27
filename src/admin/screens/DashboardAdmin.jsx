@@ -1,7 +1,63 @@
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import AdminLayout from '../components/AdminLayout'
 import { useAdmin } from '../context/AdminContext'
+
+function CambiarCredencialesModal({ onClose, onSave }) {
+  const [form, setForm] = useState({ email: '', password: '', confirmar: '' })
+  const [error, setError] = useState('')
+  const [ok, setOk] = useState(false)
+
+  const set = (k) => (e) => setForm(p => ({ ...p, [k]: e.target.value }))
+
+  const handleSave = () => {
+    if (!form.email.trim() || !form.password) { setError('Completa todos los campos'); return }
+    if (form.password !== form.confirmar) { setError('Las contraseñas no coinciden'); return }
+    if (form.password.length < 6) { setError('La contraseña debe tener al menos 6 caracteres'); return }
+    onSave(form.email.trim(), form.password)
+    setOk(true)
+    setTimeout(onClose, 1200)
+  }
+
+  const inp = {
+    width: '100%', padding: '10px 12px',
+    background: '#0A0C0F', border: '1px solid #2A3346',
+    borderRadius: 7, color: '#E8EDF5', fontSize: 14,
+    outline: 'none', boxSizing: 'border-box',
+    fontFamily: "'DM Sans', sans-serif",
+  }
+
+  return (
+    <div style={{ position: 'fixed', inset: 0, zIndex: 300, background: 'rgba(0,0,0,0.75)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24 }}>
+      <div style={{ background: '#1A1F2B', borderRadius: 12, padding: 28, maxWidth: 380, width: '100%', border: '1px solid #2A3346' }}>
+        <h3 style={{ color: '#E8EDF5', fontSize: 17, fontWeight: 600, margin: '0 0 20px' }}>Cambiar credenciales</h3>
+        {ok ? (
+          <div style={{ textAlign: 'center', padding: '20px 0', color: '#22C55E', fontSize: 15, fontWeight: 600 }}>
+            ✓ Credenciales actualizadas
+          </div>
+        ) : (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+            {[
+              { label: 'Nuevo email', key: 'email', type: 'email' },
+              { label: 'Nueva contraseña', key: 'password', type: 'password' },
+              { label: 'Confirmar contraseña', key: 'confirmar', type: 'password' },
+            ].map(({ label, key, type }) => (
+              <div key={key}>
+                <label style={{ display: 'block', color: '#7A8BA8', fontSize: 11, marginBottom: 5, textTransform: 'uppercase', letterSpacing: 0.5 }}>{label}</label>
+                <input type={type} value={form[key]} onChange={set(key)} style={inp} />
+              </div>
+            ))}
+            {error && <div style={{ background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.3)', borderRadius: 7, padding: '8px 12px', color: '#EF4444', fontSize: 13 }}>{error}</div>}
+            <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end', marginTop: 4 }}>
+              <button onClick={onClose} style={{ padding: '9px 18px', borderRadius: 7, border: '1px solid #2A3346', background: 'transparent', color: '#7A8BA8', cursor: 'pointer', fontSize: 13 }}>Cancelar</button>
+              <button onClick={handleSave} style={{ padding: '9px 18px', borderRadius: 7, border: 'none', background: '#F4A020', color: '#0A0C0F', cursor: 'pointer', fontSize: 13, fontWeight: 700 }}>Guardar</button>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}
 
 const PALETTE = [
   '#F4A020', '#22C55E', '#3B82F6', '#A855F7',
@@ -87,8 +143,9 @@ function AreaCard({ area, count, puntos, color, onClick }) {
 }
 
 export default function DashboardAdmin() {
-  const { equipos, tecnicos } = useAdmin()
+  const { equipos, tecnicos, cambiarCredenciales } = useAdmin()
   const navigate = useNavigate()
+  const [showCreds, setShowCreds] = useState(false)
 
   const totalPuntos = equipos.reduce((acc, e) => acc + (e.puntos?.length || 0), 0)
   const tecnicosActivos = tecnicos.filter(t => t.activo).length
@@ -230,6 +287,17 @@ export default function DashboardAdmin() {
                 >
                   Biblioteca de lubricantes →
                 </button>
+                <button
+                  onClick={() => setShowCreds(true)}
+                  style={{
+                    padding: '11px 16px', borderRadius: 8,
+                    border: '1px solid #2A3346', background: 'transparent',
+                    color: '#7A8BA8', fontSize: 13, cursor: 'pointer',
+                    fontFamily: "'DM Sans', sans-serif", textAlign: 'left',
+                  }}
+                >
+                  Cambiar credenciales →
+                </button>
               </div>
             </div>
 
@@ -281,6 +349,12 @@ export default function DashboardAdmin() {
           </div>
         </div>
       </div>
+      {showCreds && (
+        <CambiarCredencialesModal
+          onClose={() => setShowCreds(false)}
+          onSave={(email, password) => cambiarCredenciales(email, password)}
+        />
+      )}
     </AdminLayout>
   )
 }

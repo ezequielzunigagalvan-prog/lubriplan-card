@@ -10,12 +10,12 @@ export const FRECUENCIAS = {
 }
 
 export const METODOS = {
-  grasa: { label: 'Engrasador manual', icon: '🔧' },
-  aceite: { label: 'Pistola de aceite', icon: '🛢' },
-  circulacion: { label: 'Sistema circulación', icon: '♻️' },
-  inmersion: { label: 'Baño de inmersión', icon: '💧' },
-  niebla: { label: 'Lubricación por niebla', icon: '💨' },
-  spray: { label: 'Spray lubricante', icon: '🔫' },
+  grasa: { label: 'Engrasador manual' },
+  aceite: { label: 'Pistola de aceite' },
+  circulacion: { label: 'Sistema de circulación' },
+  inmersion: { label: 'Baño de inmersión' },
+  niebla: { label: 'Lubricación por niebla' },
+  spray: { label: 'Spray lubricante' },
 }
 
 export const equipos = [
@@ -87,7 +87,6 @@ export const equipos = [
         notas: null,
       },
     ],
-    vencidos: 2,
   },
   {
     id: 'grundfos-cr15',
@@ -133,7 +132,6 @@ export const equipos = [
         notas: 'Motor Grundfos MG 90L. Ver etiqueta en carcasa.',
       },
     ],
-    vencidos: 1,
   },
   {
     id: 'sew-r97',
@@ -191,7 +189,6 @@ export const equipos = [
         notas: 'Limpiar o reemplazar respiradero para evitar sobrepresión interna.',
       },
     ],
-    vencidos: 0,
   },
   {
     id: 'weg-w22',
@@ -225,7 +222,6 @@ export const equipos = [
         notas: null,
       },
     ],
-    vencidos: 0,
   },
   {
     id: 'siemens-ventilador',
@@ -271,7 +267,6 @@ export const equipos = [
         notas: 'Revisar tensión de correa al lubricar.',
       },
     ],
-    vencidos: 2,
   },
   {
     id: 'banda-transportadora',
@@ -353,7 +348,6 @@ export const equipos = [
         notas: null,
       },
     ],
-    vencidos: 1,
   },
   {
     id: 'ge-turbina',
@@ -459,7 +453,6 @@ export const equipos = [
         notas: null,
       },
     ],
-    vencidos: 3,
   },
   {
     id: 'lightnin-agitador',
@@ -517,6 +510,5 @@ export const equipos = [
         notas: 'Acceso por tapa lateral. Desconectar antes de lubricar.',
       },
     ],
-    vencidos: 0,
   },
 ]
