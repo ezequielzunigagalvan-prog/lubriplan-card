@@ -336,23 +336,22 @@ function DemoEquipo() {
             </div>
 
             {/* SVG + puntos */}
-            <div style={{ position: 'relative', padding: '24px 24px 20px' }}>
-              <div style={{ width: '100%', aspectRatio: '2/1', minHeight: 180 }}>
+            <div style={{ padding: '24px 24px 20px' }}>
+              <div style={{ width: '100%', aspectRatio: '16/9', minHeight: 160, position: 'relative' }}>
                 <EquipoSVG tipo="compresor" showName={false} />
-              </div>
 
-              {/* Puntos numerados */}
-              {DEMO_PUNTOS.map(p => (
-                <button
-                  key={p.id}
-                  onMouseEnter={() => setActiveId(p.id)}
-                  onMouseLeave={() => setActiveId(null)}
-                  onClick={() => setActiveId(activeId === p.id ? null : p.id)}
-                  style={{
-                    position: 'absolute',
-                    left: `calc(24px + ${p.x}% * (100% - 48px) / 100)`,
-                    top: `calc(24px + ${p.y}% * (100% - 44px) / 100)`,
-                    transform: 'translate(-50%, -50%)',
+                {/* Puntos numerados — posicionados dentro del contenedor SVG */}
+                {DEMO_PUNTOS.map(p => (
+                  <button
+                    key={p.id}
+                    onMouseEnter={() => setActiveId(p.id)}
+                    onMouseLeave={() => setActiveId(null)}
+                    onClick={() => setActiveId(activeId === p.id ? null : p.id)}
+                    style={{
+                      position: 'absolute',
+                      left: `${p.x}%`,
+                      top: `${p.y}%`,
+                      transform: 'translate(-50%, -50%)',
                     width: activeId === p.id ? 38 : 32,
                     height: activeId === p.id ? 38 : 32,
                     borderRadius: '50%',
@@ -375,9 +374,10 @@ function DemoEquipo() {
                     padding: 0,
                   }}
                 >
-                  {p.id}
-                </button>
-              ))}
+                    {p.id}
+                  </button>
+                ))}
+              </div>
             </div>
 
             {/* Leyenda frecuencias */}
@@ -984,9 +984,9 @@ export default function LandingPage() {
         {/* 3 pasos con iconos SVG */}
         <div style={{ marginTop: 64, display: 'flex', gap: 20, justifyContent: 'center', flexWrap: 'wrap' }}>
           {[
-            { label: 'Escanea QR', icon: <IconPhone />, desc: 'Con la cámara del celular' },
-            { label: 'Accede a la ficha', icon: <IconCard />, desc: 'Sin apps ni registro' },
-            { label: 'Lubrica correctamente', icon: <IconCheck size={28} />, desc: 'Información precisa siempre' },
+            { label: 'Escaneá el QR', icon: <IconPhone />, desc: 'Con la cámara del celular' },
+            { label: 'Accedé a la ficha', icon: <IconCard />, desc: 'Sin apps ni registro' },
+            { label: 'Lubricá correctamente', icon: <IconCheck size={28} />, desc: 'Información precisa siempre' },
           ].map((step, i) => (
             <div key={i} style={{
               background: '#0D1117', border: '1px solid #1E2535',
@@ -1073,7 +1073,7 @@ export default function LandingPage() {
               fontSize: 'clamp(36px, 5vw, 56px)',
               letterSpacing: 2, color: '#E8EDF5', lineHeight: 1.1, marginBottom: 16,
             }}>
-              ELIGE EL PLAN IDEAL<br />
+              ELEGÍ EL PLAN IDEAL<br />
               <span style={{ color: '#F4A020' }}>PARA TU EMPRESA</span>
             </h2>
             <p style={{ fontSize: 14, color: '#7A8BA8', maxWidth: 500, margin: '0 auto' }}>
