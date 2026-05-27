@@ -120,8 +120,9 @@ export default function LoginAdmin() {
           </form>
         </div>
 
-        <p style={{ textAlign: 'center', color: '#2A3346', fontSize: 11, marginTop: 24 }}>
-          LubriPlan Card — Sistema de Gestión de Lubricación
+        <p style={{ textAlign: 'center', color: '#2A3346', fontSize: 12, marginTop: 24, lineHeight: 1.6 }}>
+          ¿Eres técnico? No necesitas iniciar sesión.<br />
+          Escanea el QR del equipo directamente con tu celular.
         </p>
       </div>
     </div>

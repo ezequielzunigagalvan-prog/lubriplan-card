@@ -900,7 +900,7 @@ export default function LandingPage() {
             Precios
           </button>
           <button
-            onClick={() => navigate('/entrar')}
+            onClick={() => navigate('/admin/login')}
             style={{
               padding: '9px 20px', background: '#F4A020', border: 'none',
               borderRadius: 8, color: '#0A0C0F', fontSize: 13, fontWeight: 700,
