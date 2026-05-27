@@ -1,4 +1,6 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
+import LandingPage from './screens/LandingPage'
+import LoginLubriPlan from './screens/LoginLubriPlan'
 import PinScreen from './screens/PinScreen'
 import AreasScreen from './screens/AreasScreen'
 import EquiposScreen from './screens/EquiposScreen'
@@ -18,8 +20,11 @@ export default function App() {
     <BrowserRouter>
       <AdminProvider>
         <Routes>
+          {/* Landing y acceso */}
+          <Route path="/" element={<LandingPage />} />
+          <Route path="/entrar" element={<LoginLubriPlan />} />
+
           {/* Técnico routes */}
-          <Route path="/" element={<PinScreen />} />
           <Route path="/pin" element={<PinScreen />} />
           <Route path="/areas" element={<AreasScreen />} />
           <Route path="/equipos" element={<EquiposScreen />} />

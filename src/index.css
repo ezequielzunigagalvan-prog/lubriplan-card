@@ -81,6 +81,16 @@ p {
   background: transparent;
 }
 
+/* Landing / Login screens usan position:fixed para romper el max-width de 480px */
+/* El #root sigue siendo 480px para las pantallas de app (técnico/admin) */
+
+/* Botón de precios visible solo en desktop */
+@media (min-width: 640px) {
+  .nav-precios-btn {
+    display: flex !important;
+  }
+}
+
 /* Admin panel responsive sidebar */
 @media (max-width: 767px) {
   .admin-sidebar {
