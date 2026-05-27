@@ -161,8 +161,8 @@ export default function LoginLubriPlan() {
           lineHeight: 1.6,
           maxWidth: 320,
         }}>
-          ¿Sos técnico? No necesitás iniciar sesión.
-          Escaneá el QR del equipo directamente con tu celular.
+          ¿Eres técnico? No necesitas iniciar sesión.
+          Escanea el QR del equipo directamente con tu celular.
         </p>
       </div>
     </div>

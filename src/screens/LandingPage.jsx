@@ -123,7 +123,7 @@ const QA = {
     chips: ['¿Cuánto cuesta?', '¿Qué incluye el plan Estándar?', '¿Incluye historial?'],
   },
   '¿Qué incluye cada plan?': {
-    text: 'Tenemos 4 planes:\n\n• Básico ($80/eq): QR digital, hasta 3 técnicos y 30 equipos\n• Estándar ($350/eq): placa metálica, carta rígida, PDF, ilimitado\n• Pro ($350/eq + LubriPlan): todo lo anterior + historial y rutas\n• Personalizado: 100+ equipos con precio especial\n\n¿Querés que te explique alguno en detalle?',
+    text: 'Tenemos 4 planes:\n\n• Básico ($80/eq): QR digital, hasta 3 técnicos y 30 equipos\n• Estándar ($350/eq): placa metálica, carta rígida, PDF, ilimitado\n• Pro ($350/eq + LubriPlan): todo lo anterior + historial y rutas\n• Personalizado: 100+ equipos con precio especial\n\n¿Quieres que te explique alguno en detalle?',
     chips: ['¿Qué incluye el plan Estándar?', '¿Qué es el plan Pro?', '¿Cuánto cuesta?'],
   },
   '¿Qué incluye el mantenimiento?': {
@@ -296,7 +296,7 @@ function DemoEquipo() {
             ASÍ VE EL TÉCNICO LA FICHA
           </h2>
           <p style={{ fontSize: 14, color: '#7A8BA8', maxWidth: 480, margin: '0 auto' }}>
-            Pasá el cursor sobre los puntos numerados para ver los datos de lubricación de cada uno
+            Pasa el cursor sobre los puntos numerados para ver los datos de lubricación de cada uno
           </p>
         </div>
 
@@ -479,10 +479,10 @@ function DemoEquipo() {
                   <IconBolt size={26} />
                 </div>
                 <div style={{ fontSize: 15, fontWeight: 600, color: '#E8EDF5' }}>
-                  Seleccioná un punto
+                  Selecciona un punto
                 </div>
                 <div style={{ fontSize: 13, color: '#4A5568', lineHeight: 1.6, maxWidth: 220 }}>
-                  Pasá el cursor sobre los círculos numerados en la imagen del equipo para ver los datos de lubricación
+                  Pasa el cursor sobre los círculos numerados en la imagen del equipo para ver los datos de lubricación
                 </div>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginTop: 8, width: '100%' }}>
                   {DEMO_PUNTOS.map(p => (
@@ -558,7 +558,7 @@ function LubriBot() {
             Asistente LubriPlan Card
           </div>
           <h2 style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 'clamp(30px,4vw,46px)', letterSpacing: 2, color: '#E8EDF5', marginBottom: 10 }}>
-            ¿TENÉS DUDAS?
+            ¿TIENES DUDAS?
           </h2>
           <p style={{ fontSize: 14, color: '#4A5568' }}>
             Preguntale al asistente sobre qué es LubriPlan Card, planes y precios
@@ -705,7 +705,7 @@ function LubriBot() {
           borderRadius: 16,
         }}>
           <div>
-            <div style={{ fontSize: 14, fontWeight: 600, color: '#E8EDF5', marginBottom: 3 }}>¿Preferís hablar con una persona?</div>
+            <div style={{ fontSize: 14, fontWeight: 600, color: '#E8EDF5', marginBottom: 3 }}>¿Prefieres hablar con una persona?</div>
             <div style={{ fontSize: 12, color: '#4A5568' }}>Te respondemos en menos de 24 hrs por WhatsApp o correo</div>
           </div>
           <button
@@ -984,9 +984,9 @@ export default function LandingPage() {
         {/* 3 pasos con iconos SVG */}
         <div style={{ marginTop: 64, display: 'flex', gap: 20, justifyContent: 'center', flexWrap: 'wrap' }}>
           {[
-            { label: 'Escaneá el QR', icon: <IconPhone />, desc: 'Con la cámara del celular' },
-            { label: 'Accedé a la ficha', icon: <IconCard />, desc: 'Sin apps ni registro' },
-            { label: 'Lubricá correctamente', icon: <IconCheck size={28} />, desc: 'Información precisa siempre' },
+            { label: 'Escanea el QR', icon: <IconPhone />, desc: 'Con la cámara del celular' },
+            { label: 'Accede a la ficha', icon: <IconCard />, desc: 'Sin apps ni registro' },
+            { label: 'Lubrica correctamente', icon: <IconCheck size={28} />, desc: 'Información precisa siempre' },
           ].map((step, i) => (
             <div key={i} style={{
               background: '#0D1117', border: '1px solid #1E2535',
@@ -1073,7 +1073,7 @@ export default function LandingPage() {
               fontSize: 'clamp(36px, 5vw, 56px)',
               letterSpacing: 2, color: '#E8EDF5', lineHeight: 1.1, marginBottom: 16,
             }}>
-              ELEGÍ EL PLAN IDEAL<br />
+              ELIGE EL PLAN IDEAL<br />
               <span style={{ color: '#F4A020' }}>PARA TU EMPRESA</span>
             </h2>
             <p style={{ fontSize: 14, color: '#7A8BA8', maxWidth: 500, margin: '0 auto' }}>
