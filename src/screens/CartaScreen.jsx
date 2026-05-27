@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useCallback, useRef, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { FRECUENCIAS } from '../data/equipos'
 import { useAdmin } from '../admin/context/AdminContext'
@@ -120,10 +120,44 @@ export default function CartaScreen() {
   const navigate = useNavigate()
   const { equipos } = useAdmin()
 
+  const heroRef = useRef(null)
+  const imgElRef = useRef(null)
   const [puntoActivo, setPuntoActivo] = useState(null)
   const [imgActivaIdx, setImgActivaIdx] = useState(0)
+  const [imgRect, setImgRect] = useState(null)
   const [listaAbierta, setListaAbierta] = useState(false)
-  const [leyendaAbierta, setLeyendaAbierta] = useState(false)
+
+  // Reset imgRect when switching images
+  useEffect(() => { setImgRect(null) }, [imgActivaIdx])
+
+  const calcImgRect = useCallback((imgEl) => {
+    const container = heroRef.current
+    if (!container || !imgEl) return
+    const cW = container.clientWidth
+    const cH = container.clientHeight
+    const iW = imgEl.naturalWidth
+    const iH = imgEl.naturalHeight
+    if (!iW || !iH) return
+    const iAspect = iW / iH
+    const cAspect = cW / cH
+    let rW, rH
+    if (iAspect > cAspect) { rW = cW; rH = cW / iAspect }
+    else { rH = cH; rW = cH * iAspect }
+    setImgRect({ left: (cW - rW) / 2, top: (cH - rH) / 2, width: rW, height: rH })
+  }, [])
+
+  const handleImgLoad = useCallback((e) => {
+    calcImgRect(e.target)
+  }, [calcImgRect])
+
+  // Fallback for already-loaded images (data URLs load synchronously before onLoad fires)
+  useEffect(() => {
+    const img = imgElRef.current
+    if (!img || imgRect) return
+    if (img.complete && img.naturalWidth > 0) {
+      calcImgRect(img)
+    }
+  }, [imgActivaIdx, imgRect, calcImgRect])
 
   const equipo = equipos.find(e => e.id === id)
 
@@ -159,10 +193,15 @@ export default function CartaScreen() {
   const imgActiva = imagenes[imgActivaIdx] || null
   const flechas = imgActiva?.flechas || []
 
+  const imageIds = useMemo(() => new Set(imagenes.map(img => img.id)), [imagenes])
   const puntosDeLaImagen = imagenes.length === 0
     ? equipo.puntos
     : equipo.puntos.filter(p =>
-        imgActiva && (p.imagenId === imgActiva.id || (!p.imagenId && imgActivaIdx === 0))
+        imgActiva && (
+          p.imagenId === imgActiva.id ||
+          // Points with no imagenId OR orphaned imagenId show on first image
+          (!imageIds.has(p.imagenId) && imgActivaIdx === 0)
+        )
       )
 
   // Only frequencies actually present in this equipo
@@ -183,7 +222,7 @@ export default function CartaScreen() {
       {/* ══════════════════════════════════════════
           HERO IMAGE SECTION
       ══════════════════════════════════════════ */}
-      <div style={{
+      <div ref={heroRef} style={{
         position: 'relative',
         flexShrink: 0,
         height: '58vh',
@@ -196,14 +235,16 @@ export default function CartaScreen() {
           {imgActiva
             ? (
               <img
+                ref={imgElRef}
                 src={imgActiva.url}
                 alt={equipo.nombre}
+                onLoad={handleImgLoad}
                 style={{ width: '100%', height: '100%', objectFit: 'contain', display: 'block' }}
               />
             )
             : (
               <div style={{ padding: '40px 24px 24px', width: '100%', height: '100%', boxSizing: 'border-box' }}>
-                <EquipoSVG tipo={equipo.imagen} />
+                <EquipoSVG tipo={equipo.imagen} showName={false} />
               </div>
             )
           }
@@ -223,36 +264,50 @@ export default function CartaScreen() {
           pointerEvents: 'none', zIndex: 6,
         }} />
 
-        {/* ── SVG arrows/lines overlay ── */}
-        <svg
-          style={{
-            position: 'absolute', inset: 0,
-            width: '100%', height: '100%',
-            zIndex: 8, pointerEvents: 'none',
-          }}
-        >
-          <defs>
-            <marker id="arrowhead-view" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
-              <polygon points="0 0, 8 3, 0 6" fill="#F4A020" />
-            </marker>
-          </defs>
-          {flechas.map(f => (
-            <line
-              key={f.id}
-              x1={`${f.x1}%`} y1={`${f.y1}%`}
-              x2={`${f.x2}%`} y2={`${f.y2}%`}
-              stroke="#F4A020"
-              strokeWidth="2.5"
-              strokeLinecap="round"
-              strokeDasharray={f.tipo === 'linea' ? '7 5' : undefined}
-              markerEnd={f.tipo === 'flecha' ? 'url(#arrowhead-view)' : undefined}
-              opacity="0.9"
-            />
-          ))}
-        </svg>
+        {/* ── Arrows + points overlay (positioned exactly on rendered image) ── */}
+        {imgActiva && imgRect && (
+          <div style={{
+            position: 'absolute',
+            left: imgRect.left, top: imgRect.top,
+            width: imgRect.width, height: imgRect.height,
+            zIndex: 8,
+          }}>
+            {/* SVG arrows */}
+            <svg style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', pointerEvents: 'none', overflow: 'visible' }}>
+              <defs>
+                <marker id="arrowhead-view" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+                  <polygon points="0 0, 8 3, 0 6" fill="#F4A020" />
+                </marker>
+              </defs>
+              {flechas.map(f => (
+                <line
+                  key={f.id}
+                  x1={`${f.x1}%`} y1={`${f.y1}%`}
+                  x2={`${f.x2}%`} y2={`${f.y2}%`}
+                  stroke="#F4A020"
+                  strokeWidth="2.5"
+                  strokeLinecap="round"
+                  strokeDasharray={f.tipo === 'linea' ? '7 5' : undefined}
+                  markerEnd={f.tipo === 'flecha' ? 'url(#arrowhead-view)' : undefined}
+                  opacity="0.9"
+                />
+              ))}
+            </svg>
+            {/* Point markers */}
+            {puntosDeLaImagen.map((punto) => (
+              <PuntoMarcador
+                key={punto.id}
+                punto={punto}
+                globalIndex={equipo.puntos.indexOf(punto)}
+                activo={puntoActivo?.id === punto.id}
+                onClick={() => setPuntoActivo(puntoActivo?.id === punto.id ? null : punto)}
+              />
+            ))}
+          </div>
+        )}
 
-        {/* ── Point markers ── */}
-        {puntosDeLaImagen.map((punto) => (
+        {/* ── Point markers for SVG placeholder (no image) ── */}
+        {!imgActiva && puntosDeLaImagen.map((punto) => (
           <PuntoMarcador
             key={punto.id}
             punto={punto}

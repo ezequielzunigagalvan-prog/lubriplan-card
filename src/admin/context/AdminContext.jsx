@@ -139,65 +139,39 @@ export function AdminProvider({ children }) {
   const crearEquipo = useCallback((datos) => {
     const id = `equipo-${Date.now()}`
     const nuevo = { id, puntos: [], vencidos: 0, imagen: 'motor', activo: true, imagenUrl: null, imagenes: [], ...datos }
-    setEquipos(prev => {
-      const next = [...prev, nuevo]
-      persistirEquipos(next)
-      return next
-    })
+    setEquipos(prev => [...prev, nuevo])
     return id
   }, [])
 
   const editarEquipo = useCallback((id, datos) => {
-    setEquipos(prev => {
-      const next = prev.map(e => e.id === id ? { ...e, ...datos } : e)
-      persistirEquipos(next)
-      return next
-    })
+    setEquipos(prev => prev.map(e => e.id === id ? { ...e, ...datos } : e))
   }, [])
 
   const eliminarEquipo = useCallback((id) => {
     localStorage.removeItem(imgKey(id))
     localStorage.removeItem(imgsKey(id))
-    setEquipos(prev => {
-      const next = prev.filter(e => e.id !== id)
-      persistirEquipos(next)
-      return next
-    })
+    setEquipos(prev => prev.filter(e => e.id !== id))
   }, [])
 
   const actualizarPuntos = useCallback((equipoId, puntos) => {
-    setEquipos(prev => {
-      const next = prev.map(e => e.id === equipoId ? { ...e, puntos } : e)
-      persistirEquipos(next)
-      return next
-    })
+    setEquipos(prev => prev.map(e => e.id === equipoId ? { ...e, puntos } : e))
   }, [])
 
   // Legacy single-image update — kept for backwards compat
   const actualizarImagenEquipo = useCallback((equipoId, imagenUrl) => {
-    setEquipos(prev => {
-      const next = prev.map(e => {
-        if (e.id !== equipoId) return e
-        const imagenes = imagenUrl
-          ? [{ id: 'img-legacy', url: imagenUrl, flechas: [] }]
-          : []
-        return { ...e, imagenes, imagenUrl }
-      })
-      persistirEquipos(next)
-      return next
-    })
+    setEquipos(prev => prev.map(e => {
+      if (e.id !== equipoId) return e
+      const imagenes = imagenUrl ? [{ id: 'img-legacy', url: imagenUrl, flechas: [] }] : []
+      return { ...e, imagenes, imagenUrl }
+    }))
   }, [])
 
   // Multi-image update — replaces the full imagenes array
   const actualizarImagenesEquipo = useCallback((equipoId, imagenes) => {
-    setEquipos(prev => {
-      const next = prev.map(e => {
-        if (e.id !== equipoId) return e
-        return { ...e, imagenes, imagenUrl: imagenes[0]?.url || null }
-      })
-      persistirEquipos(next)
-      return next
-    })
+    setEquipos(prev => prev.map(e => {
+      if (e.id !== equipoId) return e
+      return { ...e, imagenes, imagenUrl: imagenes[0]?.url || null }
+    }))
   }, [])
 
   const crearLubricante = useCallback((datos) => {

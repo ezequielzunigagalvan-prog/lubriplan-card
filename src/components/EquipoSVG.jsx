@@ -1,5 +1,5 @@
 const SVGS = {
-  compresor: (
+  compresor: (showName) => (
     <svg viewBox="0 0 320 220" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
       {/* Base */}
       <rect x="20" y="150" width="280" height="30" rx="4" fill="#1C2230" stroke="#2A3448" strokeWidth="1.5" />
@@ -24,11 +24,11 @@ const SVGS = {
       {/* Drain valve */}
       <rect x="115" y="155" width="20" height="12" rx="2" fill="#1C2230" stroke="#2A3448" strokeWidth="1" />
       {/* Labels */}
-      <text x="130" y="130" fill="#7A8BA8" fontSize="11" textAnchor="middle" fontFamily="DM Sans">KAESER SK-19</text>
+      {showName && <text x="130" y="130" fill="#7A8BA8" fontSize="11" textAnchor="middle" fontFamily="DM Sans">KAESER SK-19</text>}
       <text x="265" y="125" fill="#7A8BA8" fontSize="9" textAnchor="middle" fontFamily="DM Sans">MOTOR</text>
     </svg>
   ),
-  bomba: (
+  bomba: (showName) => (
     <svg viewBox="0 0 320 220" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
       <rect x="20" y="160" width="280" height="25" rx="4" fill="#1C2230" stroke="#2A3448" strokeWidth="1.5" />
       {/* Volute */}
@@ -56,10 +56,10 @@ const SVGS = {
         <line key={i} x1={215 + i * 12} y1="80" x2={215 + i * 12} y2="135" stroke="#2A3448" strokeWidth="1" />
       ))}
       <text x="245" y="112" fill="#7A8BA8" fontSize="9" textAnchor="middle" fontFamily="DM Sans">MOTOR</text>
-      <text x="148" y="175" fill="#7A8BA8" fontSize="11" textAnchor="middle" fontFamily="DM Sans">Grundfos CR-15</text>
+      {showName && <text x="148" y="175" fill="#7A8BA8" fontSize="11" textAnchor="middle" fontFamily="DM Sans">Grundfos CR-15</text>}
     </svg>
   ),
-  reductor: (
+  reductor: (showName) => (
     <svg viewBox="0 0 320 220" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
       <rect x="30" y="155" width="260" height="25" rx="4" fill="#1C2230" stroke="#2A3448" strokeWidth="1.5" />
       {/* Housing */}
@@ -78,10 +78,10 @@ const SVGS = {
       <rect x="77" y="135" width="6" height="10" rx="1" fill="#22C55E" fillOpacity="0.4" />
       {/* Vent plug */}
       <rect x="148" y="60" width="14" height="8" rx="2" fill="#1C2230" stroke="#2A3448" strokeWidth="1" />
-      <text x="160" y="145" fill="#7A8BA8" fontSize="11" textAnchor="middle" fontFamily="DM Sans">SEW R97</text>
+      {showName && <text x="160" y="145" fill="#7A8BA8" fontSize="11" textAnchor="middle" fontFamily="DM Sans">SEW R97</text>}
     </svg>
   ),
-  motor: (
+  motor: (showName) => (
     <svg viewBox="0 0 320 220" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
       <rect x="30" y="160" width="260" height="22" rx="4" fill="#1C2230" stroke="#2A3448" strokeWidth="1.5" />
       {/* Motor body */}
@@ -99,10 +99,10 @@ const SVGS = {
       {/* Terminal box */}
       <rect x="110" y="55" width="50" height="18" rx="4" fill="#1C2230" stroke="#2A3448" strokeWidth="1.5" />
       <text x="135" y="67" fill="#7A8BA8" fontSize="9" textAnchor="middle" fontFamily="DM Sans">460V/60Hz</text>
-      <text x="150" y="145" fill="#7A8BA8" fontSize="11" textAnchor="middle" fontFamily="DM Sans">WEG W22</text>
+      {showName && <text x="150" y="145" fill="#7A8BA8" fontSize="11" textAnchor="middle" fontFamily="DM Sans">WEG W22</text>}
     </svg>
   ),
-  ventilador: (
+  ventilador: (showName) => (
     <svg viewBox="0 0 320 220" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
       <rect x="20" y="165" width="280" height="22" rx="4" fill="#1C2230" stroke="#2A3448" strokeWidth="1.5" />
       {/* Fan housing */}
@@ -122,10 +122,10 @@ const SVGS = {
       <circle cx="160" cy="105" r="5" fill="#F4A020" />
       {/* Shaft */}
       <rect x="233" y="100" width="55" height="12" rx="3" fill="#0F1621" stroke="#F4A020" strokeWidth="1.5" />
-      <text x="160" y="195" fill="#7A8BA8" fontSize="11" textAnchor="middle" fontFamily="DM Sans">Ventilador Siemens</text>
+      {showName && <text x="160" y="195" fill="#7A8BA8" fontSize="11" textAnchor="middle" fontFamily="DM Sans">Ventilador Siemens</text>}
     </svg>
   ),
-  banda: (
+  banda: (showName) => (
     <svg viewBox="0 0 320 220" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
       {/* Frame */}
       <rect x="20" y="145" width="280" height="12" rx="3" fill="#1C2230" stroke="#2A3448" strokeWidth="1.5" />
@@ -150,10 +150,10 @@ const SVGS = {
       {/* Drive motor */}
       <rect x="250" y="60" width="55" height="35" rx="5" fill="#0F1621" stroke="#2A3448" strokeWidth="1.5" />
       <line x1="270" y1="95" x2="270" y2="98" stroke="#F4A020" strokeWidth="2" />
-      <text x="160" y="85" fill="#7A8BA8" fontSize="11" textAnchor="middle" fontFamily="DM Sans">Banda Transportadora</text>
+      {showName && <text x="160" y="85" fill="#7A8BA8" fontSize="11" textAnchor="middle" fontFamily="DM Sans">Banda Transportadora</text>}
     </svg>
   ),
-  turbina: (
+  turbina: (showName) => (
     <svg viewBox="0 0 320 220" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
       <rect x="15" y="170" width="290" height="18" rx="4" fill="#1C2230" stroke="#2A3448" strokeWidth="1.5" />
       {/* Turbine casing */}
@@ -178,15 +178,15 @@ const SVGS = {
       <rect x="25" y="140" width="8" height="18" rx="1" fill="#0A0C0F" stroke="#22C55E" strokeWidth="1" />
       <rect x="27" y="148" width="4" height="8" rx="1" fill="#22C55E" fillOpacity="0.5" />
       <text x="47" y="150" fill="#7A8BA8" fontSize="8" textAnchor="middle" fontFamily="DM Sans">ACEITE</text>
-      <text x="155" y="195" fill="#7A8BA8" fontSize="11" textAnchor="middle" fontFamily="DM Sans">Turbina GE</text>
+      {showName && <text x="155" y="195" fill="#7A8BA8" fontSize="11" textAnchor="middle" fontFamily="DM Sans">Turbina GE</text>}
     </svg>
   ),
-  agitador: (
+  agitador: (showName) => (
     <svg viewBox="0 0 320 220" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
       {/* Reducer on top */}
       <rect x="120" y="20" width="80" height="50" rx="8" fill="#131820" stroke="#2A3448" strokeWidth="2" />
       <text x="160" y="50" fill="#7A8BA8" fontSize="9" textAnchor="middle" fontFamily="DM Sans">REDUCTOR</text>
-      <text x="160" y="62" fill="#7A8BA8" fontSize="8" textAnchor="middle" fontFamily="DM Sans">Lightnin</text>
+      {showName && <text x="160" y="62" fill="#7A8BA8" fontSize="8" textAnchor="middle" fontFamily="DM Sans">Lightnin</text>}
       {/* Main shaft */}
       <rect x="156" y="70" width="8" height="120" rx="2" fill="#0F1621" stroke="#F4A020" strokeWidth="1.5" />
       {/* Support bracket */}
@@ -205,6 +205,7 @@ const SVGS = {
   ),
 }
 
-export default function EquipoSVG({ tipo }) {
-  return SVGS[tipo] || SVGS.motor
+export default function EquipoSVG({ tipo, showName = true }) {
+  const render = SVGS[tipo] || SVGS.motor
+  return render(showName)
 }

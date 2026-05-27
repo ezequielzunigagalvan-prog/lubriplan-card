@@ -5,6 +5,7 @@ import ConfirmModal from '../components/ConfirmModal'
 import QRModal from '../components/QRModal'
 import { useAdmin } from '../context/AdminContext'
 import { convertToBase64 } from '../../utils/imageUtils'
+import { METODOS as METODOS_DATA } from '../../data/equipos'
 
 const LUBRICANTES_DATALIST_ID = 'lubricantes-list'
 
@@ -20,7 +21,8 @@ const FRECUENCIAS = [
 ]
 
 const UNIDADES = ['ml', 'g', 'oz', 'L']
-const METODOS = ['Aceitera', 'Pistola de engrase', 'Manual', 'Automático']
+// Array of {key, label} from shared METODOS, used in the form select
+const METODOS_OPTIONS = Object.entries(METODOS_DATA).map(([key, val]) => ({ key, label: val.label }))
 
 const frecColor = (f) => FRECUENCIAS.find(x => x.value === f)?.color || '#7A8BA8'
 
@@ -45,7 +47,7 @@ function PuntoForm({ punto, onSave, onDelete, onClose, lubricantes }) {
     cantidad: punto?.cantidad ?? '',
     unidad: punto?.unidad || 'ml',
     frecuencia: punto?.frecuencia || 'MONTHLY',
-    metodo: punto?.metodo || METODOS[0],
+    metodo: punto?.metodo || METODOS_OPTIONS[0].key,
     notas: punto?.notas || '',
   })
   const [confirmDelete, setConfirmDelete] = useState(false)
@@ -111,7 +113,7 @@ function PuntoForm({ punto, onSave, onDelete, onClose, lubricantes }) {
         <div>
           <label style={labelStyle}>Método</label>
           <select value={form.metodo} onChange={set('metodo')} style={inputStyle}>
-            {METODOS.map(m => <option key={m} value={m}>{m}</option>)}
+            {METODOS_OPTIONS.map(({ key, label }) => <option key={key} value={key}>{label}</option>)}
           </select>
         </div>
         <div>
@@ -255,12 +257,30 @@ export default function EditorCarta() {
   const [showQR, setShowQR] = useState(false)
   const [dragOver, setDragOver] = useState(false)
   const [imgError, setImgError] = useState(null)
+  const [editorImgRect, setEditorImgRect] = useState(null)
 
   const imgRef = useRef(null)
   const fileInputRef = useRef(null)
 
+  const handleEditorImgLoad = useCallback((e) => {
+    const container = imgRef.current
+    if (!container) return
+    const rect = container.getBoundingClientRect()
+    const iW = e.target.naturalWidth
+    const iH = e.target.naturalHeight
+    const cAspect = rect.width / rect.height
+    const iAspect = iW / iH
+    let rW, rH, oX, oY
+    if (iAspect > cAspect) { rW = rect.width; rH = rect.width / iAspect; oX = 0; oY = (rect.height - rH) / 2 }
+    else { rH = rect.height; rW = rect.height * iAspect; oX = (rect.width - rW) / 2; oY = 0 }
+    setEditorImgRect({ left: oX, top: oY, width: rW, height: rH })
+  }, [])
+
   const imgActiva = imagenes[imgActivaIdx] || null
   const selectedPunto = puntos.find(p => p.id === selectedId)
+
+  // Reset image rect when switching images
+  useEffect(() => { setEditorImgRect(null) }, [imgActivaIdx])
 
   // Cancel drawing on Escape
   useEffect(() => {
@@ -312,9 +332,14 @@ export default function EditorCarta() {
 
   const handleDeleteImage = useCallback((idx) => {
     setImagenes(prev => {
+      const deletedId = prev[idx]?.id
       const next = prev.filter((_, i) => i !== idx)
       actualizarImagenesEquipo(id, next)
       if (imgActivaIdx >= next.length) setImgActivaIdx(Math.max(0, next.length - 1))
+      // Orphan points that referenced the deleted image so they show on the first image
+      if (deletedId) {
+        setPuntos(pts => pts.map(p => p.imagenId === deletedId ? { ...p, imagenId: null } : p))
+      }
       return next
     })
   }, [id, actualizarImagenesEquipo, imgActivaIdx])
@@ -322,9 +347,19 @@ export default function EditorCarta() {
   // ---------- Canvas interaction ----------
   const getCoords = useCallback((e) => {
     const rect = imgRef.current.getBoundingClientRect()
+    const imgEl = imgRef.current.querySelector('img')
+    const iW = imgEl?.naturalWidth || 1
+    const iH = imgEl?.naturalHeight || 1
+    const cAspect = rect.width / rect.height
+    const iAspect = iW / iH
+    let rW, rH, oX, oY
+    if (iAspect > cAspect) { rW = rect.width; rH = rect.width / iAspect; oX = 0; oY = (rect.height - rH) / 2 }
+    else { rH = rect.height; rW = rect.height * iAspect; oX = (rect.width - rW) / 2; oY = 0 }
+    const imgX = Math.max(0, Math.min(rW, e.clientX - rect.left - oX))
+    const imgY = Math.max(0, Math.min(rH, e.clientY - rect.top - oY))
     return {
-      x: Math.round(((e.clientX - rect.left) / rect.width) * 100),
-      y: Math.round(((e.clientY - rect.top) / rect.height) * 100),
+      x: Math.round((imgX / rW) * 100),
+      y: Math.round((imgY / rH) * 100),
     }
   }, [])
 
@@ -339,7 +374,7 @@ export default function EditorCarta() {
         const nuevo = {
           id: newId, numero: prev.length + 1,
           nombre: '', lubricante: '', cantidad: 0,
-          unidad: 'ml', frecuencia: 'MONTHLY', metodo: METODOS[0], notas: '',
+          unidad: 'ml', frecuencia: 'MONTHLY', metodo: METODOS_OPTIONS[0].key, notas: '',
           x, y, imagenId: imgId,
         }
         return [...prev, nuevo]
@@ -728,106 +763,112 @@ export default function EditorCarta() {
                 <img
                   src={imgActiva.url}
                   alt={equipo.nombre}
+                  onLoad={handleEditorImgLoad}
                   style={{ width: '100%', height: '100%', objectFit: 'contain', display: 'block', pointerEvents: 'none' }}
                   draggable={false}
                 />
 
-                {/* SVG overlay: arrows/lines */}
-                <svg
-                  style={{
-                    position: 'absolute', inset: 0,
-                    width: '100%', height: '100%',
-                    pointerEvents: 'none', overflow: 'visible',
-                  }}
-                >
-                  <defs>
-                    <marker id="arrowhead" markerWidth="7" markerHeight="5" refX="7" refY="2.5" orient="auto">
-                      <polygon points="0 0, 7 2.5, 0 5" fill="#F4A020" />
-                    </marker>
-                    <marker id="arrowhead-preview" markerWidth="7" markerHeight="5" refX="7" refY="2.5" orient="auto">
-                      <polygon points="0 0, 7 2.5, 0 5" fill="#F4A02088" />
-                    </marker>
-                  </defs>
+                {/* Overlay positioned exactly on rendered image area */}
+                {editorImgRect && (
+                  <div style={{
+                    position: 'absolute',
+                    left: editorImgRect.left, top: editorImgRect.top,
+                    width: editorImgRect.width, height: editorImgRect.height,
+                    pointerEvents: 'none',
+                  }}>
+                    {/* SVG overlay: arrows/lines */}
+                    <svg style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', pointerEvents: 'none', overflow: 'visible' }}>
+                      <defs>
+                        <marker id="arrowhead" markerWidth="7" markerHeight="5" refX="7" refY="2.5" orient="auto">
+                          <polygon points="0 0, 7 2.5, 0 5" fill="#F4A020" />
+                        </marker>
+                        <marker id="arrowhead-preview" markerWidth="7" markerHeight="5" refX="7" refY="2.5" orient="auto">
+                          <polygon points="0 0, 7 2.5, 0 5" fill="#F4A02088" />
+                        </marker>
+                      </defs>
 
-                  {/* Existing arrows */}
-                  {(imgActiva.flechas || []).map(f => (
-                    <line
-                      key={f.id}
-                      x1={`${f.x1}%`} y1={`${f.y1}%`}
-                      x2={`${f.x2}%`} y2={`${f.y2}%`}
-                      stroke="#F4A020" strokeWidth="2"
-                      strokeDasharray={f.tipo === 'linea' ? '6 4' : undefined}
-                      markerEnd={f.tipo === 'flecha' ? 'url(#arrowhead)' : undefined}
-                    />
-                  ))}
+                      {/* Existing arrows */}
+                      {(imgActiva.flechas || []).map(f => (
+                        <line
+                          key={f.id}
+                          x1={`${f.x1}%`} y1={`${f.y1}%`}
+                          x2={`${f.x2}%`} y2={`${f.y2}%`}
+                          stroke="#F4A020" strokeWidth="2"
+                          strokeDasharray={f.tipo === 'linea' ? '6 4' : undefined}
+                          markerEnd={f.tipo === 'flecha' ? 'url(#arrowhead)' : undefined}
+                        />
+                      ))}
 
-                  {/* Draw start dot */}
-                  {drawStart && (
-                    <circle cx={`${drawStart.x}%`} cy={`${drawStart.y}%`} r="4"
-                      fill="#F4A020" stroke="#fff" strokeWidth="1" />
-                  )}
+                      {/* Draw start dot */}
+                      {drawStart && (
+                        <circle cx={`${drawStart.x}%`} cy={`${drawStart.y}%`} r="4"
+                          fill="#F4A020" stroke="#fff" strokeWidth="1" />
+                      )}
 
-                  {/* Preview line */}
-                  {drawStart && previewEnd && (
-                    <line
-                      x1={`${drawStart.x}%`} y1={`${drawStart.y}%`}
-                      x2={`${previewEnd.x}%`} y2={`${previewEnd.y}%`}
-                      stroke="#F4A02088" strokeWidth="1.5" strokeDasharray="5 4"
-                      markerEnd={herramienta === 'flecha' ? 'url(#arrowhead-preview)' : undefined}
-                    />
-                  )}
-                </svg>
+                      {/* Preview line */}
+                      {drawStart && previewEnd && (
+                        <line
+                          x1={`${drawStart.x}%`} y1={`${drawStart.y}%`}
+                          x2={`${previewEnd.x}%`} y2={`${previewEnd.y}%`}
+                          stroke="#F4A02088" strokeWidth="1.5" strokeDasharray="5 4"
+                          markerEnd={herramienta === 'flecha' ? 'url(#arrowhead-preview)' : undefined}
+                        />
+                      )}
+                    </svg>
 
-                {/* Delete buttons for arrows (HTML, positioned absolutely) */}
-                {herramienta === 'punto' && (imgActiva.flechas || []).map(f => (
-                  <button
-                    key={`del-${f.id}`}
-                    onClick={e => { e.stopPropagation(); handleDeleteFlecha(f.id) }}
-                    title="Eliminar esta línea"
-                    style={{
-                      position: 'absolute',
-                      left: `${(f.x1 + f.x2) / 2}%`,
-                      top: `${(f.y1 + f.y2) / 2}%`,
-                      transform: 'translate(-50%, -50%)',
-                      width: 18, height: 18, borderRadius: '50%',
-                      background: '#EF4444', border: '1px solid #fff',
-                      color: '#fff', fontSize: 11, fontWeight: 700,
-                      cursor: 'pointer', zIndex: 20, padding: 0,
-                      display: 'flex', alignItems: 'center', justifyContent: 'center',
-                      lineHeight: 1,
-                    }}
-                  >
-                    ×
-                  </button>
-                ))}
+                    {/* Delete buttons for arrows */}
+                    {herramienta === 'punto' && (imgActiva.flechas || []).map(f => (
+                      <button
+                        key={`del-${f.id}`}
+                        onClick={e => { e.stopPropagation(); handleDeleteFlecha(f.id) }}
+                        title="Eliminar esta línea"
+                        style={{
+                          position: 'absolute',
+                          left: `${(f.x1 + f.x2) / 2}%`,
+                          top: `${(f.y1 + f.y2) / 2}%`,
+                          transform: 'translate(-50%, -50%)',
+                          width: 18, height: 18, borderRadius: '50%',
+                          background: '#EF4444', border: '1px solid #fff',
+                          color: '#fff', fontSize: 11, fontWeight: 700,
+                          cursor: 'pointer', zIndex: 20, padding: 0,
+                          display: 'flex', alignItems: 'center', justifyContent: 'center',
+                          lineHeight: 1, pointerEvents: 'auto',
+                        }}
+                      >
+                        ×
+                      </button>
+                    ))}
 
-                {/* Point markers (only for this image) */}
-                {puntosDeLaImagen.map(p => (
-                  <button
-                    key={p.id}
-                    onClick={e => {
-                      e.stopPropagation()
-                      if (selectMode) { toggleCheck(p.id); return }
-                      setSelectedId(p.id === selectedId ? null : p.id)
-                    }}
-                    style={{
-                      position: 'absolute',
-                      left: `${p.x}%`, top: `${p.y}%`,
-                      transform: 'translate(-50%, -50%)',
-                      width: 30, height: 30, borderRadius: '50%',
-                      background: frecColor(p.frecuencia),
-                      border: (p.id === selectedId || checkedIds.has(p.id)) ? '3px solid #fff' : '2px solid rgba(0,0,0,0.5)',
-                      color: '#fff', fontSize: 11, fontWeight: 700,
-                      cursor: 'pointer',
-                      display: 'flex', alignItems: 'center', justifyContent: 'center',
-                      boxShadow: '0 2px 8px rgba(0,0,0,0.5)',
-                      zIndex: 10, padding: 0,
-                      fontFamily: "'DM Sans', sans-serif",
-                    }}
-                  >
-                    {p.numero}
-                  </button>
-                ))}
+                    {/* Point markers (only for this image) */}
+                    {puntosDeLaImagen.map(p => (
+                      <button
+                        key={p.id}
+                        onClick={e => {
+                          e.stopPropagation()
+                          if (selectMode) { toggleCheck(p.id); return }
+                          setSelectedId(p.id === selectedId ? null : p.id)
+                        }}
+                        style={{
+                          position: 'absolute',
+                          left: `${p.x}%`, top: `${p.y}%`,
+                          transform: 'translate(-50%, -50%)',
+                          width: 30, height: 30, borderRadius: '50%',
+                          background: frecColor(p.frecuencia),
+                          border: (p.id === selectedId || checkedIds.has(p.id)) ? '3px solid #fff' : '2px solid rgba(0,0,0,0.5)',
+                          color: '#fff', fontSize: 11, fontWeight: 700,
+                          cursor: 'pointer',
+                          display: 'flex', alignItems: 'center', justifyContent: 'center',
+                          boxShadow: '0 2px 8px rgba(0,0,0,0.5)',
+                          zIndex: 10, padding: 0,
+                          fontFamily: "'DM Sans', sans-serif",
+                          pointerEvents: 'auto',
+                        }}
+                      >
+                        {p.numero}
+                      </button>
+                    ))}
+                  </div>
+                )}
               </div>
             )}
           </div>
