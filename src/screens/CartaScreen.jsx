@@ -128,9 +128,6 @@ export default function CartaScreen() {
   const [imgRect, setImgRect] = useState(null)
   const [listaAbierta, setListaAbierta] = useState(false)
 
-  // Reset imgRect when switching images
-  useEffect(() => { setImgRect(null) }, [imgActivaIdx])
-
   // Register technician's last activity
   useEffect(() => {
     const tecId = sessionStorage.getItem('tecnicoActivoId')
@@ -140,14 +137,16 @@ export default function CartaScreen() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id])
 
-  const calcImgRect = useCallback((imgEl) => {
+  const recalcImgRect = useCallback(() => {
     const container = heroRef.current
-    if (!container || !imgEl) return
+    const img = imgElRef.current
+    if (!container || !img) return
+    const iW = img.naturalWidth
+    const iH = img.naturalHeight
+    if (!iW || !iH) return
     const cW = container.clientWidth
     const cH = container.clientHeight
-    const iW = imgEl.naturalWidth
-    const iH = imgEl.naturalHeight
-    if (!iW || !iH) return
+    if (!cW || !cH) return
     const iAspect = iW / iH
     const cAspect = cW / cH
     let rW, rH
@@ -156,18 +155,26 @@ export default function CartaScreen() {
     setImgRect({ left: (cW - rW) / 2, top: (cH - rH) / 2, width: rW, height: rH })
   }, [])
 
-  const handleImgLoad = useCallback((e) => {
-    calcImgRect(e.target)
-  }, [calcImgRect])
-
-  // Fallback for already-loaded images (data URLs load synchronously before onLoad fires)
+  // Recalculate when active image changes — rAF ensures layout is settled
   useEffect(() => {
-    const img = imgElRef.current
-    if (!img || imgRect) return
-    if (img.complete && img.naturalWidth > 0) {
-      calcImgRect(img)
-    }
-  }, [imgActivaIdx, imgRect, calcImgRect])
+    setImgRect(null)
+    if (!imgElRef.current) return
+    const raf = requestAnimationFrame(recalcImgRect)
+    return () => cancelAnimationFrame(raf)
+  }, [imgActivaIdx, recalcImgRect])
+
+  // ResizeObserver for orientation/layout changes
+  useEffect(() => {
+    const container = heroRef.current
+    if (!container) return
+    const observer = new ResizeObserver(recalcImgRect)
+    observer.observe(container)
+    return () => observer.disconnect()
+  }, [recalcImgRect])
+
+  const handleImgLoad = useCallback(() => {
+    recalcImgRect()
+  }, [recalcImgRect])
 
   // Swipe horizontal para navegar imágenes
   const handleHeroTouchStart = useCallback((e) => {
