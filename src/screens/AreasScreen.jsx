@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { useAdmin } from '../admin/context/AdminContext'
 
 const PALETTE = [
-  '#F4A020',
+  '#818cf8',
   '#22C55E',
   '#3B82F6',
   '#A855F7',
@@ -25,21 +25,7 @@ function BuildingIcon({ color, size = 26 }) {
   )
 }
 
-function GearIcon({ color, size = 26 }) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 26 26" fill="none">
-      <circle cx="13" cy="13" r="4" stroke={color} strokeWidth="1.5" />
-      <path
-        d="M13 2v3M13 21v3M2 13h3M21 13h3M4.9 4.9l2.1 2.1M18.9 18.9l2.1 2.1M4.9 21.1l2.1-2.1M18.9 7.1l2.1-2.1"
-        stroke={color}
-        strokeWidth="1.5"
-        strokeLinecap="round"
-      />
-    </svg>
-  )
-}
-
-function ChevronRight({ color = '#7A8BA8' }) {
+function ChevronRight({ color = '#8892b0' }) {
   return (
     <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
       <path d="M6 4l4 4-4 4" stroke={color} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
@@ -53,14 +39,14 @@ function AreaCard({ area, count, color, onClick }) {
   function handlePointerDown() {
     if (ref.current) {
       ref.current.style.borderColor = color
-      ref.current.style.background = '#1C2230'
+      ref.current.style.background = '#1c1a3a'
     }
   }
 
   function handlePointerUp() {
     if (ref.current) {
-      ref.current.style.borderColor = '#2A3448'
-      ref.current.style.background = '#131820'
+      ref.current.style.borderColor = '#2a2850'
+      ref.current.style.background = '#13112a'
     }
   }
 
@@ -74,8 +60,8 @@ function AreaCard({ area, count, color, onClick }) {
       style={{
         display: 'flex',
         flexDirection: 'column',
-        background: '#131820',
-        border: '1px solid #2A3448',
+        background: '#13112a',
+        border: '1px solid #2a2850',
         borderRadius: 16,
         overflow: 'hidden',
         cursor: 'pointer',
@@ -127,7 +113,7 @@ function AreaCard({ area, count, color, onClick }) {
               fontFamily: "'DM Sans', sans-serif",
               fontWeight: 600,
               fontSize: 14,
-              color: '#E8EDF5',
+              color: '#e8eeff',
               lineHeight: 1.35,
               marginBottom: 4,
             }}
@@ -137,7 +123,7 @@ function AreaCard({ area, count, color, onClick }) {
           <div
             style={{
               fontSize: 12,
-              color: '#7A8BA8',
+              color: '#8892b0',
               fontFamily: "'DM Sans', sans-serif",
             }}
           >
@@ -192,29 +178,29 @@ function EquipoResultado({ equipo, onClick }) {
         alignItems: 'center',
         gap: 12,
         width: '100%',
-        background: '#131820',
-        border: '1px solid #2A3448',
+        background: '#13112a',
+        border: '1px solid #2a2850',
         borderRadius: 14,
         padding: '13px 16px',
         cursor: 'pointer',
         textAlign: 'left',
         transition: 'border-color 0.15s',
       }}
-      onPointerDown={e => { e.currentTarget.style.borderColor = '#F4A020'; e.currentTarget.style.background = '#1C2230' }}
-      onPointerUp={e => { e.currentTarget.style.borderColor = '#2A3448'; e.currentTarget.style.background = '#131820' }}
-      onPointerLeave={e => { e.currentTarget.style.borderColor = '#2A3448'; e.currentTarget.style.background = '#131820' }}
+      onPointerDown={e => { e.currentTarget.style.borderColor = '#6366f1'; e.currentTarget.style.background = '#1c1a3a' }}
+      onPointerUp={e => { e.currentTarget.style.borderColor = '#2a2850'; e.currentTarget.style.background = '#13112a' }}
+      onPointerLeave={e => { e.currentTarget.style.borderColor = '#2a2850'; e.currentTarget.style.background = '#13112a' }}
     >
       <div
         style={{
           flexShrink: 0,
-          background: 'rgba(244,160,32,0.12)',
-          border: '1px solid rgba(244,160,32,0.25)',
+          background: 'rgba(99,102,241,0.12)',
+          border: '1px solid rgba(99,102,241,0.25)',
           borderRadius: 8,
           padding: '5px 8px',
           fontFamily: 'monospace',
           fontSize: 12,
           fontWeight: 700,
-          color: '#F4A020',
+          color: '#818cf8',
           letterSpacing: 1,
           minWidth: 62,
           textAlign: 'center',
@@ -224,16 +210,16 @@ function EquipoResultado({ equipo, onClick }) {
       </div>
       <div style={{ flex: 1, minWidth: 0 }}>
         <div style={{
-          fontSize: 14, fontWeight: 600, color: '#E8EDF5',
+          fontSize: 14, fontWeight: 600, color: '#e8eeff',
           overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
           fontFamily: "'DM Sans', sans-serif",
         }}>
           {equipo.nombre}
         </div>
-        <div style={{ fontSize: 12, color: '#7A8BA8', marginTop: 1 }}>{equipo.area}</div>
+        <div style={{ fontSize: 12, color: '#8892b0', marginTop: 1 }}>{equipo.area}</div>
       </div>
       <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-        <path d="M6 4l4 4-4 4" stroke="#7A8BA8" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+        <path d="M6 4l4 4-4 4" stroke="#8892b0" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
       </svg>
     </button>
   )
@@ -265,7 +251,6 @@ export default function AreasScreen() {
     return areas.filter(a => a.nombre.toLowerCase().includes(q))
   }, [areas, busquedaArea])
 
-  // Quick equipment search by code or name
   const resultadosRapidos = useMemo(() => {
     const q = busquedaRapida.trim().toLowerCase()
     if (!q) return []
@@ -284,7 +269,7 @@ export default function AreasScreen() {
         flexDirection: 'column',
         height: '100%',
         minHeight: 0,
-        background: '#0A0C0F',
+        background: '#0c0a1e',
         overflow: 'hidden',
       }}
     >
@@ -292,8 +277,8 @@ export default function AreasScreen() {
       <div
         style={{
           padding: '52px 20px 16px',
-          background: '#0A0C0F',
-          borderBottom: '1px solid #2A3448',
+          background: '#0c0a1e',
+          borderBottom: '1px solid #2a2850',
           flexShrink: 0,
         }}
       >
@@ -304,28 +289,28 @@ export default function AreasScreen() {
                 fontFamily: "'Bebas Neue', sans-serif",
                 fontSize: 24,
                 letterSpacing: 3,
-                color: '#F4A020',
+                color: '#818cf8',
                 lineHeight: 1,
               }}
             >
               LUBRIPLAN
             </div>
-            <div style={{ fontSize: 12, color: '#7A8BA8', marginTop: 4 }}>
+            <div style={{ fontSize: 12, color: '#8892b0', marginTop: 4 }}>
               {areas.length} área{areas.length !== 1 ? 's' : ''} · {equiposActivos.length} equipos
             </div>
           </div>
           <button
             onClick={() => navigate('/')}
             style={{
-              background: '#131820',
-              border: '1px solid #2A3448',
+              background: '#13112a',
+              border: '1px solid #2a2850',
               borderRadius: 10,
               padding: '10px 16px',
               cursor: 'pointer',
               display: 'flex',
               alignItems: 'center',
               gap: 6,
-              color: '#7A8BA8',
+              color: '#8892b0',
               fontSize: 13,
               fontWeight: 500,
               fontFamily: "'DM Sans', sans-serif",
@@ -344,8 +329,8 @@ export default function AreasScreen() {
             width="17" height="17" viewBox="0 0 17 17" fill="none"
             style={{ position: 'absolute', left: 14, top: '50%', transform: 'translateY(-50%)', zIndex: 1 }}
           >
-            <circle cx="7.5" cy="7.5" r="5" stroke={modoRapido ? '#F4A020' : '#7A8BA8'} strokeWidth="1.5" />
-            <path d="M11.5 11.5L15 15" stroke={modoRapido ? '#F4A020' : '#7A8BA8'} strokeWidth="1.5" strokeLinecap="round" />
+            <circle cx="7.5" cy="7.5" r="5" stroke={modoRapido ? '#6366f1' : '#8892b0'} strokeWidth="1.5" />
+            <path d="M11.5 11.5L15 15" stroke={modoRapido ? '#6366f1' : '#8892b0'} strokeWidth="1.5" strokeLinecap="round" />
           </svg>
           <input
             ref={searchRef}
@@ -356,12 +341,12 @@ export default function AreasScreen() {
             style={{
               width: '100%',
               height: 48,
-              background: '#131820',
-              border: `1px solid ${modoRapido ? '#F4A02060' : '#2A3448'}`,
+              background: '#13112a',
+              border: `1px solid ${modoRapido ? '#6366f160' : '#2a2850'}`,
               borderRadius: 12,
               paddingLeft: 42,
               paddingRight: busquedaRapida ? 40 : 16,
-              color: '#E8EDF5',
+              color: '#e8eeff',
               fontSize: 15,
               fontFamily: "'DM Sans', sans-serif",
               outline: 'none',
@@ -374,7 +359,7 @@ export default function AreasScreen() {
               onClick={() => setBusquedaRapida('')}
               style={{
                 position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)',
-                background: 'none', border: 'none', color: '#7A8BA8',
+                background: 'none', border: 'none', color: '#8892b0',
                 cursor: 'pointer', fontSize: 18, lineHeight: 1, padding: 4,
               }}
             >
@@ -396,7 +381,7 @@ export default function AreasScreen() {
         {modoRapido ? (
           /* Quick search results */
           <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-            <div style={{ fontSize: 12, color: '#7A8BA8', marginBottom: 4 }}>
+            <div style={{ fontSize: 12, color: '#8892b0', marginBottom: 4 }}>
               {resultadosRapidos.length > 0
                 ? `${resultadosRapidos.length} resultado${resultadosRapidos.length !== 1 ? 's' : ''} — toca para ver la carta`
                 : 'Sin resultados'}
@@ -405,12 +390,12 @@ export default function AreasScreen() {
               <div
                 style={{
                   display: 'flex', flexDirection: 'column',
-                  alignItems: 'center', gap: 12, paddingTop: 40, color: '#7A8BA8',
+                  alignItems: 'center', gap: 12, paddingTop: 40, color: '#8892b0',
                 }}
               >
                 <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
-                  <circle cx="24" cy="24" r="20" stroke="#2A3448" strokeWidth="2" />
-                  <path d="M24 16v10M24 32h.01" stroke="#7A8BA8" strokeWidth="2" strokeLinecap="round" />
+                  <circle cx="24" cy="24" r="20" stroke="#2a2850" strokeWidth="2" />
+                  <path d="M24 16v10M24 32h.01" stroke="#8892b0" strokeWidth="2" strokeLinecap="round" />
                 </svg>
                 <span style={{ fontSize: 14 }}>
                   Sin equipos para "{busquedaRapida}"
@@ -435,8 +420,8 @@ export default function AreasScreen() {
                 width="15" height="15" viewBox="0 0 15 15" fill="none"
                 style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)' }}
               >
-                <circle cx="6.5" cy="6.5" r="4.5" stroke="#7A8BA8" strokeWidth="1.3" />
-                <path d="M10 10L13 13" stroke="#7A8BA8" strokeWidth="1.3" strokeLinecap="round" />
+                <circle cx="6.5" cy="6.5" r="4.5" stroke="#8892b0" strokeWidth="1.3" />
+                <path d="M10 10L13 13" stroke="#8892b0" strokeWidth="1.3" strokeLinecap="round" />
               </svg>
               <input
                 type="text"
@@ -446,12 +431,12 @@ export default function AreasScreen() {
                 style={{
                   width: '100%',
                   height: 40,
-                  background: '#131820',
-                  border: '1px solid #2A3448',
+                  background: '#13112a',
+                  border: '1px solid #2a2850',
                   borderRadius: 10,
                   paddingLeft: 36,
                   paddingRight: 12,
-                  color: '#E8EDF5',
+                  color: '#e8eeff',
                   fontSize: 13,
                   fontFamily: "'DM Sans', sans-serif",
                   outline: 'none',
@@ -464,12 +449,12 @@ export default function AreasScreen() {
               <div
                 style={{
                   display: 'flex', flexDirection: 'column',
-                  alignItems: 'center', gap: 12, paddingTop: 40, color: '#7A8BA8',
+                  alignItems: 'center', gap: 12, paddingTop: 40, color: '#8892b0',
                 }}
               >
                 <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
-                  <circle cx="24" cy="24" r="20" stroke="#2A3448" strokeWidth="2" />
-                  <path d="M24 16v10M24 32h.01" stroke="#7A8BA8" strokeWidth="2" strokeLinecap="round" />
+                  <circle cx="24" cy="24" r="20" stroke="#2a2850" strokeWidth="2" />
+                  <path d="M24 16v10M24 32h.01" stroke="#8892b0" strokeWidth="2" strokeLinecap="round" />
                 </svg>
                 <span style={{ fontSize: 15 }}>Sin áreas para "{busquedaArea}"</span>
               </div>

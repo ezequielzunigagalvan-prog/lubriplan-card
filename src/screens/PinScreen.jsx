@@ -65,7 +65,7 @@ export default function PinScreen() {
   return (
     <div
       className="flex flex-col items-center justify-between h-full"
-      style={{ background: '#0A0C0F', padding: '48px 24px 36px' }}
+      style={{ background: '#0c0a1e', padding: '48px 24px 36px' }}
     >
       {/* Logo */}
       <div className="flex flex-col items-center gap-4">
@@ -87,9 +87,9 @@ export default function PinScreen() {
                   width: 18,
                   height: 18,
                   borderRadius: '50%',
-                  border: `2px solid ${error ? '#EF4444' : '#F4A020'}`,
+                  border: `2px solid ${error ? '#EF4444' : '#6366f1'}`,
                   background: pin.length > i
-                    ? (error ? '#EF4444' : '#F4A020')
+                    ? (error ? '#EF4444' : '#6366f1')
                     : 'transparent',
                   transition: 'background 0.15s, border-color 0.15s',
                 }}
@@ -135,8 +135,8 @@ export default function PinScreen() {
                 height: 76,
                 borderRadius: 16,
                 border: 'none',
-                background: key === 'DEL' ? '#1C2230' : '#131820',
-                color: key === 'DEL' ? '#7A8BA8' : '#E8EDF5',
+                background: key === 'DEL' ? '#1c1a3a' : '#13112a',
+                color: key === 'DEL' ? '#8892b0' : '#e8eeff',
                 fontFamily: key === 'DEL' ? "'DM Sans', sans-serif" : "'Bebas Neue', sans-serif",
                 fontSize: key === 'DEL' ? 13 : 28,
                 fontWeight: key === 'DEL' ? 600 : 400,
@@ -152,18 +152,18 @@ export default function PinScreen() {
                 boxShadow: '0 2px 8px rgba(0,0,0,0.4)',
               }}
               onPointerDown={e => {
-                e.currentTarget.style.background = '#F4A020'
-                e.currentTarget.style.color = '#0A0C0F'
+                e.currentTarget.style.background = '#6366f1'
+                e.currentTarget.style.color = '#0c0a1e'
                 e.currentTarget.style.transform = 'scale(0.95)'
               }}
               onPointerUp={e => {
-                e.currentTarget.style.background = key === 'DEL' ? '#1C2230' : '#131820'
-                e.currentTarget.style.color = key === 'DEL' ? '#7A8BA8' : '#E8EDF5'
+                e.currentTarget.style.background = key === 'DEL' ? '#1c1a3a' : '#13112a'
+                e.currentTarget.style.color = key === 'DEL' ? '#8892b0' : '#e8eeff'
                 e.currentTarget.style.transform = 'scale(1)'
               }}
               onPointerLeave={e => {
-                e.currentTarget.style.background = key === 'DEL' ? '#1C2230' : '#131820'
-                e.currentTarget.style.color = key === 'DEL' ? '#7A8BA8' : '#E8EDF5'
+                e.currentTarget.style.background = key === 'DEL' ? '#1c1a3a' : '#13112a'
+                e.currentTarget.style.color = key === 'DEL' ? '#8892b0' : '#e8eeff'
                 e.currentTarget.style.transform = 'scale(1)'
               }}
             >

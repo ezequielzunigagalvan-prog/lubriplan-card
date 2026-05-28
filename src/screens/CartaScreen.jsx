@@ -5,6 +5,17 @@ import { useAdmin } from '../admin/context/AdminContext'
 import EquipoSVG from '../components/EquipoSVG'
 import BottomSheet from '../components/BottomSheet'
 
+const BG = '#0c0a1e'
+const BG_HERO = '#111027'
+const BG_CARD = '#13112a'
+const BORDER = '#2a2850'
+const ACCENT = '#6366f1'
+const ACCENT_L = '#818cf8'
+const TEXT = '#e8eeff'
+const TEXT_SUB = '#8892b0'
+const TEXT_MUTED = '#4a5070'
+const ORANGE = '#F4A020'
+
 // ---------- Point marker ----------
 function PuntoMarcador({ punto, globalIndex, activo, onClick }) {
   const freq = FRECUENCIAS[punto.frecuencia] || { color: '#7A8BA8' }
@@ -37,6 +48,7 @@ function PuntoMarcador({ punto, globalIndex, activo, onClick }) {
         padding: 0,
         lineHeight: 1,
         transition: 'width 0.15s, height 0.15s, box-shadow 0.15s',
+        pointerEvents: 'auto',
       }}
     >
       {globalIndex + 1}
@@ -58,16 +70,15 @@ function PuntoRow({ punto, globalIndex, onClick }) {
         padding: '11px 16px',
         background: 'transparent',
         border: 'none',
-        borderBottom: '1px solid #1A2030',
+        borderBottom: `1px solid ${BORDER}`,
         cursor: 'pointer',
         textAlign: 'left',
         transition: 'background 0.12s',
       }}
-      onPointerDown={e => e.currentTarget.style.background = 'rgba(244,160,32,0.06)'}
+      onPointerDown={e => e.currentTarget.style.background = 'rgba(99,102,241,0.07)'}
       onPointerUp={e => e.currentTarget.style.background = 'transparent'}
       onPointerLeave={e => e.currentTarget.style.background = 'transparent'}
     >
-      {/* Number badge */}
       <div style={{
         width: 30, height: 30, borderRadius: '50%',
         background: freq.color,
@@ -79,24 +90,22 @@ function PuntoRow({ punto, globalIndex, onClick }) {
         {globalIndex + 1}
       </div>
 
-      {/* Text */}
       <div style={{ flex: 1, minWidth: 0 }}>
         <div style={{
-          fontSize: 14, fontWeight: 600, color: '#E8EDF5',
+          fontSize: 14, fontWeight: 600, color: TEXT,
           overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
           fontFamily: "'DM Sans', sans-serif",
         }}>
           {punto.nombre}
         </div>
         {punto.lubricante && (
-          <div style={{ fontSize: 12, color: '#7A8BA8', marginTop: 1 }}>
+          <div style={{ fontSize: 12, color: TEXT_SUB, marginTop: 1 }}>
             {punto.lubricante}
             {punto.cantidad > 0 ? ` · ${punto.cantidad} ${punto.unidad}` : ''}
           </div>
         )}
       </div>
 
-      {/* Freq badge + chevron */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexShrink: 0 }}>
         <span style={{
           background: freq.bg, color: freq.color,
@@ -107,7 +116,7 @@ function PuntoRow({ punto, globalIndex, onClick }) {
           {freq.label}
         </span>
         <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-          <path d="M5 3l4 4-4 4" stroke="#4A5568" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+          <path d="M5 3l4 4-4 4" stroke={TEXT_MUTED} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
         </svg>
       </div>
     </button>
@@ -120,15 +129,15 @@ export default function CartaScreen() {
   const navigate = useNavigate()
   const { equipos, editarTecnico } = useAdmin()
 
-  const heroRef = useRef(null)
   const imgElRef = useRef(null)
   const swipeStartX = useRef(null)
+  const imagenesCountRef = useRef(0)
+
   const [puntoActivo, setPuntoActivo] = useState(null)
   const [imgActivaIdx, setImgActivaIdx] = useState(0)
-  const [imgRect, setImgRect] = useState(null)
+  const [imgNaturalSize, setImgNaturalSize] = useState(null)
   const [listaAbierta, setListaAbierta] = useState(false)
 
-  // Register technician's last activity
   useEffect(() => {
     const tecId = sessionStorage.getItem('tecnicoActivoId')
     if (tecId) {
@@ -137,53 +146,37 @@ export default function CartaScreen() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id])
 
-  const calcRect = useCallback(() => {
-    const container = heroRef.current
+  // Get natural dimensions — works for both sync (data URL) and async image decoding
+  useEffect(() => {
+    setImgNaturalSize(null)
     const img = imgElRef.current
-    if (!container || !img) return false
-    const iW = img.naturalWidth
-    const iH = img.naturalHeight
-    if (!iW || !iH) return false
-    const cW = container.clientWidth
-    const cH = container.clientHeight
-    if (!cW || !cH) return false
-    const iAspect = iW / iH
-    const cAspect = cW / cH
-    let rW, rH
-    if (iAspect > cAspect) { rW = cW; rH = cW / iAspect }
-    else { rH = cH; rW = cH * iAspect }
-    setImgRect({ left: (cW - rW) / 2, top: (cH - rH) / 2, width: rW, height: rH })
-    return true
+    if (!img) return
+    if (img.naturalWidth > 0 && img.naturalHeight > 0) {
+      setImgNaturalSize({ w: img.naturalWidth, h: img.naturalHeight })
+      return
+    }
+    let cancelled = false
+    let tries = 0
+    let rafId
+    const check = () => {
+      if (cancelled) return
+      const el = imgElRef.current
+      if (el?.naturalWidth > 0 && el?.naturalHeight > 0) {
+        setImgNaturalSize({ w: el.naturalWidth, h: el.naturalHeight })
+        return
+      }
+      if (tries++ < 60) rafId = requestAnimationFrame(check)
+    }
+    rafId = requestAnimationFrame(check)
+    return () => { cancelled = true; cancelAnimationFrame(rafId) }
+  }, [imgActivaIdx])
+
+  const handleImgLoad = useCallback((e) => {
+    if (e.target.naturalWidth > 0) {
+      setImgNaturalSize({ w: e.target.naturalWidth, h: e.target.naturalHeight })
+    }
   }, [])
 
-  // Try immediately, then retry each frame until naturalWidth is available (handles sync + async data URL decode)
-  useEffect(() => {
-    setImgRect(null)
-    let rafId
-    let tries = 0
-    let cancelled = false
-    const attempt = () => {
-      if (cancelled) return
-      if (calcRect()) return
-      if (tries++ < 60) rafId = requestAnimationFrame(attempt)
-    }
-    rafId = requestAnimationFrame(attempt)
-    return () => { cancelled = true; cancelAnimationFrame(rafId) }
-  }, [imgActivaIdx, calcRect])
-
-  // onLoad handler — fires for async decodes (also catches if rAF ran too early)
-  const handleImgLoad = useCallback(() => { calcRect() }, [calcRect])
-
-  // ResizeObserver for orientation/window resize
-  useEffect(() => {
-    const container = heroRef.current
-    if (!container) return
-    const ro = new ResizeObserver(calcRect)
-    ro.observe(container)
-    return () => ro.disconnect()
-  }, [calcRect])
-
-  // Swipe horizontal para navegar imágenes
   const handleHeroTouchStart = useCallback((e) => {
     swipeStartX.current = e.touches[0].clientX
   }, [])
@@ -192,11 +185,11 @@ export default function CartaScreen() {
     if (swipeStartX.current === null) return
     const dx = e.changedTouches[0].clientX - swipeStartX.current
     if (Math.abs(dx) > 50) {
-      if (dx < 0) setImgActivaIdx(i => Math.min(i + 1, imagenes.length - 1))
+      if (dx < 0) setImgActivaIdx(i => Math.min(i + 1, imagenesCountRef.current - 1))
       else setImgActivaIdx(i => Math.max(0, i - 1))
     }
     swipeStartX.current = null
-  }, [imagenes.length])
+  }, [])
 
   const equipo = equipos.find(e => e.id === id)
 
@@ -205,15 +198,15 @@ export default function CartaScreen() {
       <div style={{
         display: 'flex', flexDirection: 'column',
         alignItems: 'center', justifyContent: 'center',
-        height: '100%', gap: 16, background: '#0A0C0F', color: '#7A8BA8',
+        height: '100%', gap: 16, background: BG, color: TEXT_SUB,
       }}>
         <svg width="56" height="56" viewBox="0 0 56 56" fill="none">
-          <circle cx="28" cy="28" r="26" stroke="#2A3448" strokeWidth="2" />
-          <path d="M28 18v14M28 38h.01" stroke="#7A8BA8" strokeWidth="2.5" strokeLinecap="round" />
+          <circle cx="28" cy="28" r="26" stroke={BORDER} strokeWidth="2" />
+          <path d="M28 18v14M28 38h.01" stroke={TEXT_SUB} strokeWidth="2.5" strokeLinecap="round" />
         </svg>
         <p style={{ fontSize: 16, margin: 0 }}>Equipo no encontrado</p>
         <button onClick={() => navigate(-1)} style={{
-          background: '#F4A020', color: '#0A0C0F', border: 'none',
+          background: ACCENT, color: '#fff', border: 'none',
           borderRadius: 12, padding: '12px 28px', fontWeight: 700,
           cursor: 'pointer', fontSize: 15,
         }}>
@@ -229,6 +222,8 @@ export default function CartaScreen() {
       ? [{ id: 'legacy', url: equipo.imagenUrl, flechas: [] }]
       : []
 
+  imagenesCountRef.current = imagenes.length
+
   const imgActiva = imagenes[imgActivaIdx] || null
   const flechas = imgActiva?.flechas || []
 
@@ -238,18 +233,15 @@ export default function CartaScreen() {
     : equipo.puntos.filter(p =>
         imgActiva && (
           p.imagenId === imgActiva.id ||
-          // Points with no imagenId OR orphaned imagenId show on first image
           (!imageIds.has(p.imagenId) && imgActivaIdx === 0)
         )
       )
 
-  // Auto-open list when there are no images
   useEffect(() => {
     if (imagenes.length === 0) setListaAbierta(true)
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [equipo.id])
 
-  // Only frequencies actually present in this equipo
   const frecuenciasPresentes = useMemo(() => {
     const present = new Set(equipo.puntos.map(p => p.frecuencia))
     return Object.entries(FRECUENCIAS).filter(([k]) => present.has(k))
@@ -260,15 +252,12 @@ export default function CartaScreen() {
   return (
     <div style={{
       display: 'flex', flexDirection: 'column',
-      height: '100%', background: '#080A0E',
+      height: '100%', background: BG,
       overflow: 'hidden', position: 'relative',
     }}>
 
-      {/* ══════════════════════════════════════════
-          HERO IMAGE SECTION
-      ══════════════════════════════════════════ */}
+      {/* ══ HERO ══ */}
       <div
-        ref={heroRef}
         onTouchStart={handleHeroTouchStart}
         onTouchEnd={handleHeroTouchEnd}
         style={{
@@ -276,11 +265,11 @@ export default function CartaScreen() {
           flexShrink: 0,
           height: '58vh',
           minHeight: 290,
-          background: '#0D1117',
+          background: BG_HERO,
         }}
       >
 
-        {/* Image / SVG */}
+        {/* Image */}
         <div style={{ position: 'absolute', inset: 0 }}>
           {imgActiva
             ? (
@@ -301,63 +290,72 @@ export default function CartaScreen() {
           }
         </div>
 
-        {/* Top gradient for header readability */}
+        {/* Gradients */}
         <div style={{
           position: 'absolute', top: 0, left: 0, right: 0, height: 130,
-          background: 'linear-gradient(to bottom, rgba(8,10,14,0.92) 0%, rgba(8,10,14,0.6) 60%, transparent 100%)',
+          background: 'linear-gradient(to bottom, rgba(12,10,30,0.95) 0%, rgba(12,10,30,0.5) 60%, transparent 100%)',
           pointerEvents: 'none', zIndex: 6,
         }} />
-
-        {/* Bottom gradient (subtle) */}
         <div style={{
           position: 'absolute', bottom: 0, left: 0, right: 0, height: 60,
-          background: 'linear-gradient(to top, rgba(8,10,14,0.8) 0%, transparent 100%)',
+          background: 'linear-gradient(to top, rgba(12,10,30,0.85) 0%, transparent 100%)',
           pointerEvents: 'none', zIndex: 6,
         }} />
 
-        {/* ── Arrows + points overlay (positioned exactly on rendered image) ── */}
-        {imgActiva && imgRect && (
+        {/* ── CSS aspect-ratio overlay: perfectly matches objectFit:contain image area ── */}
+        {imgActiva && imgNaturalSize && (
           <div style={{
             position: 'absolute',
-            left: imgRect.left, top: imgRect.top,
-            width: imgRect.width, height: imgRect.height,
+            inset: 0,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
             zIndex: 8,
+            pointerEvents: 'none',
           }}>
-            {/* SVG arrows */}
-            <svg style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', pointerEvents: 'none', overflow: 'visible' }}>
-              <defs>
-                <marker id="arrowhead-view" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
-                  <polygon points="0 0, 8 3, 0 6" fill="#F4A020" />
-                </marker>
-              </defs>
-              {flechas.map(f => (
-                <line
-                  key={f.id}
-                  x1={`${f.x1}%`} y1={`${f.y1}%`}
-                  x2={`${f.x2}%`} y2={`${f.y2}%`}
-                  stroke="#F4A020"
-                  strokeWidth="2.5"
-                  strokeLinecap="round"
-                  strokeDasharray={f.tipo === 'linea' ? '7 5' : undefined}
-                  markerEnd={f.tipo === 'flecha' ? 'url(#arrowhead-view)' : undefined}
-                  opacity="0.9"
+            <div style={{
+              position: 'relative',
+              maxWidth: '100%',
+              maxHeight: '100%',
+              aspectRatio: `${imgNaturalSize.w} / ${imgNaturalSize.h}`,
+              pointerEvents: 'none',
+            }}>
+              {/* SVG arrows */}
+              <svg style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', pointerEvents: 'none', overflow: 'visible' }}>
+                <defs>
+                  <marker id="arrowhead-view" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+                    <polygon points="0 0, 8 3, 0 6" fill={ORANGE} />
+                  </marker>
+                </defs>
+                {flechas.map(f => (
+                  <line
+                    key={f.id}
+                    x1={`${f.x1}%`} y1={`${f.y1}%`}
+                    x2={`${f.x2}%`} y2={`${f.y2}%`}
+                    stroke={ORANGE}
+                    strokeWidth="2.5"
+                    strokeLinecap="round"
+                    strokeDasharray={f.tipo === 'linea' ? '7 5' : undefined}
+                    markerEnd={f.tipo === 'flecha' ? 'url(#arrowhead-view)' : undefined}
+                    opacity="0.9"
+                  />
+                ))}
+              </svg>
+              {/* Point markers */}
+              {puntosDeLaImagen.map((punto) => (
+                <PuntoMarcador
+                  key={punto.id}
+                  punto={punto}
+                  globalIndex={equipo.puntos.indexOf(punto)}
+                  activo={puntoActivo?.id === punto.id}
+                  onClick={() => setPuntoActivo(puntoActivo?.id === punto.id ? null : punto)}
                 />
               ))}
-            </svg>
-            {/* Point markers */}
-            {puntosDeLaImagen.map((punto) => (
-              <PuntoMarcador
-                key={punto.id}
-                punto={punto}
-                globalIndex={equipo.puntos.indexOf(punto)}
-                activo={puntoActivo?.id === punto.id}
-                onClick={() => setPuntoActivo(puntoActivo?.id === punto.id ? null : punto)}
-              />
-            ))}
+            </div>
           </div>
         )}
 
-        {/* ── Point markers for SVG placeholder (no image) ── */}
+        {/* Points over SVG placeholder (no image) */}
         {!imgActiva && puntosDeLaImagen.map((punto) => (
           <PuntoMarcador
             key={punto.id}
@@ -368,7 +366,7 @@ export default function CartaScreen() {
           />
         ))}
 
-        {/* ── Floating header ── */}
+        {/* Floating header */}
         <div style={{
           position: 'absolute', top: 0, left: 0, right: 0,
           padding: '48px 16px 0',
@@ -379,12 +377,12 @@ export default function CartaScreen() {
             onClick={() => navigate(-1)}
             style={{
               width: 38, height: 38, borderRadius: 10,
-              background: 'rgba(19,24,32,0.75)',
+              background: 'rgba(12,10,30,0.8)',
               backdropFilter: 'blur(8px)',
               WebkitBackdropFilter: 'blur(8px)',
-              border: '1px solid rgba(255,255,255,0.1)',
+              border: `1px solid ${BORDER}`,
               display: 'flex', alignItems: 'center', justifyContent: 'center',
-              cursor: 'pointer', flexShrink: 0, color: '#E8EDF5',
+              cursor: 'pointer', flexShrink: 0, color: TEXT,
             }}
           >
             <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
@@ -394,7 +392,7 @@ export default function CartaScreen() {
 
           <div style={{ flex: 1, minWidth: 0 }}>
             <div style={{
-              fontSize: 15, fontWeight: 700, color: '#E8EDF5',
+              fontSize: 15, fontWeight: 700, color: TEXT,
               fontFamily: "'DM Sans', sans-serif",
               overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
               textShadow: '0 1px 4px rgba(0,0,0,0.6)',
@@ -405,9 +403,9 @@ export default function CartaScreen() {
               {equipo.codigo && (
                 <span style={{
                   fontFamily: 'monospace', fontSize: 10, fontWeight: 700,
-                  color: '#F4A020', letterSpacing: 1,
-                  background: 'rgba(244,160,32,0.18)', borderRadius: 4,
-                  padding: '1px 6px', border: '1px solid rgba(244,160,32,0.25)',
+                  color: ACCENT_L, letterSpacing: 1,
+                  background: 'rgba(99,102,241,0.18)', borderRadius: 4,
+                  padding: '1px 6px', border: '1px solid rgba(99,102,241,0.3)',
                 }}>
                   {equipo.codigo}
                 </span>
@@ -420,12 +418,12 @@ export default function CartaScreen() {
             onClick={() => window.print()}
             style={{
               width: 38, height: 38, borderRadius: 10,
-              background: 'rgba(19,24,32,0.75)',
+              background: 'rgba(12,10,30,0.8)',
               backdropFilter: 'blur(8px)',
               WebkitBackdropFilter: 'blur(8px)',
-              border: '1px solid rgba(255,255,255,0.1)',
+              border: `1px solid ${BORDER}`,
               display: 'flex', alignItems: 'center', justifyContent: 'center',
-              cursor: 'pointer', flexShrink: 0, color: 'rgba(255,255,255,0.6)',
+              cursor: 'pointer', flexShrink: 0, color: 'rgba(255,255,255,0.55)',
             }}
           >
             <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
@@ -436,20 +434,19 @@ export default function CartaScreen() {
           </button>
         </div>
 
-        {/* ── Multi-image dots + prev/next ── */}
+        {/* Multi-image nav */}
         {imagenes.length > 1 && (
           <>
-            {/* Prev arrow */}
             <button
               onClick={() => setImgActivaIdx(i => Math.max(0, i - 1))}
               disabled={imgActivaIdx === 0}
               style={{
                 position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)',
                 width: 32, height: 32, borderRadius: '50%',
-                background: 'rgba(19,24,32,0.7)', border: '1px solid rgba(255,255,255,0.1)',
+                background: 'rgba(12,10,30,0.75)', border: `1px solid ${BORDER}`,
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
                 cursor: imgActivaIdx === 0 ? 'default' : 'pointer',
-                zIndex: 12, color: imgActivaIdx === 0 ? 'rgba(255,255,255,0.2)' : '#E8EDF5',
+                zIndex: 12, color: imgActivaIdx === 0 ? 'rgba(255,255,255,0.2)' : TEXT,
               }}
             >
               <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
@@ -457,17 +454,16 @@ export default function CartaScreen() {
               </svg>
             </button>
 
-            {/* Next arrow */}
             <button
               onClick={() => setImgActivaIdx(i => Math.min(imagenes.length - 1, i + 1))}
               disabled={imgActivaIdx === imagenes.length - 1}
               style={{
                 position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)',
                 width: 32, height: 32, borderRadius: '50%',
-                background: 'rgba(19,24,32,0.7)', border: '1px solid rgba(255,255,255,0.1)',
+                background: 'rgba(12,10,30,0.75)', border: `1px solid ${BORDER}`,
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
                 cursor: imgActivaIdx === imagenes.length - 1 ? 'default' : 'pointer',
-                zIndex: 12, color: imgActivaIdx === imagenes.length - 1 ? 'rgba(255,255,255,0.2)' : '#E8EDF5',
+                zIndex: 12, color: imgActivaIdx === imagenes.length - 1 ? 'rgba(255,255,255,0.2)' : TEXT,
               }}
             >
               <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
@@ -475,7 +471,6 @@ export default function CartaScreen() {
               </svg>
             </button>
 
-            {/* Dots */}
             <div style={{
               position: 'absolute', bottom: 14, left: 0, right: 0,
               display: 'flex', justifyContent: 'center', gap: 6, zIndex: 12,
@@ -486,7 +481,7 @@ export default function CartaScreen() {
                   onClick={() => setImgActivaIdx(i)}
                   style={{
                     width: i === imgActivaIdx ? 20 : 6, height: 6, borderRadius: 3,
-                    background: i === imgActivaIdx ? '#F4A020' : 'rgba(255,255,255,0.35)',
+                    background: i === imgActivaIdx ? ACCENT_L : 'rgba(255,255,255,0.3)',
                     border: 'none', cursor: 'pointer', padding: 0,
                     transition: 'width 0.2s, background 0.2s',
                   }}
@@ -497,29 +492,24 @@ export default function CartaScreen() {
         )}
       </div>
 
-      {/* ══════════════════════════════════════════
-          BOTTOM PANEL — scrollable
-      ══════════════════════════════════════════ */}
+      {/* ══ BOTTOM PANEL ══ */}
       <div style={{
-        flex: 1, overflowY: 'auto', background: '#0A0C0F',
+        flex: 1, overflowY: 'auto', background: BG,
         display: 'flex', flexDirection: 'column',
       }}>
 
-        {/* ── Frequencies present (compact strip) ── */}
+        {/* Frequencies legend */}
         {frecuenciasPresentes.length > 0 && (
           <div style={{
             display: 'flex', gap: '6px 14px', flexWrap: 'wrap',
-            padding: '12px 16px',
-            background: '#0D1117',
-            borderBottom: '1px solid #1A2030',
+            padding: '10px 16px',
+            background: BG_CARD,
+            borderBottom: `1px solid ${BORDER}`,
           }}>
             {frecuenciasPresentes.map(([key, val]) => (
               <div key={key} style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
-                <div style={{ width: 9, height: 9, borderRadius: '50%', background: val.color, flexShrink: 0 }} />
-                <span style={{
-                  fontSize: 11, color: '#8A9BB8',
-                  fontFamily: "'DM Sans', sans-serif",
-                }}>
+                <div style={{ width: 8, height: 8, borderRadius: '50%', background: val.color, flexShrink: 0 }} />
+                <span style={{ fontSize: 11, color: TEXT_SUB, fontFamily: "'DM Sans', sans-serif" }}>
                   {val.label}
                 </span>
               </div>
@@ -527,29 +517,28 @@ export default function CartaScreen() {
           </div>
         )}
 
-        {/* ── Points list collapsible ── */}
+        {/* Points list */}
         <div style={{ flex: 1 }}>
-          {/* Header */}
           <button
             onClick={() => setListaAbierta(o => !o)}
             style={{
               display: 'flex', alignItems: 'center', justifyContent: 'space-between',
               width: '100%', padding: '14px 16px',
               background: 'transparent', border: 'none',
-              borderBottom: listaAbierta ? '1px solid #1A2030' : 'none',
+              borderBottom: listaAbierta ? `1px solid ${BORDER}` : 'none',
               cursor: 'pointer', textAlign: 'left',
             }}
           >
             <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
               <span style={{
                 fontFamily: "'DM Sans', sans-serif",
-                fontSize: 13, fontWeight: 700, color: '#E8EDF5',
+                fontSize: 13, fontWeight: 700, color: TEXT,
                 textTransform: 'uppercase', letterSpacing: 1,
               }}>
                 Puntos de lubricación
               </span>
               <span style={{
-                background: '#F4A020', color: '#0A0C0F',
+                background: ACCENT, color: '#fff',
                 fontSize: 11, fontWeight: 800,
                 padding: '1px 8px', borderRadius: 20,
                 fontFamily: "'DM Sans', sans-serif",
@@ -559,7 +548,6 @@ export default function CartaScreen() {
             </div>
 
             <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-              {/* Frequency dots preview (collapsed state) */}
               {!listaAbierta && (
                 <div style={{ display: 'flex', gap: 3 }}>
                   {equipo.puntos.slice(0, 8).map((p, i) => {
@@ -567,7 +555,7 @@ export default function CartaScreen() {
                     return (
                       <div key={i} style={{
                         width: 8, height: 8, borderRadius: '50%',
-                        background: freq?.color || '#7A8BA8',
+                        background: freq?.color || TEXT_SUB,
                       }} />
                     )
                   })}
@@ -577,12 +565,11 @@ export default function CartaScreen() {
                 width="18" height="18" viewBox="0 0 18 18" fill="none"
                 style={{ transition: 'transform 0.2s', transform: listaAbierta ? 'rotate(180deg)' : 'rotate(0deg)' }}
               >
-                <path d="M4 7l5 5 5-5" stroke="#7A8BA8" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                <path d="M4 7l5 5 5-5" stroke={TEXT_SUB} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
               </svg>
             </div>
           </button>
 
-          {/* Expanded list */}
           {listaAbierta && (
             <div>
               {equipo.puntos.map((punto, i) => (
@@ -593,16 +580,14 @@ export default function CartaScreen() {
                   onClick={() => setPuntoActivo(punto)}
                 />
               ))}
-              {/* Last row has no border */}
               <div style={{ height: 24 }} />
             </div>
           )}
 
-          {/* Collapsed hint */}
           {!listaAbierta && (
             <div style={{
               padding: '4px 16px 16px',
-              fontSize: 12, color: '#4A5568',
+              fontSize: 12, color: TEXT_MUTED,
               fontFamily: "'DM Sans', sans-serif",
             }}>
               Toca un punto en la imagen o despliega la lista
@@ -611,7 +596,6 @@ export default function CartaScreen() {
         </div>
       </div>
 
-      {/* BottomSheet */}
       {puntoActivo && (
         <BottomSheet
           punto={puntoActivo}
