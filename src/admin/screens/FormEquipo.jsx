@@ -7,7 +7,7 @@ function Field({ label, error, children }) {
   return (
     <div>
       <label style={{
-        display: 'block', color: '#7A8BA8', fontSize: 12,
+        display: 'block', color: '#8892b0', fontSize: 12,
         letterSpacing: 0.5, marginBottom: 8, textTransform: 'uppercase',
       }}>
         {label}
@@ -59,9 +59,9 @@ export default function FormEquipo() {
 
   const inputStyle = (hasError = false) => ({
     width: '100%', padding: '11px 14px',
-    background: '#0A0C0F',
-    border: `1px solid ${hasError ? '#EF4444' : '#2A3346'}`,
-    borderRadius: 8, color: '#E8EDF5', fontSize: 14,
+    background: '#0c0a1e',
+    border: `1px solid ${hasError ? '#EF4444' : '#2a2850'}`,
+    borderRadius: 8, color: '#e8eeff', fontSize: 14,
     outline: 'none', boxSizing: 'border-box',
     fontFamily: "'DM Sans', sans-serif",
   })
@@ -70,8 +70,8 @@ export default function FormEquipo() {
     <AdminLayout titulo={isEditing ? 'Editar equipo' : 'Nuevo equipo'}>
       <div style={{ maxWidth: 560 }}>
         <div style={{
-          background: '#111418', borderRadius: 12,
-          border: '1px solid #1E2535', padding: '32px 28px',
+          background: '#13112a', borderRadius: 12,
+          border: '1px solid #2a2850', padding: '32px 28px',
         }}>
           <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
             <Field label="Código del equipo *" error={errores.codigo}>
@@ -127,9 +127,9 @@ export default function FormEquipo() {
                 id="activo"
                 checked={form.activo}
                 onChange={set('activo')}
-                style={{ width: 16, height: 16, accentColor: '#F4A020', cursor: 'pointer' }}
+                style={{ width: 16, height: 16, accentColor: '#6366f1', cursor: 'pointer' }}
               />
-              <label htmlFor="activo" style={{ color: '#E8EDF5', fontSize: 14, cursor: 'pointer' }}>
+              <label htmlFor="activo" style={{ color: '#e8eeff', fontSize: 14, cursor: 'pointer' }}>
                 Equipo activo
               </label>
             </div>
@@ -140,8 +140,8 @@ export default function FormEquipo() {
                 onClick={() => navigate('/admin/equipos')}
                 style={{
                   flex: 1, padding: '12px',
-                  border: '1px solid #2A3346', borderRadius: 8,
-                  background: 'transparent', color: '#7A8BA8',
+                  border: '1px solid #2a2850', borderRadius: 8,
+                  background: 'transparent', color: '#8892b0',
                   cursor: 'pointer', fontSize: 14,
                   fontFamily: "'DM Sans', sans-serif",
                 }}
@@ -152,7 +152,7 @@ export default function FormEquipo() {
                 type="submit"
                 style={{
                   flex: 2, padding: '12px',
-                  background: '#F4A020', color: '#0A0C0F',
+                  background: '#6366f1', color: '#fff',
                   border: 'none', borderRadius: 8,
                   fontSize: 14, fontWeight: 700, cursor: 'pointer',
                   fontFamily: "'DM Sans', sans-serif",

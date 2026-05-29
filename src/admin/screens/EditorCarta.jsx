@@ -21,20 +21,19 @@ const FRECUENCIAS = [
 ]
 
 const UNIDADES = ['ml', 'g', 'oz', 'L']
-// Array of {key, label} from shared METODOS, used in the form select
 const METODOS_OPTIONS = Object.entries(METODOS_DATA).map(([key, val]) => ({ key, label: val.label }))
 
-const frecColor = (f) => FRECUENCIAS.find(x => x.value === f)?.color || '#7A8BA8'
+const frecColor = (f) => FRECUENCIAS.find(x => x.value === f)?.color || '#8892b0'
 
 const labelStyle = {
-  display: 'block', color: '#7A8BA8', fontSize: 11,
+  display: 'block', color: '#8892b0', fontSize: 11,
   letterSpacing: 0.5, marginBottom: 6, textTransform: 'uppercase',
 }
 
 const inputStyle = {
   width: '100%', padding: '9px 12px',
-  background: '#0A0C0F', border: '1px solid #2A3346',
-  borderRadius: 7, color: '#E8EDF5', fontSize: 13,
+  background: '#0c0a1e', border: '1px solid #2a2850',
+  borderRadius: 7, color: '#e8eeff', fontSize: 13,
   outline: 'none', boxSizing: 'border-box',
   fontFamily: "'DM Sans', sans-serif",
 }
@@ -63,12 +62,12 @@ function PuntoForm({ punto, onSave, onDelete, onClose, lubricantes }) {
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
       <div style={{
         display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-        padding: '14px 16px', borderBottom: '1px solid #1E2535', flexShrink: 0,
+        padding: '14px 16px', borderBottom: '1px solid #2a2850', flexShrink: 0,
       }}>
-        <span style={{ color: '#E8EDF5', fontWeight: 600, fontSize: 15 }}>
+        <span style={{ color: '#e8eeff', fontWeight: 600, fontSize: 15 }}>
           Punto #{punto?.numero}
         </span>
-        <button onClick={onClose} style={{ background: 'none', border: 'none', color: '#7A8BA8', cursor: 'pointer', padding: 4, display: 'flex' }}>
+        <button onClick={onClose} style={{ background: 'none', border: 'none', color: '#8892b0', cursor: 'pointer', padding: 4, display: 'flex' }}>
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
             <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
           </svg>
@@ -124,13 +123,13 @@ function PuntoForm({ punto, onSave, onDelete, onClose, lubricantes }) {
         </div>
       </div>
 
-      <div style={{ padding: '12px 16px', borderTop: '1px solid #1E2535', display: 'flex', flexDirection: 'column', gap: 8, flexShrink: 0 }}>
+      <div style={{ padding: '12px 16px', borderTop: '1px solid #2a2850', display: 'flex', flexDirection: 'column', gap: 8, flexShrink: 0 }}>
         <button
           onClick={handleSave}
           disabled={!form.nombre.trim()}
           style={{
-            padding: '11px', background: form.nombre.trim() ? '#F4A020' : '#2A3346',
-            color: form.nombre.trim() ? '#0A0C0F' : '#4A5568',
+            padding: '11px', background: form.nombre.trim() ? '#6366f1' : '#2a2850',
+            color: form.nombre.trim() ? '#fff' : '#4a5070',
             border: 'none', borderRadius: 8, fontSize: 14, fontWeight: 700,
             cursor: form.nombre.trim() ? 'pointer' : 'not-allowed',
             fontFamily: "'DM Sans', sans-serif",
@@ -167,7 +166,7 @@ function BulkFrecuenciaPanel({ count, onApply, onCancel }) {
   const [freq, setFreq] = useState('MONTHLY')
   return (
     <div style={{ padding: 16, display: 'flex', flexDirection: 'column', gap: 10 }}>
-      <div style={{ color: '#E8EDF5', fontSize: 13, fontWeight: 600, marginBottom: 4 }}>
+      <div style={{ color: '#e8eeff', fontSize: 13, fontWeight: 600, marginBottom: 4 }}>
         Cambiar frecuencia de {count} punto{count !== 1 ? 's' : ''}
       </div>
       <select value={freq} onChange={e => setFreq(e.target.value)} style={inputStyle}>
@@ -176,7 +175,7 @@ function BulkFrecuenciaPanel({ count, onApply, onCancel }) {
       <button
         onClick={() => onApply(freq)}
         style={{
-          padding: '10px', background: '#F4A020', color: '#0A0C0F',
+          padding: '10px', background: '#6366f1', color: '#fff',
           border: 'none', borderRadius: 8, fontSize: 13, fontWeight: 700,
           cursor: 'pointer', fontFamily: "'DM Sans', sans-serif",
         }}
@@ -186,8 +185,8 @@ function BulkFrecuenciaPanel({ count, onApply, onCancel }) {
       <button
         onClick={onCancel}
         style={{
-          padding: '10px', background: 'transparent', color: '#7A8BA8',
-          border: '1px solid #2A3346', borderRadius: 8, fontSize: 13,
+          padding: '10px', background: 'transparent', color: '#8892b0',
+          border: '1px solid #2a2850', borderRadius: 8, fontSize: 13,
           cursor: 'pointer', fontFamily: "'DM Sans', sans-serif",
         }}
       >
@@ -257,38 +256,52 @@ export default function EditorCarta() {
   const [showQR, setShowQR] = useState(false)
   const [dragOver, setDragOver] = useState(false)
   const [imgError, setImgError] = useState(null)
-  const [editorImgRect, setEditorImgRect] = useState(null)
+  // Natural dimensions of the active image — used for both overlay and getCoords
+  const [imgNaturalSize, setImgNaturalSize] = useState(null)
 
   const imgRef = useRef(null)
   const fileInputRef = useRef(null)
 
-  const handleEditorImgLoad = useCallback((e) => {
-    const container = imgRef.current
-    if (!container) return
-    const rect = container.getBoundingClientRect()
-    const iW = e.target.naturalWidth
-    const iH = e.target.naturalHeight
-    const cAspect = rect.width / rect.height
-    const iAspect = iW / iH
-    let rW, rH, oX, oY
-    if (iAspect > cAspect) { rW = rect.width; rH = rect.width / iAspect; oX = 0; oY = (rect.height - rH) / 2 }
-    else { rH = rect.height; rW = rect.height * iAspect; oX = (rect.width - rW) / 2; oY = 0 }
-    setEditorImgRect({ left: oX, top: oY, width: rW, height: rH })
-  }, [])
-
   const imgActiva = imagenes[imgActivaIdx] || null
   const selectedPunto = puntos.find(p => p.id === selectedId)
 
-  // Reset image rect when switching images
-  useEffect(() => { setEditorImgRect(null) }, [imgActivaIdx])
+  // Reset natural size when switching images
+  useEffect(() => { setImgNaturalSize(null) }, [imgActivaIdx])
+
+  // Detect natural size — works for cached (already decoded) base64 images too
+  useEffect(() => {
+    if (!imgActiva) return
+    const img = imgRef.current?.querySelector('img')
+    if (img?.naturalWidth > 0 && img?.naturalHeight > 0) {
+      setImgNaturalSize({ w: img.naturalWidth, h: img.naturalHeight })
+      return
+    }
+    let cancelled = false
+    let tries = 0
+    let rafId
+    const check = () => {
+      if (cancelled) return
+      const el = imgRef.current?.querySelector('img')
+      if (el?.naturalWidth > 0 && el?.naturalHeight > 0) {
+        setImgNaturalSize({ w: el.naturalWidth, h: el.naturalHeight })
+        return
+      }
+      if (tries++ < 60) rafId = requestAnimationFrame(check)
+    }
+    rafId = requestAnimationFrame(check)
+    return () => { cancelled = true; cancelAnimationFrame(rafId) }
+  }, [imgActivaIdx, imgActiva])
+
+  const handleEditorImgLoad = useCallback((e) => {
+    if (e.target.naturalWidth > 0) {
+      setImgNaturalSize({ w: e.target.naturalWidth, h: e.target.naturalHeight })
+    }
+  }, [])
 
   // Cancel drawing on Escape
   useEffect(() => {
     const handler = (e) => {
-      if (e.key === 'Escape') {
-        setDrawStart(null)
-        setPreviewEnd(null)
-      }
+      if (e.key === 'Escape') { setDrawStart(null); setPreviewEnd(null) }
     }
     window.addEventListener('keydown', handler)
     return () => window.removeEventListener('keydown', handler)
@@ -301,6 +314,26 @@ export default function EditorCarta() {
       </AdminLayout>
     )
   }
+
+  // ---------- Compute click coords relative to rendered image area ----------
+  const getCoords = useCallback((e) => {
+    if (!imgNaturalSize) return { x: 50, y: 50 }
+    const rect = imgRef.current.getBoundingClientRect()
+    const { w: iW, h: iH } = imgNaturalSize
+    const cW = rect.width
+    const cH = rect.height
+    const cAspect = cW / cH
+    const iAspect = iW / iH
+    let rW, rH, oX, oY
+    if (iAspect > cAspect) { rW = cW; rH = cW / iAspect; oX = 0; oY = (cH - rH) / 2 }
+    else { rH = cH; rW = cH * iAspect; oX = (cW - rW) / 2; oY = 0 }
+    const imgX = Math.max(0, Math.min(rW, e.clientX - rect.left - oX))
+    const imgY = Math.max(0, Math.min(rH, e.clientY - rect.top - oY))
+    return {
+      x: Math.round((imgX / rW) * 100),
+      y: Math.round((imgY / rH) * 100),
+    }
+  }, [imgNaturalSize])
 
   // ---------- Image handlers ----------
   const saveImagenes = useCallback((next) => {
@@ -336,7 +369,6 @@ export default function EditorCarta() {
       const next = prev.filter((_, i) => i !== idx)
       actualizarImagenesEquipo(id, next)
       if (imgActivaIdx >= next.length) setImgActivaIdx(Math.max(0, next.length - 1))
-      // Orphan points that referenced the deleted image so they show on the first image
       if (deletedId) {
         setPuntos(pts => pts.map(p => p.imagenId === deletedId ? { ...p, imagenId: null } : p))
       }
@@ -345,24 +377,6 @@ export default function EditorCarta() {
   }, [id, actualizarImagenesEquipo, imgActivaIdx])
 
   // ---------- Canvas interaction ----------
-  const getCoords = useCallback((e) => {
-    const rect = imgRef.current.getBoundingClientRect()
-    const imgEl = imgRef.current.querySelector('img')
-    const iW = imgEl?.naturalWidth || 1
-    const iH = imgEl?.naturalHeight || 1
-    const cAspect = rect.width / rect.height
-    const iAspect = iW / iH
-    let rW, rH, oX, oY
-    if (iAspect > cAspect) { rW = rect.width; rH = rect.width / iAspect; oX = 0; oY = (rect.height - rH) / 2 }
-    else { rH = rect.height; rW = rect.height * iAspect; oX = (rect.width - rW) / 2; oY = 0 }
-    const imgX = Math.max(0, Math.min(rW, e.clientX - rect.left - oX))
-    const imgY = Math.max(0, Math.min(rH, e.clientY - rect.top - oY))
-    return {
-      x: Math.round((imgX / rW) * 100),
-      y: Math.round((imgY / rH) * 100),
-    }
-  }, [])
-
   const handleCanvasClick = useCallback((e) => {
     if (!imgActiva) return
     const { x, y } = getCoords(e)
@@ -383,7 +397,6 @@ export default function EditorCarta() {
       return
     }
 
-    // Arrow / line drawing
     if (!drawStart) {
       setDrawStart({ x, y })
     } else {
@@ -391,7 +404,7 @@ export default function EditorCarta() {
         id: `f-${Date.now()}`,
         x1: drawStart.x, y1: drawStart.y,
         x2: x, y2: y,
-        tipo: herramienta, // 'flecha' | 'linea'
+        tipo: herramienta,
       }
       setImagenes(prev => {
         const next = prev.map((img, i) =>
@@ -488,7 +501,7 @@ export default function EditorCarta() {
       const html2canvas = (await import('html2canvas')).default
       const { jsPDF } = await import('jspdf')
       const el = document.getElementById('carta-export-area')
-      const canvas = await html2canvas(el, { backgroundColor: '#111418', scale: 1.5 })
+      const canvas = await html2canvas(el, { backgroundColor: '#13112a', scale: 1.5 })
       const pdf = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' })
       const imgData = canvas.toDataURL('image/jpeg', 0.85)
       const pdfW = pdf.internal.pageSize.getWidth()
@@ -500,7 +513,6 @@ export default function EditorCarta() {
     }
   }
 
-  // Points to show on current image
   const puntosDeLaImagen = puntos.filter(p =>
     imgActiva && (p.imagenId === imgActiva.id || (!p.imagenId && imgActivaIdx === 0))
   )
@@ -516,8 +528,8 @@ export default function EditorCarta() {
         <button onClick={() => navigate('/admin/equipos')} style={{
           display: 'flex', alignItems: 'center', gap: 8,
           padding: '9px 16px', borderRadius: 8,
-          border: '1px solid #2A3346', background: 'transparent',
-          color: '#7A8BA8', cursor: 'pointer', fontSize: 13,
+          border: '1px solid #2a2850', background: 'transparent',
+          color: '#8892b0', cursor: 'pointer', fontSize: 13,
           fontFamily: "'DM Sans', sans-serif",
         }}>
           ← Volver a equipos
@@ -527,10 +539,10 @@ export default function EditorCarta() {
           <div style={{
             display: 'flex', alignItems: 'center', gap: 8,
             padding: '7px 14px', borderRadius: 8,
-            background: 'rgba(244,160,32,0.1)', border: '1px solid rgba(244,160,32,0.25)',
+            background: 'rgba(129,140,248,0.1)', border: '1px solid rgba(129,140,248,0.25)',
           }}>
-            <span style={{ color: '#7A8BA8', fontSize: 11, textTransform: 'uppercase', letterSpacing: 0.5 }}>Código</span>
-            <span style={{ color: '#F4A020', fontFamily: 'monospace', fontSize: 15, fontWeight: 700, letterSpacing: 2 }}>
+            <span style={{ color: '#8892b0', fontSize: 11, textTransform: 'uppercase', letterSpacing: 0.5 }}>Código</span>
+            <span style={{ color: '#818cf8', fontFamily: 'monospace', fontSize: 15, fontWeight: 700, letterSpacing: 2 }}>
               {equipo.codigo}
             </span>
           </div>
@@ -538,22 +550,22 @@ export default function EditorCarta() {
 
         <div style={{ flex: 1 }} />
         <button onClick={() => setShowQR(true)} style={{
-          padding: '9px 16px', borderRadius: 8, border: '1px solid #2A3346',
-          background: 'transparent', color: '#E8EDF5', cursor: 'pointer', fontSize: 13,
+          padding: '9px 16px', borderRadius: 8, border: '1px solid #2a2850',
+          background: 'transparent', color: '#e8eeff', cursor: 'pointer', fontSize: 13,
           fontFamily: "'DM Sans', sans-serif",
         }}>
           Generar QR
         </button>
         <button onClick={handleExportPDF} style={{
-          padding: '9px 16px', borderRadius: 8, border: '1px solid #2A3346',
-          background: 'transparent', color: '#E8EDF5', cursor: 'pointer', fontSize: 13,
+          padding: '9px 16px', borderRadius: 8, border: '1px solid #2a2850',
+          background: 'transparent', color: '#e8eeff', cursor: 'pointer', fontSize: 13,
           fontFamily: "'DM Sans', sans-serif",
         }}>
           Exportar PDF
         </button>
         <button onClick={handleSaveAll} style={{
           padding: '9px 20px', borderRadius: 8, border: 'none',
-          background: '#F4A020', color: '#0A0C0F',
+          background: '#6366f1', color: '#fff',
           fontSize: 13, fontWeight: 700, cursor: 'pointer',
           fontFamily: "'DM Sans', sans-serif",
         }}>
@@ -569,32 +581,26 @@ export default function EditorCarta() {
         {/* LEFT — image panel */}
         <div style={{
           flex: '0 0 60%',
-          background: '#111418', borderRadius: 12,
-          border: '1px solid #1E2535',
+          background: '#13112a', borderRadius: 12,
+          border: '1px solid #2a2850',
           display: 'flex', flexDirection: 'column', overflow: 'hidden',
         }}>
           {/* Image tabs row */}
           <div style={{
             display: 'flex', alignItems: 'center', gap: 6,
-            padding: '8px 12px', borderBottom: '1px solid #1E2535',
+            padding: '8px 12px', borderBottom: '1px solid #2a2850',
             flexShrink: 0, overflowX: 'auto', scrollbarWidth: 'none',
           }}>
             {imagenes.map((img, i) => (
-              <div
-                key={img.id}
-                style={{
-                  position: 'relative', flexShrink: 0,
-                  display: 'flex', alignItems: 'center', gap: 0,
-                }}
-              >
+              <div key={img.id} style={{ position: 'relative', flexShrink: 0, display: 'flex', alignItems: 'center', gap: 0 }}>
                 <button
                   onClick={() => { setImgActivaIdx(i); setDrawStart(null); setPreviewEnd(null) }}
                   style={{
                     display: 'flex', alignItems: 'center', gap: 6,
                     padding: '5px 10px', borderRadius: 7,
-                    border: `1px solid ${i === imgActivaIdx ? '#F4A020' : '#2A3346'}`,
-                    background: i === imgActivaIdx ? 'rgba(244,160,32,0.12)' : 'transparent',
-                    color: i === imgActivaIdx ? '#F4A020' : '#7A8BA8',
+                    border: `1px solid ${i === imgActivaIdx ? '#6366f1' : '#2a2850'}`,
+                    background: i === imgActivaIdx ? 'rgba(99,102,241,0.12)' : 'transparent',
+                    color: i === imgActivaIdx ? '#818cf8' : '#8892b0',
                     cursor: 'pointer', fontSize: 12, fontWeight: i === imgActivaIdx ? 700 : 400,
                     fontFamily: "'DM Sans', sans-serif",
                   }}
@@ -623,15 +629,14 @@ export default function EditorCarta() {
               </div>
             ))}
 
-            {/* Add image button */}
             <button
               onClick={() => fileInputRef.current?.click()}
               style={{
                 flexShrink: 0,
                 display: 'flex', alignItems: 'center', gap: 5,
                 padding: '5px 10px', borderRadius: 7,
-                border: '1px dashed #2A3346', background: 'transparent',
-                color: '#4A5568', cursor: 'pointer', fontSize: 12,
+                border: '1px dashed #2a2850', background: 'transparent',
+                color: '#4a5070', cursor: 'pointer', fontSize: 12,
                 fontFamily: "'DM Sans', sans-serif",
               }}
             >
@@ -646,14 +651,14 @@ export default function EditorCarta() {
             )}
           </div>
 
-          {/* Tool selector (only when image is loaded) */}
+          {/* Tool selector */}
           {imgActiva && (
             <div style={{
               display: 'flex', alignItems: 'center', gap: 6,
-              padding: '7px 12px', borderBottom: '1px solid #1E2535',
+              padding: '7px 12px', borderBottom: '1px solid #2a2850',
               flexShrink: 0,
             }}>
-              <span style={{ color: '#4A5568', fontSize: 11, textTransform: 'uppercase', letterSpacing: 0.5, marginRight: 4 }}>
+              <span style={{ color: '#4a5070', fontSize: 11, textTransform: 'uppercase', letterSpacing: 0.5, marginRight: 4 }}>
                 Herramienta:
               </span>
               {HERRAMIENTAS.map(h => (
@@ -669,9 +674,9 @@ export default function EditorCarta() {
                   style={{
                     display: 'flex', alignItems: 'center', gap: 5,
                     padding: '5px 10px', borderRadius: 6,
-                    border: `1px solid ${herramienta === h.id ? '#F4A020' : '#2A3346'}`,
-                    background: herramienta === h.id ? 'rgba(244,160,32,0.12)' : 'transparent',
-                    color: herramienta === h.id ? '#F4A020' : '#7A8BA8',
+                    border: `1px solid ${herramienta === h.id ? '#6366f1' : '#2a2850'}`,
+                    background: herramienta === h.id ? 'rgba(99,102,241,0.12)' : 'transparent',
+                    color: herramienta === h.id ? '#818cf8' : '#8892b0',
                     cursor: 'pointer', fontSize: 12,
                     fontFamily: "'DM Sans', sans-serif",
                   }}
@@ -681,14 +686,12 @@ export default function EditorCarta() {
                 </button>
               ))}
 
-              {/* Drawing hint */}
               {(herramienta === 'flecha' || herramienta === 'linea') && (
-                <span style={{ color: '#4A5568', fontSize: 11, marginLeft: 6 }}>
+                <span style={{ color: '#4a5070', fontSize: 11, marginLeft: 6 }}>
                   {drawStart ? '→ clic para fijar el extremo' : 'Clic para fijar el inicio'}
                 </span>
               )}
 
-              {/* Clear arrows on current image */}
               {imgActiva && (imgActiva.flechas || []).length > 0 && (
                 <button
                   onClick={() => {
@@ -727,13 +730,13 @@ export default function EditorCarta() {
                   display: 'flex', flexDirection: 'column',
                   alignItems: 'center', justifyContent: 'center', gap: 14,
                   cursor: 'pointer', borderRadius: 8,
-                  border: `2px dashed ${imgError ? '#EF4444' : dragOver ? '#F4A020' : '#2A3346'}`,
-                  background: dragOver ? 'rgba(244,160,32,0.05)' : 'transparent',
+                  border: `2px dashed ${imgError ? '#EF4444' : dragOver ? '#6366f1' : '#2a2850'}`,
+                  background: dragOver ? 'rgba(99,102,241,0.05)' : 'transparent',
                   transition: 'border-color 0.2s, background 0.2s',
                 }}
               >
                 <svg width="44" height="44" viewBox="0 0 24 24" fill="none"
-                  stroke={imgError ? '#EF4444' : dragOver ? '#F4A020' : '#4A5568'}
+                  stroke={imgError ? '#EF4444' : dragOver ? '#6366f1' : '#4a5070'}
                   strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
                   <rect x="3" y="3" width="18" height="18" rx="2" />
                   <circle cx="8.5" cy="8.5" r="1.5" />
@@ -744,10 +747,10 @@ export default function EditorCarta() {
                     <div style={{ color: '#EF4444', fontSize: 13, fontWeight: 600, maxWidth: 220 }}>{imgError}</div>
                   ) : (
                     <>
-                      <div style={{ color: '#E8EDF5', fontSize: 14, fontWeight: 500, marginBottom: 4 }}>
+                      <div style={{ color: '#e8eeff', fontSize: 14, fontWeight: 500, marginBottom: 4 }}>
                         Arrastrá fotos del equipo aquí
                       </div>
-                      <div style={{ color: '#4A5568', fontSize: 12 }}>o hacé clic para seleccionar (máx. 2MB c/u)</div>
+                      <div style={{ color: '#4a5070', fontSize: 12 }}>o hacé clic para seleccionar (máx. 2MB c/u)</div>
                     </>
                   )}
                 </div>
@@ -761,6 +764,7 @@ export default function EditorCarta() {
                 style={{ position: 'absolute', inset: 0, cursor: cursorCanvas, userSelect: 'none' }}
               >
                 <img
+                  key={imgActiva.id}
                   src={imgActiva.url}
                   alt={equipo.nombre}
                   onLoad={handleEditorImgLoad}
@@ -768,105 +772,108 @@ export default function EditorCarta() {
                   draggable={false}
                 />
 
-                {/* Overlay positioned exactly on rendered image area */}
-                {editorImgRect && (
+                {/* CSS aspect-ratio overlay — aligns exactly with objectFit:contain image */}
+                {imgNaturalSize && (
                   <div style={{
-                    position: 'absolute',
-                    left: editorImgRect.left, top: editorImgRect.top,
-                    width: editorImgRect.width, height: editorImgRect.height,
+                    position: 'absolute', inset: 0,
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
                     pointerEvents: 'none',
                   }}>
-                    {/* SVG overlay: arrows/lines */}
-                    <svg style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', pointerEvents: 'none', overflow: 'visible' }}>
-                      <defs>
-                        <marker id="arrowhead" markerWidth="7" markerHeight="5" refX="7" refY="2.5" orient="auto">
-                          <polygon points="0 0, 7 2.5, 0 5" fill="#F4A020" />
-                        </marker>
-                        <marker id="arrowhead-preview" markerWidth="7" markerHeight="5" refX="7" refY="2.5" orient="auto">
-                          <polygon points="0 0, 7 2.5, 0 5" fill="#F4A02088" />
-                        </marker>
-                      </defs>
+                    <div style={{
+                      position: 'relative',
+                      maxWidth: '100%', maxHeight: '100%',
+                      aspectRatio: `${imgNaturalSize.w} / ${imgNaturalSize.h}`,
+                      pointerEvents: 'none',
+                    }}>
+                      {/* SVG arrows */}
+                      <svg style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', pointerEvents: 'none', overflow: 'visible' }}>
+                        <defs>
+                          <marker id="arrowhead" markerWidth="7" markerHeight="5" refX="7" refY="2.5" orient="auto">
+                            <polygon points="0 0, 7 2.5, 0 5" fill="#818cf8" />
+                          </marker>
+                          <marker id="arrowhead-preview" markerWidth="7" markerHeight="5" refX="7" refY="2.5" orient="auto">
+                            <polygon points="0 0, 7 2.5, 0 5" fill="#818cf888" />
+                          </marker>
+                        </defs>
 
-                      {/* Existing arrows */}
-                      {(imgActiva.flechas || []).map(f => (
-                        <line
-                          key={f.id}
-                          x1={`${f.x1}%`} y1={`${f.y1}%`}
-                          x2={`${f.x2}%`} y2={`${f.y2}%`}
-                          stroke="#F4A020" strokeWidth="2"
-                          strokeDasharray={f.tipo === 'linea' ? '6 4' : undefined}
-                          markerEnd={f.tipo === 'flecha' ? 'url(#arrowhead)' : undefined}
-                        />
+                        {(imgActiva.flechas || []).map(f => (
+                          <line
+                            key={f.id}
+                            x1={`${f.x1}%`} y1={`${f.y1}%`}
+                            x2={`${f.x2}%`} y2={`${f.y2}%`}
+                            stroke="#818cf8" strokeWidth="2"
+                            strokeDasharray={f.tipo === 'linea' ? '6 4' : undefined}
+                            markerEnd={f.tipo === 'flecha' ? 'url(#arrowhead)' : undefined}
+                          />
+                        ))}
+
+                        {drawStart && (
+                          <circle cx={`${drawStart.x}%`} cy={`${drawStart.y}%`} r="4"
+                            fill="#818cf8" stroke="#fff" strokeWidth="1" />
+                        )}
+
+                        {drawStart && previewEnd && (
+                          <line
+                            x1={`${drawStart.x}%`} y1={`${drawStart.y}%`}
+                            x2={`${previewEnd.x}%`} y2={`${previewEnd.y}%`}
+                            stroke="#818cf888" strokeWidth="1.5" strokeDasharray="5 4"
+                            markerEnd={herramienta === 'flecha' ? 'url(#arrowhead-preview)' : undefined}
+                          />
+                        )}
+                      </svg>
+
+                      {/* Delete buttons for arrows */}
+                      {herramienta === 'punto' && (imgActiva.flechas || []).map(f => (
+                        <button
+                          key={`del-${f.id}`}
+                          onClick={e => { e.stopPropagation(); handleDeleteFlecha(f.id) }}
+                          title="Eliminar esta línea"
+                          style={{
+                            position: 'absolute',
+                            left: `${(f.x1 + f.x2) / 2}%`,
+                            top: `${(f.y1 + f.y2) / 2}%`,
+                            transform: 'translate(-50%, -50%)',
+                            width: 18, height: 18, borderRadius: '50%',
+                            background: '#EF4444', border: '1px solid #fff',
+                            color: '#fff', fontSize: 11, fontWeight: 700,
+                            cursor: 'pointer', zIndex: 20, padding: 0,
+                            display: 'flex', alignItems: 'center', justifyContent: 'center',
+                            lineHeight: 1, pointerEvents: 'auto',
+                          }}
+                        >
+                          ×
+                        </button>
                       ))}
 
-                      {/* Draw start dot */}
-                      {drawStart && (
-                        <circle cx={`${drawStart.x}%`} cy={`${drawStart.y}%`} r="4"
-                          fill="#F4A020" stroke="#fff" strokeWidth="1" />
-                      )}
-
-                      {/* Preview line */}
-                      {drawStart && previewEnd && (
-                        <line
-                          x1={`${drawStart.x}%`} y1={`${drawStart.y}%`}
-                          x2={`${previewEnd.x}%`} y2={`${previewEnd.y}%`}
-                          stroke="#F4A02088" strokeWidth="1.5" strokeDasharray="5 4"
-                          markerEnd={herramienta === 'flecha' ? 'url(#arrowhead-preview)' : undefined}
-                        />
-                      )}
-                    </svg>
-
-                    {/* Delete buttons for arrows */}
-                    {herramienta === 'punto' && (imgActiva.flechas || []).map(f => (
-                      <button
-                        key={`del-${f.id}`}
-                        onClick={e => { e.stopPropagation(); handleDeleteFlecha(f.id) }}
-                        title="Eliminar esta línea"
-                        style={{
-                          position: 'absolute',
-                          left: `${(f.x1 + f.x2) / 2}%`,
-                          top: `${(f.y1 + f.y2) / 2}%`,
-                          transform: 'translate(-50%, -50%)',
-                          width: 18, height: 18, borderRadius: '50%',
-                          background: '#EF4444', border: '1px solid #fff',
-                          color: '#fff', fontSize: 11, fontWeight: 700,
-                          cursor: 'pointer', zIndex: 20, padding: 0,
-                          display: 'flex', alignItems: 'center', justifyContent: 'center',
-                          lineHeight: 1, pointerEvents: 'auto',
-                        }}
-                      >
-                        ×
-                      </button>
-                    ))}
-
-                    {/* Point markers (only for this image) */}
-                    {puntosDeLaImagen.map(p => (
-                      <button
-                        key={p.id}
-                        onClick={e => {
-                          e.stopPropagation()
-                          if (selectMode) { toggleCheck(p.id); return }
-                          setSelectedId(p.id === selectedId ? null : p.id)
-                        }}
-                        style={{
-                          position: 'absolute',
-                          left: `${p.x}%`, top: `${p.y}%`,
-                          transform: 'translate(-50%, -50%)',
-                          width: 30, height: 30, borderRadius: '50%',
-                          background: frecColor(p.frecuencia),
-                          border: (p.id === selectedId || checkedIds.has(p.id)) ? '3px solid #fff' : '2px solid rgba(0,0,0,0.5)',
-                          color: '#fff', fontSize: 11, fontWeight: 700,
-                          cursor: 'pointer',
-                          display: 'flex', alignItems: 'center', justifyContent: 'center',
-                          boxShadow: '0 2px 8px rgba(0,0,0,0.5)',
-                          zIndex: 10, padding: 0,
-                          fontFamily: "'DM Sans', sans-serif",
-                          pointerEvents: 'auto',
-                        }}
-                      >
-                        {p.numero}
-                      </button>
-                    ))}
+                      {/* Point markers */}
+                      {puntosDeLaImagen.map(p => (
+                        <button
+                          key={p.id}
+                          onClick={e => {
+                            e.stopPropagation()
+                            if (selectMode) { toggleCheck(p.id); return }
+                            setSelectedId(p.id === selectedId ? null : p.id)
+                          }}
+                          style={{
+                            position: 'absolute',
+                            left: `${p.x}%`, top: `${p.y}%`,
+                            transform: 'translate(-50%, -50%)',
+                            width: 30, height: 30, borderRadius: '50%',
+                            background: frecColor(p.frecuencia),
+                            border: (p.id === selectedId || checkedIds.has(p.id)) ? '3px solid #fff' : '2px solid rgba(0,0,0,0.5)',
+                            color: '#fff', fontSize: 11, fontWeight: 700,
+                            cursor: 'pointer',
+                            display: 'flex', alignItems: 'center', justifyContent: 'center',
+                            boxShadow: '0 2px 8px rgba(0,0,0,0.5)',
+                            zIndex: 10, padding: 0,
+                            fontFamily: "'DM Sans', sans-serif",
+                            pointerEvents: 'auto',
+                          }}
+                        >
+                          {p.numero}
+                        </button>
+                      ))}
+                    </div>
                   </div>
                 )}
               </div>
@@ -885,8 +892,8 @@ export default function EditorCarta() {
         {/* RIGHT — point list or form */}
         <div style={{
           flex: '0 0 40%',
-          background: '#111418', borderRadius: 12,
-          border: '1px solid #1E2535',
+          background: '#13112a', borderRadius: 12,
+          border: '1px solid #2a2850',
           display: 'flex', flexDirection: 'column', overflow: 'hidden',
         }}>
           {bulkFrecuencia && selectMode ? (
@@ -907,7 +914,7 @@ export default function EditorCarta() {
             <>
               {/* Panel header */}
               <div style={{
-                padding: '10px 12px 10px 16px', borderBottom: '1px solid #1E2535', flexShrink: 0,
+                padding: '10px 12px 10px 16px', borderBottom: '1px solid #2a2850', flexShrink: 0,
                 display: 'flex', alignItems: 'center', justifyContent: 'space-between',
               }}>
                 {selectMode ? (
@@ -915,7 +922,7 @@ export default function EditorCarta() {
                     <button
                       onClick={toggleSelectAll}
                       style={{
-                        background: 'none', border: 'none', color: '#7A8BA8',
+                        background: 'none', border: 'none', color: '#8892b0',
                         fontSize: 12, cursor: 'pointer', padding: 0,
                         fontFamily: "'DM Sans', sans-serif",
                       }}
@@ -925,7 +932,7 @@ export default function EditorCarta() {
                     <button
                       onClick={() => { setSelectMode(false); setCheckedIds(new Set()) }}
                       style={{
-                        background: 'none', border: 'none', color: '#7A8BA8',
+                        background: 'none', border: 'none', color: '#8892b0',
                         fontSize: 12, cursor: 'pointer', padding: '4px 8px',
                         fontFamily: "'DM Sans', sans-serif",
                       }}
@@ -935,10 +942,10 @@ export default function EditorCarta() {
                   </>
                 ) : (
                   <>
-                    <span style={{ color: '#7A8BA8', fontSize: 12, textTransform: 'uppercase', letterSpacing: 0.5 }}>
+                    <span style={{ color: '#8892b0', fontSize: 12, textTransform: 'uppercase', letterSpacing: 0.5 }}>
                       Puntos ({puntos.length})
                       {imgActiva && (
-                        <span style={{ color: '#4A5568', marginLeft: 6, fontSize: 10 }}>
+                        <span style={{ color: '#4a5070', marginLeft: 6, fontSize: 10 }}>
                           · {puntosDeLaImagen.length} en esta foto
                         </span>
                       )}
@@ -947,8 +954,8 @@ export default function EditorCarta() {
                       <button
                         onClick={() => { setSelectMode(true); setSelectedId(null) }}
                         style={{
-                          background: 'none', border: '1px solid #2A3346',
-                          borderRadius: 6, color: '#7A8BA8',
+                          background: 'none', border: '1px solid #2a2850',
+                          borderRadius: 6, color: '#8892b0',
                           fontSize: 11, cursor: 'pointer', padding: '3px 10px',
                           fontFamily: "'DM Sans', sans-serif",
                         }}
@@ -968,11 +975,11 @@ export default function EditorCarta() {
                     alignItems: 'center', justifyContent: 'center',
                     height: '100%', gap: 10, padding: 28, textAlign: 'center',
                   }}>
-                    <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#2A3346" strokeWidth="1.5">
+                    <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#2a2850" strokeWidth="1.5">
                       <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
                       <circle cx="12" cy="10" r="3" />
                     </svg>
-                    <div style={{ color: '#4A5568', fontSize: 13 }}>
+                    <div style={{ color: '#4a5070', fontSize: 13 }}>
                       {imagenes.length > 0
                         ? 'Hacé clic en la foto para agregar un punto'
                         : 'Primero agregá una foto del equipo'}
@@ -989,11 +996,11 @@ export default function EditorCarta() {
                         style={{
                           display: 'flex', alignItems: 'center', gap: 12,
                           padding: '11px 16px', cursor: 'pointer',
-                          borderBottom: i < puntos.length - 1 ? '1px solid #1E2535' : 'none',
+                          borderBottom: i < puntos.length - 1 ? '1px solid #2a2850' : 'none',
                           background: isChecked
                             ? 'rgba(239,68,68,0.07)'
                             : p.id === selectedId && !selectMode
-                              ? 'rgba(244,160,32,0.05)'
+                              ? 'rgba(99,102,241,0.07)'
                               : 'transparent',
                           opacity: !selectMode && imgActiva && !isOnThisImg ? 0.4 : 1,
                           transition: 'background 0.1s, opacity 0.1s',
@@ -1002,7 +1009,7 @@ export default function EditorCarta() {
                         {selectMode ? (
                           <div style={{
                             width: 20, height: 20, borderRadius: 5, flexShrink: 0,
-                            border: `2px solid ${isChecked ? '#EF4444' : '#2A3346'}`,
+                            border: `2px solid ${isChecked ? '#EF4444' : '#2a2850'}`,
                             background: isChecked ? '#EF4444' : 'transparent',
                             display: 'flex', alignItems: 'center', justifyContent: 'center',
                           }}>
@@ -1024,20 +1031,20 @@ export default function EditorCarta() {
                         )}
                         <div style={{ flex: 1, minWidth: 0 }}>
                           <div style={{
-                            color: p.nombre ? '#E8EDF5' : '#4A5568',
+                            color: p.nombre ? '#e8eeff' : '#4a5070',
                             fontSize: 13, fontWeight: 500,
                             overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
                           }}>
                             {p.nombre || 'Sin nombre'}
                           </div>
-                          <div style={{ color: '#4A5568', fontSize: 11 }}>
+                          <div style={{ color: '#4a5070', fontSize: 11 }}>
                             {FRECUENCIAS.find(f => f.value === p.frecuencia)?.label}
                           </div>
                         </div>
                         {!selectMode && (
                           <button
                             onClick={e => { e.stopPropagation(); handleDeletePunto(p.id) }}
-                            style={{ background: 'none', border: 'none', color: '#4A5568', cursor: 'pointer', padding: 4, display: 'flex' }}
+                            style={{ background: 'none', border: 'none', color: '#4a5070', cursor: 'pointer', padding: 4, display: 'flex' }}
                           >
                             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                               <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
@@ -1051,7 +1058,7 @@ export default function EditorCarta() {
               </div>
 
               {/* Footer */}
-              <div style={{ padding: 14, borderTop: '1px solid #1E2535', flexShrink: 0 }}>
+              <div style={{ padding: 14, borderTop: '1px solid #2a2850', flexShrink: 0 }}>
                 {selectMode ? (
                   <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
                     <button
@@ -1059,9 +1066,9 @@ export default function EditorCarta() {
                       disabled={checkedIds.size === 0}
                       style={{
                         width: '100%', padding: '9px', borderRadius: 8,
-                        border: checkedIds.size > 0 ? '1px solid #F4A02060' : '1px solid #1E2535',
-                        background: checkedIds.size > 0 ? 'rgba(244,160,32,0.1)' : '#1E2535',
-                        color: checkedIds.size > 0 ? '#F4A020' : '#4A5568',
+                        border: checkedIds.size > 0 ? '1px solid rgba(129,140,248,0.4)' : '1px solid #2a2850',
+                        background: checkedIds.size > 0 ? 'rgba(99,102,241,0.1)' : '#2a2850',
+                        color: checkedIds.size > 0 ? '#818cf8' : '#4a5070',
                         cursor: checkedIds.size > 0 ? 'pointer' : 'not-allowed',
                         fontSize: 13, fontFamily: "'DM Sans', sans-serif",
                       }}
@@ -1073,8 +1080,8 @@ export default function EditorCarta() {
                       disabled={checkedIds.size === 0}
                       style={{
                         width: '100%', padding: '9px', borderRadius: 8, border: 'none',
-                        background: checkedIds.size > 0 ? '#EF4444' : '#1E2535',
-                        color: checkedIds.size > 0 ? '#fff' : '#4A5568',
+                        background: checkedIds.size > 0 ? '#EF4444' : '#2a2850',
+                        color: checkedIds.size > 0 ? '#fff' : '#4a5070',
                         cursor: checkedIds.size > 0 ? 'pointer' : 'not-allowed',
                         fontSize: 13, fontWeight: 700,
                         fontFamily: "'DM Sans', sans-serif",
@@ -1088,8 +1095,8 @@ export default function EditorCarta() {
                 ) : (
                   <button onClick={() => setShowQR(true)} style={{
                     width: '100%', padding: '10px', borderRadius: 8,
-                    border: '1px solid #2A3346', background: 'transparent',
-                    color: '#7A8BA8', cursor: 'pointer', fontSize: 13,
+                    border: '1px solid #2a2850', background: 'transparent',
+                    color: '#8892b0', cursor: 'pointer', fontSize: 13,
                     fontFamily: "'DM Sans', sans-serif",
                   }}>
                     Generar QR

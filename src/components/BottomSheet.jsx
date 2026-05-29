@@ -5,40 +5,40 @@ function MetodoIcon({ metodo }) {
   const icons = {
     grasa: (
       <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
-        <path d="M14.5 3.5a3 3 0 0 1-3.5 4.5L6 13a2 2 0 1 1-1.5-1.5l5-5a3 3 0 0 1 4.5-3.5l-2 2 1.5 1.5 2-2z" stroke="#F4A020" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
+        <path d="M14.5 3.5a3 3 0 0 1-3.5 4.5L6 13a2 2 0 1 1-1.5-1.5l5-5a3 3 0 0 1 4.5-3.5l-2 2 1.5 1.5 2-2z" stroke="#818cf8" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
       </svg>
     ),
     aceite: (
       <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
-        <path d="M9 2L13 8H5L9 2Z" stroke="#F4A020" strokeWidth="1.4" strokeLinejoin="round" />
-        <rect x="6" y="8" width="6" height="8" rx="1" stroke="#F4A020" strokeWidth="1.4" />
+        <path d="M9 2L13 8H5L9 2Z" stroke="#818cf8" strokeWidth="1.4" strokeLinejoin="round" />
+        <rect x="6" y="8" width="6" height="8" rx="1" stroke="#818cf8" strokeWidth="1.4" />
       </svg>
     ),
     circulacion: (
       <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
-        <path d="M3 9a6 6 0 0 1 11-3.3" stroke="#F4A020" strokeWidth="1.4" strokeLinecap="round" />
-        <path d="M15 9a6 6 0 0 1-11 3.3" stroke="#F4A020" strokeWidth="1.4" strokeLinecap="round" />
-        <path d="M13.7 5.7l.3 2.3-2.3.3" stroke="#F4A020" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
-        <path d="M4.3 12.3l-.3-2.3 2.3-.3" stroke="#F4A020" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
+        <path d="M3 9a6 6 0 0 1 11-3.3" stroke="#818cf8" strokeWidth="1.4" strokeLinecap="round" />
+        <path d="M15 9a6 6 0 0 1-11 3.3" stroke="#818cf8" strokeWidth="1.4" strokeLinecap="round" />
+        <path d="M13.7 5.7l.3 2.3-2.3.3" stroke="#818cf8" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
+        <path d="M4.3 12.3l-.3-2.3 2.3-.3" stroke="#818cf8" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
       </svg>
     ),
     inmersion: (
       <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
-        <path d="M9 3C7 6 5 8 5 10.5a4 4 0 0 0 8 0C13 8 11 6 9 3z" stroke="#F4A020" strokeWidth="1.4" strokeLinejoin="round" />
-        <path d="M6.5 11.5a2.5 2.5 0 0 0 3 1.5" stroke="#F4A020" strokeWidth="1.2" strokeLinecap="round" />
+        <path d="M9 3C7 6 5 8 5 10.5a4 4 0 0 0 8 0C13 8 11 6 9 3z" stroke="#818cf8" strokeWidth="1.4" strokeLinejoin="round" />
+        <path d="M6.5 11.5a2.5 2.5 0 0 0 3 1.5" stroke="#818cf8" strokeWidth="1.2" strokeLinecap="round" />
       </svg>
     ),
     niebla: (
       <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
-        <path d="M3 7h12M4 10h10M6 13h6" stroke="#F4A020" strokeWidth="1.4" strokeLinecap="round" />
-        <path d="M6 4c0-1 1-2 3-2s3.5 1 3.5 3c1.5 0 2.5 1 2.5 2H4C4 5.5 5 4 6 4z" stroke="#F4A020" strokeWidth="1.3" strokeLinejoin="round" />
+        <path d="M3 7h12M4 10h10M6 13h6" stroke="#818cf8" strokeWidth="1.4" strokeLinecap="round" />
+        <path d="M6 4c0-1 1-2 3-2s3.5 1 3.5 3c1.5 0 2.5 1 2.5 2H4C4 5.5 5 4 6 4z" stroke="#818cf8" strokeWidth="1.3" strokeLinejoin="round" />
       </svg>
     ),
     spray: (
       <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
-        <rect x="3" y="9" width="7" height="7" rx="1.5" stroke="#F4A020" strokeWidth="1.4" />
-        <path d="M7 9V6h5v3" stroke="#F4A020" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
-        <path d="M12 6h1.5M12 9h2M12 7.5h1.5" stroke="#F4A020" strokeWidth="1.2" strokeLinecap="round" />
+        <rect x="3" y="9" width="7" height="7" rx="1.5" stroke="#818cf8" strokeWidth="1.4" />
+        <path d="M7 9V6h5v3" stroke="#818cf8" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
+        <path d="M12 6h1.5M12 9h2M12 7.5h1.5" stroke="#818cf8" strokeWidth="1.2" strokeLinecap="round" />
       </svg>
     ),
   }
@@ -86,7 +86,6 @@ export default function BottomSheet({ punto, globalIndex, onClose }) {
 
   return (
     <>
-      {/* Overlay */}
       <div
         className="animate-fade-in"
         onClick={onClose}
@@ -98,7 +97,6 @@ export default function BottomSheet({ punto, globalIndex, onClose }) {
         }}
       />
 
-      {/* Sheet */}
       <div
         ref={sheetRef}
         className="animate-slide-up"
@@ -111,7 +109,7 @@ export default function BottomSheet({ punto, globalIndex, onClose }) {
           left: 0,
           right: 0,
           height: '65%',
-          background: '#131820',
+          background: '#13112a',
           borderRadius: '24px 24px 0 0',
           zIndex: 50,
           display: 'flex',
@@ -119,71 +117,63 @@ export default function BottomSheet({ punto, globalIndex, onClose }) {
           overflow: 'hidden',
           transform: `translateY(${translateY}px)`,
           transition: dragging ? 'none' : 'transform 0.2s ease',
-          borderTop: '1px solid #2A3448',
+          borderTop: '1px solid #2a2850',
         }}
       >
         {/* Drag handle */}
-        <div
-          style={{
-            display: 'flex',
-            justifyContent: 'center',
-            padding: '14px 0 10px',
-            flexShrink: 0,
-          }}
-        >
-          <div
-            style={{
-              width: 40,
-              height: 4,
-              borderRadius: 2,
-              background: '#2A3448',
-            }}
-          />
+        <div style={{
+          display: 'flex',
+          justifyContent: 'center',
+          padding: '14px 0 10px',
+          flexShrink: 0,
+        }}>
+          <div style={{
+            width: 40,
+            height: 4,
+            borderRadius: 2,
+            background: '#2a2850',
+          }} />
         </div>
 
         {/* Scrollable content */}
-        <div
-          style={{
-            flex: 1,
-            overflowY: 'auto',
-            padding: '8px 24px 40px',
-            display: 'flex',
-            flexDirection: 'column',
-            gap: 20,
-          }}
-        >
+        <div style={{
+          flex: 1,
+          overflowY: 'auto',
+          padding: '8px 24px 40px',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: 20,
+        }}>
           {/* Header */}
           <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12, justifyContent: 'space-between' }}>
             <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12, flex: 1, minWidth: 0 }}>
               {globalIndex != null && (
                 <div style={{
                   width: 36, height: 36, borderRadius: '50%',
-                  background: freq?.color || '#F4A020',
+                  background: freq?.color || '#6366f1',
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
                   fontFamily: "'Bebas Neue', sans-serif",
-                  fontSize: 18, color: '#0A0C0F', fontWeight: 700,
+                  fontSize: 18, color: '#0c0a1e', fontWeight: 700,
                   flexShrink: 0, marginTop: 2,
                 }}>
                   {globalIndex + 1}
                 </div>
               )}
-              <h2
-                style={{
-                  fontFamily: "'DM Sans', sans-serif",
-                  fontSize: 20,
-                  fontWeight: 700,
-                  color: '#E8EDF5',
-                  lineHeight: 1.3,
-                  flex: 1,
-                }}
-              >
+              <h2 style={{
+                fontFamily: "'DM Sans', sans-serif",
+                fontSize: 20,
+                fontWeight: 700,
+                color: '#e8eeff',
+                lineHeight: 1.3,
+                flex: 1,
+              }}>
                 {punto.nombre}
               </h2>
             </div>
             <button
               onClick={onClose}
               style={{
-                background: '#1C2230',
+                background: '#1c1a3a',
                 border: 'none',
                 borderRadius: 10,
                 width: 36,
@@ -193,7 +183,7 @@ export default function BottomSheet({ punto, globalIndex, onClose }) {
                 justifyContent: 'center',
                 cursor: 'pointer',
                 flexShrink: 0,
-                color: '#7A8BA8',
+                color: '#8892b0',
               }}
             >
               <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
@@ -203,48 +193,42 @@ export default function BottomSheet({ punto, globalIndex, onClose }) {
           </div>
 
           {/* Frequency badge */}
-          <div
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: 8,
-              background: freq.bg,
-              border: `1px solid ${freq.color}30`,
-              borderRadius: 10,
-              padding: '8px 14px',
-              alignSelf: 'flex-start',
-            }}
-          >
+          <div style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: 8,
+            background: freq.bg,
+            border: `1px solid ${freq.color}30`,
+            borderRadius: 10,
+            padding: '8px 14px',
+            alignSelf: 'flex-start',
+          }}>
             <div style={{ width: 10, height: 10, borderRadius: '50%', background: freq.color }} />
-            <span
-              style={{
-                color: freq.color,
-                fontSize: 14,
-                fontWeight: 700,
-                fontFamily: "'DM Sans', sans-serif",
-              }}
-            >
+            <span style={{
+              color: freq.color,
+              fontSize: 14,
+              fontWeight: 700,
+              fontFamily: "'DM Sans', sans-serif",
+            }}>
               {freq.label}
             </span>
           </div>
 
           {/* Info rows */}
-          <div
-            style={{
-              display: 'flex',
-              flexDirection: 'column',
-              gap: 0,
-              background: '#1C2230',
-              borderRadius: 14,
-              overflow: 'hidden',
-              border: '1px solid #2A3448',
-            }}
-          >
+          <div style={{
+            display: 'flex',
+            flexDirection: 'column',
+            gap: 0,
+            background: '#1c1a3a',
+            borderRadius: 14,
+            overflow: 'hidden',
+            border: '1px solid #2a2850',
+          }}>
             <InfoRow
               icon={
                 <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
-                  <path d="M3 9C3 6 6 3 9 3s6 3 6 6-3 6-6 6-6-3-6-6z" stroke="#F4A020" strokeWidth="1.4" />
-                  <path d="M9 6v4M9 12h.01" stroke="#F4A020" strokeWidth="1.4" strokeLinecap="round" />
+                  <path d="M3 9C3 6 6 3 9 3s6 3 6 6-3 6-6 6-6-3-6-6z" stroke="#818cf8" strokeWidth="1.4" />
+                  <path d="M9 6v4M9 12h.01" stroke="#818cf8" strokeWidth="1.4" strokeLinecap="round" />
                 </svg>
               }
               label="Lubricante"
@@ -256,8 +240,8 @@ export default function BottomSheet({ punto, globalIndex, onClose }) {
               <InfoRow
                 icon={
                   <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
-                    <path d="M9 2L13 8H5L9 2Z" stroke="#F4A020" strokeWidth="1.4" strokeLinejoin="round" />
-                    <rect x="6" y="8" width="6" height="8" rx="1" stroke="#F4A020" strokeWidth="1.4" />
+                    <path d="M9 2L13 8H5L9 2Z" stroke="#818cf8" strokeWidth="1.4" strokeLinejoin="round" />
+                    <rect x="6" y="8" width="6" height="8" rx="1" stroke="#818cf8" strokeWidth="1.4" />
                   </svg>
                 }
                 label="Cantidad"
@@ -276,34 +260,28 @@ export default function BottomSheet({ punto, globalIndex, onClose }) {
 
           {/* Technical notes */}
           {punto.notas && (
-            <div
-              style={{
-                background: '#0A0C0F',
-                borderRadius: 14,
-                padding: '14px 16px',
-                border: '1px solid #2A3448',
-              }}
-            >
-              <div
-                style={{
-                  fontSize: 11,
-                  fontWeight: 700,
-                  letterSpacing: 1.5,
-                  color: '#7A8BA8',
-                  textTransform: 'uppercase',
-                  marginBottom: 8,
-                }}
-              >
+            <div style={{
+              background: '#0c0a1e',
+              borderRadius: 14,
+              padding: '14px 16px',
+              border: '1px solid #2a2850',
+            }}>
+              <div style={{
+                fontSize: 11,
+                fontWeight: 700,
+                letterSpacing: 1.5,
+                color: '#8892b0',
+                textTransform: 'uppercase',
+                marginBottom: 8,
+              }}>
                 Notas técnicas
               </div>
-              <p
-                style={{
-                  fontSize: 14,
-                  color: '#B8C5D8',
-                  lineHeight: 1.6,
-                  fontFamily: "'DM Sans', sans-serif",
-                }}
-              >
+              <p style={{
+                fontSize: 14,
+                color: '#b8c5e8',
+                lineHeight: 1.6,
+                fontFamily: "'DM Sans', sans-serif",
+              }}>
                 {punto.notas}
               </p>
             </div>
@@ -316,23 +294,21 @@ export default function BottomSheet({ punto, globalIndex, onClose }) {
 
 function InfoRow({ icon, label, value, last }) {
   return (
-    <div
-      style={{
-        display: 'flex',
-        alignItems: 'center',
-        gap: 14,
-        padding: '14px 16px',
-        borderBottom: last ? 'none' : '1px solid #2A3448',
-      }}
-    >
+    <div style={{
+      display: 'flex',
+      alignItems: 'center',
+      gap: 14,
+      padding: '14px 16px',
+      borderBottom: last ? 'none' : '1px solid #2a2850',
+    }}>
       <div style={{ width: 20, display: 'flex', justifyContent: 'center', flexShrink: 0 }}>
         {icon}
       </div>
       <div style={{ flex: 1 }}>
-        <div style={{ fontSize: 11, color: '#7A8BA8', fontWeight: 600, letterSpacing: 0.8, textTransform: 'uppercase', marginBottom: 3 }}>
+        <div style={{ fontSize: 11, color: '#8892b0', fontWeight: 600, letterSpacing: 0.8, textTransform: 'uppercase', marginBottom: 3 }}>
           {label}
         </div>
-        <div style={{ fontSize: 15, color: '#E8EDF5', fontWeight: 500, fontFamily: "'DM Sans', sans-serif" }}>
+        <div style={{ fontSize: 15, color: '#e8eeff', fontWeight: 500, fontFamily: "'DM Sans', sans-serif" }}>
           {value}
         </div>
       </div>

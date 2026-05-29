@@ -21,16 +21,16 @@ function CambiarCredencialesModal({ onClose, onSave }) {
 
   const inp = {
     width: '100%', padding: '10px 12px',
-    background: '#0A0C0F', border: '1px solid #2A3346',
-    borderRadius: 7, color: '#E8EDF5', fontSize: 14,
+    background: '#0c0a1e', border: '1px solid #2a2850',
+    borderRadius: 7, color: '#e8eeff', fontSize: 14,
     outline: 'none', boxSizing: 'border-box',
     fontFamily: "'DM Sans', sans-serif",
   }
 
   return (
     <div style={{ position: 'fixed', inset: 0, zIndex: 300, background: 'rgba(0,0,0,0.75)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24 }}>
-      <div style={{ background: '#1A1F2B', borderRadius: 12, padding: 28, maxWidth: 380, width: '100%', border: '1px solid #2A3346' }}>
-        <h3 style={{ color: '#E8EDF5', fontSize: 17, fontWeight: 600, margin: '0 0 20px' }}>Cambiar credenciales</h3>
+      <div style={{ background: '#1c1a3a', borderRadius: 12, padding: 28, maxWidth: 380, width: '100%', border: '1px solid #2a2850' }}>
+        <h3 style={{ color: '#e8eeff', fontSize: 17, fontWeight: 600, margin: '0 0 20px' }}>Cambiar credenciales</h3>
         {ok ? (
           <div style={{ textAlign: 'center', padding: '20px 0', color: '#22C55E', fontSize: 15, fontWeight: 600 }}>
             ✓ Credenciales actualizadas
@@ -43,14 +43,14 @@ function CambiarCredencialesModal({ onClose, onSave }) {
               { label: 'Confirmar contraseña', key: 'confirmar', type: 'password' },
             ].map(({ label, key, type }) => (
               <div key={key}>
-                <label style={{ display: 'block', color: '#7A8BA8', fontSize: 11, marginBottom: 5, textTransform: 'uppercase', letterSpacing: 0.5 }}>{label}</label>
+                <label style={{ display: 'block', color: '#8892b0', fontSize: 11, marginBottom: 5, textTransform: 'uppercase', letterSpacing: 0.5 }}>{label}</label>
                 <input type={type} value={form[key]} onChange={set(key)} style={inp} />
               </div>
             ))}
             {error && <div style={{ background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.3)', borderRadius: 7, padding: '8px 12px', color: '#EF4444', fontSize: 13 }}>{error}</div>}
             <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end', marginTop: 4 }}>
-              <button onClick={onClose} style={{ padding: '9px 18px', borderRadius: 7, border: '1px solid #2A3346', background: 'transparent', color: '#7A8BA8', cursor: 'pointer', fontSize: 13 }}>Cancelar</button>
-              <button onClick={handleSave} style={{ padding: '9px 18px', borderRadius: 7, border: 'none', background: '#F4A020', color: '#0A0C0F', cursor: 'pointer', fontSize: 13, fontWeight: 700 }}>Guardar</button>
+              <button onClick={onClose} style={{ padding: '9px 18px', borderRadius: 7, border: '1px solid #2a2850', background: 'transparent', color: '#8892b0', cursor: 'pointer', fontSize: 13 }}>Cancelar</button>
+              <button onClick={handleSave} style={{ padding: '9px 18px', borderRadius: 7, border: 'none', background: '#6366f1', color: '#fff', cursor: 'pointer', fontSize: 13, fontWeight: 700 }}>Guardar</button>
             </div>
           </div>
         )}
@@ -60,15 +60,15 @@ function CambiarCredencialesModal({ onClose, onSave }) {
 }
 
 const PALETTE = [
-  '#F4A020', '#22C55E', '#3B82F6', '#A855F7',
+  '#818cf8', '#22C55E', '#3B82F6', '#A855F7',
   '#EF4444', '#06B6D4', '#FB923C', '#EC4899',
 ]
 
 function StatCard({ label, value, color, icon }) {
   return (
     <div style={{
-      background: '#111418', borderRadius: 12,
-      border: '1px solid #1E2535', padding: '20px 24px',
+      background: '#13112a', borderRadius: 12,
+      border: '1px solid #2a2850', padding: '20px 24px',
       display: 'flex', alignItems: 'center', gap: 16,
     }}>
       <div style={{
@@ -80,10 +80,10 @@ function StatCard({ label, value, color, icon }) {
         {icon}
       </div>
       <div>
-        <div style={{ color: '#7A8BA8', fontSize: 12, textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 4 }}>
+        <div style={{ color: '#8892b0', fontSize: 12, textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 4 }}>
           {label}
         </div>
-        <div style={{ color: '#E8EDF5', fontSize: 28, fontWeight: 700, lineHeight: 1 }}>{value}</div>
+        <div style={{ color: '#e8eeff', fontSize: 28, fontWeight: 700, lineHeight: 1 }}>{value}</div>
       </div>
     </div>
   )
@@ -94,15 +94,10 @@ function AreaCard({ area, count, puntos, color, onClick }) {
     <button
       onClick={onClick}
       style={{
-        display: 'flex',
-        alignItems: 'center',
-        gap: 14,
-        background: '#111418',
-        border: '1px solid #1E2535',
-        borderRadius: 10,
-        padding: '14px 18px',
-        cursor: 'pointer',
-        textAlign: 'left',
+        display: 'flex', alignItems: 'center', gap: 14,
+        background: '#13112a', border: '1px solid #2a2850',
+        borderRadius: 10, padding: '14px 18px',
+        cursor: 'pointer', textAlign: 'left',
         transition: 'border-color 0.15s, background 0.15s',
         width: '100%',
       }}
@@ -111,30 +106,23 @@ function AreaCard({ area, count, puntos, color, onClick }) {
         e.currentTarget.style.background = color + '08'
       }}
       onMouseLeave={e => {
-        e.currentTarget.style.borderColor = '#1E2535'
-        e.currentTarget.style.background = '#111418'
+        e.currentTarget.style.borderColor = '#2a2850'
+        e.currentTarget.style.background = '#13112a'
       }}
     >
-      {/* Color strip */}
-      <div style={{
-        width: 4, height: 40, borderRadius: 2,
-        background: color, flexShrink: 0,
-      }} />
-
-      {/* Text */}
+      <div style={{ width: 4, height: 40, borderRadius: 2, background: color, flexShrink: 0 }} />
       <div style={{ flex: 1, minWidth: 0 }}>
         <div style={{
-          color: '#E8EDF5', fontSize: 13, fontWeight: 600,
+          color: '#e8eeff', fontSize: 13, fontWeight: 600,
           overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
           fontFamily: "'DM Sans', sans-serif",
         }}>
           {area}
         </div>
-        <div style={{ color: '#7A8BA8', fontSize: 12, marginTop: 2, fontFamily: "'DM Sans', sans-serif" }}>
+        <div style={{ color: '#8892b0', fontSize: 12, marginTop: 2, fontFamily: "'DM Sans', sans-serif" }}>
           {count} equipo{count !== 1 ? 's' : ''} · {puntos} punto{puntos !== 1 ? 's' : ''}
         </div>
       </div>
-
       <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
         <path d="M5 3l4 4-4 4" stroke={color} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
       </svg>
@@ -163,13 +151,12 @@ export default function DashboardAdmin() {
   return (
     <AdminLayout titulo="Dashboard">
       <div style={{ maxWidth: 1100 }}>
-        {/* Stats */}
         <div style={{
           display: 'grid',
           gridTemplateColumns: 'repeat(auto-fit, minmax(210px, 1fr))',
           gap: 16, marginBottom: 28,
         }}>
-          <StatCard label="Equipos registrados" value={equipos.length} color="#F4A020" icon={
+          <StatCard label="Equipos registrados" value={equipos.length} color="#818cf8" icon={
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <circle cx="12" cy="12" r="3" />
               <path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83" />
@@ -196,22 +183,16 @@ export default function DashboardAdmin() {
           } />
         </div>
 
-        {/* Content row */}
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 340px', gap: 20, alignItems: 'flex-start' }}>
           {/* Áreas */}
-          <div style={{
-            background: '#111418', borderRadius: 12,
-            border: '1px solid #1E2535', overflow: 'hidden',
-          }}>
+          <div style={{ background: '#13112a', borderRadius: 12, border: '1px solid #2a2850', overflow: 'hidden' }}>
             <div style={{
-              padding: '16px 24px', borderBottom: '1px solid #1E2535',
+              padding: '16px 24px', borderBottom: '1px solid #2a2850',
               display: 'flex', alignItems: 'center', justifyContent: 'space-between',
             }}>
-              <h2 style={{ color: '#E8EDF5', fontSize: 15, fontWeight: 600, margin: 0 }}>
-                Equipos por área
-              </h2>
+              <h2 style={{ color: '#e8eeff', fontSize: 15, fontWeight: 600, margin: 0 }}>Equipos por área</h2>
               <button onClick={() => navigate('/admin/equipos')} style={{
-                background: 'none', border: 'none', color: '#F4A020', cursor: 'pointer', fontSize: 13,
+                background: 'none', border: 'none', color: '#818cf8', cursor: 'pointer', fontSize: 13,
                 fontFamily: "'DM Sans', sans-serif",
               }}>
                 Gestionar →
@@ -225,7 +206,7 @@ export default function DashboardAdmin() {
                   count={count}
                   puntos={puntos}
                   color={PALETTE[idx % PALETTE.length]}
-                  onClick={() => navigate(`/admin/equipos`)}
+                  onClick={() => navigate('/admin/equipos')}
                 />
               ))}
             </div>
@@ -234,12 +215,8 @@ export default function DashboardAdmin() {
           {/* Right column */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
             {/* Quick actions */}
-            <div style={{
-              background: '#111418', borderRadius: 12,
-              border: '1px solid #1E2535',
-              padding: '16px 20px',
-            }}>
-              <h3 style={{ color: '#7A8BA8', fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 14, margin: '0 0 14px' }}>
+            <div style={{ background: '#13112a', borderRadius: 12, border: '1px solid #2a2850', padding: '16px 20px' }}>
+              <h3 style={{ color: '#8892b0', fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: 0.5, margin: '0 0 14px' }}>
                 Acciones rápidas
               </h3>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
@@ -247,52 +224,37 @@ export default function DashboardAdmin() {
                   onClick={() => navigate('/admin/equipos/nuevo')}
                   style={{
                     padding: '11px 16px', borderRadius: 8, border: 'none',
-                    background: '#F4A020', color: '#0A0C0F',
+                    background: '#6366f1', color: '#fff',
                     fontSize: 13, fontWeight: 700, cursor: 'pointer',
                     fontFamily: "'DM Sans', sans-serif", textAlign: 'left',
                   }}
                 >
                   + Agregar equipo
                 </button>
-                <button
-                  onClick={() => navigate('/admin/equipos')}
-                  style={{
-                    padding: '11px 16px', borderRadius: 8,
-                    border: '1px solid #2A3346', background: 'transparent',
-                    color: '#E8EDF5', fontSize: 13, cursor: 'pointer',
-                    fontFamily: "'DM Sans', sans-serif", textAlign: 'left',
-                  }}
-                >
-                  Ver todos los equipos →
-                </button>
-                <button
-                  onClick={() => navigate('/admin/tecnicos')}
-                  style={{
-                    padding: '11px 16px', borderRadius: 8,
-                    border: '1px solid #2A3346', background: 'transparent',
-                    color: '#E8EDF5', fontSize: 13, cursor: 'pointer',
-                    fontFamily: "'DM Sans', sans-serif", textAlign: 'left',
-                  }}
-                >
-                  Gestionar técnicos →
-                </button>
-                <button
-                  onClick={() => navigate('/admin/lubricantes')}
-                  style={{
-                    padding: '11px 16px', borderRadius: 8,
-                    border: '1px solid #2A3346', background: 'transparent',
-                    color: '#E8EDF5', fontSize: 13, cursor: 'pointer',
-                    fontFamily: "'DM Sans', sans-serif", textAlign: 'left',
-                  }}
-                >
-                  Biblioteca de lubricantes →
-                </button>
+                {[
+                  { label: 'Ver todos los equipos →', path: '/admin/equipos' },
+                  { label: 'Gestionar técnicos →', path: '/admin/tecnicos' },
+                  { label: 'Biblioteca de lubricantes →', path: '/admin/lubricantes' },
+                ].map(({ label, path }) => (
+                  <button
+                    key={path}
+                    onClick={() => navigate(path)}
+                    style={{
+                      padding: '11px 16px', borderRadius: 8,
+                      border: '1px solid #2a2850', background: 'transparent',
+                      color: '#e8eeff', fontSize: 13, cursor: 'pointer',
+                      fontFamily: "'DM Sans', sans-serif", textAlign: 'left',
+                    }}
+                  >
+                    {label}
+                  </button>
+                ))}
                 <button
                   onClick={() => setShowCreds(true)}
                   style={{
                     padding: '11px 16px', borderRadius: 8,
-                    border: '1px solid #2A3346', background: 'transparent',
-                    color: '#7A8BA8', fontSize: 13, cursor: 'pointer',
+                    border: '1px solid #2a2850', background: 'transparent',
+                    color: '#8892b0', fontSize: 13, cursor: 'pointer',
                     fontFamily: "'DM Sans', sans-serif", textAlign: 'left',
                   }}
                 >
@@ -302,14 +264,9 @@ export default function DashboardAdmin() {
             </div>
 
             {/* Recent equipment */}
-            <div style={{
-              background: '#111418', borderRadius: 12,
-              border: '1px solid #1E2535', overflow: 'hidden',
-            }}>
-              <div style={{ padding: '14px 20px', borderBottom: '1px solid #1E2535' }}>
-                <h3 style={{ color: '#E8EDF5', fontSize: 14, fontWeight: 600, margin: 0 }}>
-                  Últimos equipos
-                </h3>
+            <div style={{ background: '#13112a', borderRadius: 12, border: '1px solid #2a2850', overflow: 'hidden' }}>
+              <div style={{ padding: '14px 20px', borderBottom: '1px solid #2a2850' }}>
+                <h3 style={{ color: '#e8eeff', fontSize: 14, fontWeight: 600, margin: 0 }}>Últimos equipos</h3>
               </div>
               {equipos.slice(-5).reverse().map((e, i, arr) => (
                 <button
@@ -318,7 +275,7 @@ export default function DashboardAdmin() {
                   style={{
                     display: 'flex', alignItems: 'center', gap: 10,
                     width: '100%', padding: '11px 20px',
-                    borderBottom: i < arr.length - 1 ? '1px solid #1E2535' : 'none',
+                    borderBottom: i < arr.length - 1 ? '1px solid #2a2850' : 'none',
                     background: 'transparent', border: 'none',
                     cursor: 'pointer', textAlign: 'left',
                     transition: 'background 0.1s',
@@ -329,15 +286,15 @@ export default function DashboardAdmin() {
                   {e.codigo && (
                     <span style={{
                       fontFamily: 'monospace', fontSize: 11, fontWeight: 700,
-                      color: '#F4A020', letterSpacing: 1,
-                      background: 'rgba(244,160,32,0.1)', borderRadius: 4,
+                      color: '#818cf8', letterSpacing: 1,
+                      background: 'rgba(129,140,248,0.1)', borderRadius: 4,
                       padding: '2px 6px', flexShrink: 0,
                     }}>
                       {e.codigo}
                     </span>
                   )}
                   <span style={{
-                    color: '#E8EDF5', fontSize: 13,
+                    color: '#e8eeff', fontSize: 13,
                     overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
                     fontFamily: "'DM Sans', sans-serif",
                   }}>

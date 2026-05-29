@@ -23,8 +23,8 @@ function TecnicoModal({ tecnico, onSave, onClose }) {
 
   const commonInput = {
     width: '100%', padding: '10px 12px',
-    background: '#0A0C0F', border: '1px solid #2A3346',
-    borderRadius: 7, color: '#E8EDF5', fontSize: 14,
+    background: '#0c0a1e', border: '1px solid #2a2850',
+    borderRadius: 7, color: '#e8eeff', fontSize: 14,
     outline: 'none', boxSizing: 'border-box',
     fontFamily: "'DM Sans', sans-serif",
   }
@@ -36,15 +36,15 @@ function TecnicoModal({ tecnico, onSave, onClose }) {
       display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24,
     }}>
       <div style={{
-        background: '#1A1F2B', borderRadius: 12, padding: 28,
-        maxWidth: 380, width: '100%', border: '1px solid #2A3346',
+        background: '#1c1a3a', borderRadius: 12, padding: 28,
+        maxWidth: 380, width: '100%', border: '1px solid #2a2850',
       }}>
-        <h3 style={{ color: '#E8EDF5', fontSize: 17, fontWeight: 600, margin: '0 0 20px' }}>
+        <h3 style={{ color: '#e8eeff', fontSize: 17, fontWeight: 600, margin: '0 0 20px' }}>
           {isEditing ? 'Editar técnico' : 'Nuevo técnico'}
         </h3>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
           <div>
-            <label style={{ display: 'block', color: '#7A8BA8', fontSize: 12, marginBottom: 6, textTransform: 'uppercase', letterSpacing: 0.5 }}>
+            <label style={{ display: 'block', color: '#8892b0', fontSize: 12, marginBottom: 6, textTransform: 'uppercase', letterSpacing: 0.5 }}>
               Nombre
             </label>
             <input
@@ -56,7 +56,7 @@ function TecnicoModal({ tecnico, onSave, onClose }) {
             />
           </div>
           <div>
-            <label style={{ display: 'block', color: '#7A8BA8', fontSize: 12, marginBottom: 6, textTransform: 'uppercase', letterSpacing: 0.5 }}>
+            <label style={{ display: 'block', color: '#8892b0', fontSize: 12, marginBottom: 6, textTransform: 'uppercase', letterSpacing: 0.5 }}>
               PIN (4 dígitos)
             </label>
             <div style={{ display: 'flex', gap: 8 }}>
@@ -71,8 +71,8 @@ function TecnicoModal({ tecnico, onSave, onClose }) {
               <button
                 onClick={() => setForm(p => ({ ...p, pin: generarPIN() }))}
                 style={{
-                  padding: '10px 14px', borderRadius: 7, border: '1px solid #2A3346',
-                  background: 'transparent', color: '#7A8BA8', cursor: 'pointer', fontSize: 12,
+                  padding: '10px 14px', borderRadius: 7, border: '1px solid #2a2850',
+                  background: 'transparent', color: '#8892b0', cursor: 'pointer', fontSize: 12,
                   whiteSpace: 'nowrap', fontFamily: "'DM Sans', sans-serif",
                 }}
               >
@@ -85,14 +85,14 @@ function TecnicoModal({ tecnico, onSave, onClose }) {
 
           <div style={{ display: 'flex', gap: 10, marginTop: 4 }}>
             <button onClick={onClose} style={{
-              flex: 1, padding: '11px', border: '1px solid #2A3346', borderRadius: 8,
-              background: 'transparent', color: '#7A8BA8', cursor: 'pointer', fontSize: 14,
+              flex: 1, padding: '11px', border: '1px solid #2a2850', borderRadius: 8,
+              background: 'transparent', color: '#8892b0', cursor: 'pointer', fontSize: 14,
               fontFamily: "'DM Sans', sans-serif",
             }}>
               Cancelar
             </button>
             <button onClick={handleSave} style={{
-              flex: 2, padding: '11px', background: '#F4A020', color: '#0A0C0F',
+              flex: 2, padding: '11px', background: '#6366f1', color: '#fff',
               border: 'none', borderRadius: 8, fontSize: 14, fontWeight: 700, cursor: 'pointer',
               fontFamily: "'DM Sans', sans-serif",
             }}>
@@ -107,7 +107,7 @@ function TecnicoModal({ tecnico, onSave, onClose }) {
 
 export default function GestionTecnicos() {
   const { tecnicos, crearTecnico, editarTecnico, eliminarTecnico, toggleTecnico } = useAdmin()
-  const [modal, setModal] = useState(null) // null | 'nuevo' | tecnico-obj
+  const [modal, setModal] = useState(null)
   const [confirmId, setConfirmId] = useState(null)
 
   const tecnicoAEditar = modal && modal !== 'nuevo' ? modal : null
@@ -144,7 +144,7 @@ export default function GestionTecnicos() {
             onClick={() => setModal('nuevo')}
             style={{
               padding: '10px 20px', borderRadius: 8, border: 'none',
-              background: '#F4A020', color: '#0A0C0F',
+              background: '#6366f1', color: '#fff',
               fontSize: 14, fontWeight: 700, cursor: 'pointer',
               fontFamily: "'DM Sans', sans-serif",
             }}
@@ -154,16 +154,16 @@ export default function GestionTecnicos() {
         </div>
 
         <div style={{
-          background: '#111418', borderRadius: 12,
-          border: '1px solid #1E2535', overflow: 'hidden',
+          background: '#13112a', borderRadius: 12,
+          border: '1px solid #2a2850', overflow: 'hidden',
         }}>
           <table style={{ width: '100%', borderCollapse: 'collapse' }}>
             <thead>
-              <tr style={{ borderBottom: '1px solid #1E2535' }}>
+              <tr style={{ borderBottom: '1px solid #2a2850' }}>
                 {['Nombre', 'PIN', 'Última consulta', 'Estado', 'Acciones'].map(h => (
                   <th key={h} style={{
                     padding: '12px 20px', textAlign: 'left',
-                    color: '#4A5568', fontSize: 11, fontWeight: 600,
+                    color: '#4a5070', fontSize: 11, fontWeight: 600,
                     textTransform: 'uppercase', letterSpacing: 0.5,
                   }}>{h}</th>
                 ))}
@@ -172,18 +172,18 @@ export default function GestionTecnicos() {
             <tbody>
               {tecnicos.map((t, i) => (
                 <tr key={t.id} style={{
-                  borderBottom: i < tecnicos.length - 1 ? '1px solid #1E2535' : 'none',
+                  borderBottom: i < tecnicos.length - 1 ? '1px solid #2a2850' : 'none',
                   background: i % 2 === 0 ? 'transparent' : 'rgba(255,255,255,0.015)',
                 }}>
-                  <td style={{ padding: '13px 20px', color: '#E8EDF5', fontSize: 14, fontWeight: 500 }}>
+                  <td style={{ padding: '13px 20px', color: '#e8eeff', fontSize: 14, fontWeight: 500 }}>
                     {t.nombre}
                   </td>
                   <td style={{ padding: '13px 20px' }}>
-                    <span style={{ fontFamily: 'monospace', fontSize: 18, letterSpacing: 4, color: '#F4A020' }}>
+                    <span style={{ fontFamily: 'monospace', fontSize: 18, letterSpacing: 4, color: '#818cf8' }}>
                       {t.pin}
                     </span>
                   </td>
-                  <td style={{ padding: '13px 20px', color: '#7A8BA8', fontSize: 13 }}>
+                  <td style={{ padding: '13px 20px', color: '#8892b0', fontSize: 13 }}>
                     {t.ultimaConsulta || '—'}
                   </td>
                   <td style={{ padding: '13px 20px' }}>
@@ -203,7 +203,7 @@ export default function GestionTecnicos() {
                   </td>
                   <td style={{ padding: '13px 20px' }}>
                     <div style={{ display: 'flex', gap: 8 }}>
-                      <ActionBtn color="#F4A020" onClick={() => setModal(t)}>Editar</ActionBtn>
+                      <ActionBtn color="#818cf8" onClick={() => setModal(t)}>Editar</ActionBtn>
                       <ActionBtn color="#EF4444" onClick={() => setConfirmId(t.id)}>Eliminar</ActionBtn>
                     </div>
                   </td>
@@ -213,7 +213,7 @@ export default function GestionTecnicos() {
           </table>
         </div>
 
-        <p style={{ color: '#4A5568', fontSize: 12, marginTop: 12 }}>
+        <p style={{ color: '#4a5070', fontSize: 12, marginTop: 12 }}>
           El estado del técnico controla si su PIN puede acceder a la aplicación.
         </p>
       </div>

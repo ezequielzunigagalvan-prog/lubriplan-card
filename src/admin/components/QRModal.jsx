@@ -49,19 +49,17 @@ export default function QRModal({ equipoId, equipoNombre, onClose }) {
       padding: 24,
     }}>
       <div style={{
-        background: '#1A1F2B', borderRadius: 12, padding: '32px 28px',
-        maxWidth: 380, width: '100%', border: '1px solid #2A3346',
+        background: '#1c1a3a', borderRadius: 12, padding: '32px 28px',
+        maxWidth: 380, width: '100%', border: '1px solid #2a2850',
         textAlign: 'center',
       }}>
-        <h3 style={{ color: '#E8EDF5', fontSize: 16, fontWeight: 600, margin: '0 0 4px' }}>Código QR</h3>
-        <p style={{ color: '#7A8BA8', fontSize: 13, margin: '0 0 20px' }}>{equipoNombre}</p>
+        <h3 style={{ color: '#e8eeff', fontSize: 16, fontWeight: 600, margin: '0 0 4px' }}>Código QR</h3>
+        <p style={{ color: '#8892b0', fontSize: 13, margin: '0 0 20px' }}>{equipoNombre}</p>
 
-        {/* Canvas oculto para descarga/impresión en alta resolución */}
         <div ref={canvasRef} style={{ display: 'none' }}>
           <QRCodeCanvas value={url} size={400} />
         </div>
 
-        {/* SVG visible */}
         <div style={{
           background: '#fff', borderRadius: 8, padding: 16,
           display: 'inline-block', marginBottom: 12,
@@ -69,9 +67,8 @@ export default function QRModal({ equipoId, equipoNombre, onClose }) {
           <QRCodeSVG value={url} size={200} />
         </div>
 
-        <p style={{ color: '#4A5568', fontSize: 11, margin: '0 0 12px', wordBreak: 'break-all' }}>{url}</p>
+        <p style={{ color: '#4a5070', fontSize: 11, margin: '0 0 12px', wordBreak: 'break-all' }}>{url}</p>
 
-        {/* Aviso cuando corre en localhost */}
         {isLocalhost && (
           <div style={{
             background: 'rgba(234,179,8,0.08)', border: '1px solid rgba(234,179,8,0.25)',
@@ -80,18 +77,17 @@ export default function QRModal({ equipoId, equipoNombre, onClose }) {
             <p style={{ color: '#EAB308', fontSize: 12, margin: 0, fontWeight: 600, marginBottom: 4 }}>
               Solo funciona en este dispositivo
             </p>
-            <p style={{ color: '#7A8BA8', fontSize: 11, margin: 0, lineHeight: 1.5 }}>
+            <p style={{ color: '#8892b0', fontSize: 11, margin: 0, lineHeight: 1.5 }}>
               El QR apunta a <strong>localhost</strong>. Para usarlo en otro dispositivo, desplegá la app en un servidor con dominio real.
             </p>
           </div>
         )}
 
-        {/* Botones descarga / impresión */}
         <div style={{ display: 'flex', gap: 8, marginBottom: 10 }}>
           <button onClick={handleDownload} style={{
             flex: 1, padding: '10px', borderRadius: 8,
-            border: '1px solid #2A3346', background: 'transparent',
-            color: '#E8EDF5', cursor: 'pointer', fontSize: 13,
+            border: '1px solid #2a2850', background: 'transparent',
+            color: '#e8eeff', cursor: 'pointer', fontSize: 13,
             fontFamily: "'DM Sans', sans-serif",
             display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
           }}>
@@ -104,8 +100,8 @@ export default function QRModal({ equipoId, equipoNombre, onClose }) {
           </button>
           <button onClick={handlePrint} style={{
             flex: 1, padding: '10px', borderRadius: 8,
-            border: '1px solid #2A3346', background: 'transparent',
-            color: '#E8EDF5', cursor: 'pointer', fontSize: 13,
+            border: '1px solid #2a2850', background: 'transparent',
+            color: '#e8eeff', cursor: 'pointer', fontSize: 13,
             fontFamily: "'DM Sans', sans-serif",
             display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
           }}>
@@ -120,7 +116,7 @@ export default function QRModal({ equipoId, equipoNombre, onClose }) {
 
         <button onClick={onClose} style={{
           padding: '11px 24px', borderRadius: 8, border: 'none',
-          background: '#F4A020', color: '#0A0C0F', cursor: 'pointer',
+          background: '#6366f1', color: '#fff', cursor: 'pointer',
           fontSize: 14, fontWeight: 700, width: '100%',
           fontFamily: "'DM Sans', sans-serif",
         }}>

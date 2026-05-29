@@ -7,15 +7,15 @@ const TIPOS = ['Aceite industrial', 'Aceite hidráulico', 'Aceite engranajes', '
 
 const inputStyle = (hasError = false) => ({
   width: '100%', padding: '10px 13px',
-  background: '#0A0C0F',
-  border: `1px solid ${hasError ? '#EF4444' : '#2A3346'}`,
-  borderRadius: 7, color: '#E8EDF5', fontSize: 13,
+  background: '#0c0a1e',
+  border: `1px solid ${hasError ? '#EF4444' : '#2a2850'}`,
+  borderRadius: 7, color: '#e8eeff', fontSize: 13,
   outline: 'none', boxSizing: 'border-box',
   fontFamily: "'DM Sans', sans-serif",
 })
 
 const labelStyle = {
-  display: 'block', color: '#7A8BA8', fontSize: 11,
+  display: 'block', color: '#8892b0', fontSize: 11,
   letterSpacing: 0.5, marginBottom: 6, textTransform: 'uppercase',
 }
 
@@ -43,11 +43,11 @@ function LubricanteForm({ lubricante, onSave, onCancel }) {
 
   return (
     <div style={{
-      background: '#111418', borderRadius: 12,
-      border: '1px solid #2A3346', padding: '24px 20px',
+      background: '#13112a', borderRadius: 12,
+      border: '1px solid #2a2850', padding: '24px 20px',
       marginBottom: 24,
     }}>
-      <h3 style={{ color: '#E8EDF5', fontSize: 14, fontWeight: 600, margin: '0 0 20px' }}>
+      <h3 style={{ color: '#e8eeff', fontSize: 14, fontWeight: 600, margin: '0 0 20px' }}>
         {isEditing ? 'Editar lubricante' : 'Nuevo lubricante'}
       </h3>
 
@@ -100,8 +100,8 @@ function LubricanteForm({ lubricante, onSave, onCancel }) {
             onClick={onCancel}
             style={{
               flex: 1, padding: '10px',
-              border: '1px solid #2A3346', borderRadius: 8,
-              background: 'transparent', color: '#7A8BA8',
+              border: '1px solid #2a2850', borderRadius: 8,
+              background: 'transparent', color: '#8892b0',
               cursor: 'pointer', fontSize: 13,
               fontFamily: "'DM Sans', sans-serif",
             }}
@@ -112,7 +112,7 @@ function LubricanteForm({ lubricante, onSave, onCancel }) {
             onClick={handleSave}
             style={{
               flex: 2, padding: '10px',
-              background: '#F4A020', color: '#0A0C0F',
+              background: '#6366f1', color: '#fff',
               border: 'none', borderRadius: 8,
               fontSize: 13, fontWeight: 700, cursor: 'pointer',
               fontFamily: "'DM Sans', sans-serif",
@@ -141,15 +141,8 @@ export default function GestionLubricantes() {
   const lubAEliminar = lubricantes.find(l => l.id === confirmId)
   const lubEditing = lubricantes.find(l => l.id === editingId)
 
-  const handleSaveNew = (datos) => {
-    crearLubricante(datos)
-    setShowForm(false)
-  }
-
-  const handleSaveEdit = (datos) => {
-    editarLubricante(editingId, datos)
-    setEditingId(null)
-  }
+  const handleSaveNew = (datos) => { crearLubricante(datos); setShowForm(false) }
+  const handleSaveEdit = (datos) => { editarLubricante(editingId, datos); setEditingId(null) }
 
   return (
     <AdminLayout titulo="Lubricantes">
@@ -163,8 +156,8 @@ export default function GestionLubricantes() {
             onChange={e => setBusqueda(e.target.value)}
             style={{
               flex: 1, minWidth: 180, padding: '10px 14px',
-              background: '#111418', border: '1px solid #2A3346',
-              borderRadius: 8, color: '#E8EDF5', fontSize: 14, outline: 'none',
+              background: '#13112a', border: '1px solid #2a2850',
+              borderRadius: 8, color: '#e8eeff', fontSize: 14, outline: 'none',
               fontFamily: "'DM Sans', sans-serif",
             }}
           />
@@ -173,7 +166,7 @@ export default function GestionLubricantes() {
               onClick={() => setShowForm(true)}
               style={{
                 padding: '10px 20px', borderRadius: 8, border: 'none',
-                background: '#F4A020', color: '#0A0C0F',
+                background: '#6366f1', color: '#fff',
                 fontSize: 14, fontWeight: 700, cursor: 'pointer',
                 fontFamily: "'DM Sans', sans-serif",
                 whiteSpace: 'nowrap',
@@ -184,33 +177,21 @@ export default function GestionLubricantes() {
           )}
         </div>
 
-        {/* Form panel */}
-        {showForm && (
-          <LubricanteForm
-            onSave={handleSaveNew}
-            onCancel={() => setShowForm(false)}
-          />
-        )}
-        {editingId && (
-          <LubricanteForm
-            lubricante={lubEditing}
-            onSave={handleSaveEdit}
-            onCancel={() => setEditingId(null)}
-          />
-        )}
+        {showForm && <LubricanteForm onSave={handleSaveNew} onCancel={() => setShowForm(false)} />}
+        {editingId && <LubricanteForm lubricante={lubEditing} onSave={handleSaveEdit} onCancel={() => setEditingId(null)} />}
 
         {/* Table */}
         <div style={{
-          background: '#111418', borderRadius: 12,
-          border: '1px solid #1E2535', overflow: 'hidden',
+          background: '#13112a', borderRadius: 12,
+          border: '1px solid #2a2850', overflow: 'hidden',
         }}>
           <table style={{ width: '100%', borderCollapse: 'collapse' }}>
             <thead>
-              <tr style={{ borderBottom: '1px solid #1E2535' }}>
+              <tr style={{ borderBottom: '1px solid #2a2850' }}>
                 {['Nombre', 'Tipo', 'Viscosidad', 'Acciones'].map(h => (
                   <th key={h} style={{
                     padding: '12px 20px', textAlign: 'left',
-                    color: '#4A5568', fontSize: 11, fontWeight: 600,
+                    color: '#4a5070', fontSize: 11, fontWeight: 600,
                     textTransform: 'uppercase', letterSpacing: 0.5,
                   }}>{h}</th>
                 ))}
@@ -219,7 +200,7 @@ export default function GestionLubricantes() {
             <tbody>
               {filtrados.length === 0 && (
                 <tr>
-                  <td colSpan={4} style={{ padding: 40, textAlign: 'center', color: '#4A5568', fontSize: 14 }}>
+                  <td colSpan={4} style={{ padding: 40, textAlign: 'center', color: '#4a5070', fontSize: 14 }}>
                     {lubricantes.length === 0
                       ? 'No hay lubricantes registrados. Agregá el primero.'
                       : 'No hay lubricantes que coincidan con la búsqueda'}
@@ -228,27 +209,27 @@ export default function GestionLubricantes() {
               )}
               {filtrados.map((l, i) => (
                 <tr key={l.id} style={{
-                  borderBottom: i < filtrados.length - 1 ? '1px solid #1E2535' : 'none',
+                  borderBottom: i < filtrados.length - 1 ? '1px solid #2a2850' : 'none',
                   background: i % 2 === 0 ? 'transparent' : 'rgba(255,255,255,0.015)',
                 }}>
                   <td style={{ padding: '13px 20px' }}>
-                    <div style={{ color: '#E8EDF5', fontSize: 14, fontWeight: 500 }}>{l.nombre}</div>
+                    <div style={{ color: '#e8eeff', fontSize: 14, fontWeight: 500 }}>{l.nombre}</div>
                     {l.notas && (
-                      <div style={{ color: '#4A5568', fontSize: 11, marginTop: 2 }}>{l.notas}</div>
+                      <div style={{ color: '#4a5070', fontSize: 11, marginTop: 2 }}>{l.notas}</div>
                     )}
                   </td>
-                  <td style={{ padding: '13px 20px', color: '#7A8BA8', fontSize: 13 }}>{l.tipo || '—'}</td>
+                  <td style={{ padding: '13px 20px', color: '#8892b0', fontSize: 13 }}>{l.tipo || '—'}</td>
                   <td style={{ padding: '13px 20px' }}>
                     {l.viscosidad ? (
                       <span style={{
                         padding: '2px 8px', borderRadius: 4,
-                        background: 'rgba(244,160,32,0.1)', border: '1px solid rgba(244,160,32,0.2)',
-                        color: '#F4A020', fontSize: 11, fontFamily: 'monospace',
+                        background: 'rgba(99,102,241,0.1)', border: '1px solid rgba(99,102,241,0.2)',
+                        color: '#818cf8', fontSize: 11, fontFamily: 'monospace',
                       }}>
                         {l.viscosidad}
                       </span>
                     ) : (
-                      <span style={{ color: '#2A3346', fontSize: 13 }}>—</span>
+                      <span style={{ color: '#2a2850', fontSize: 13 }}>—</span>
                     )}
                   </td>
                   <td style={{ padding: '13px 20px' }}>
@@ -257,8 +238,8 @@ export default function GestionLubricantes() {
                         onClick={() => { setEditingId(l.id); setShowForm(false) }}
                         style={{
                           padding: '5px 12px', borderRadius: 6,
-                          border: '1px solid #F4A02044',
-                          background: '#F4A02011', color: '#F4A020',
+                          border: '1px solid rgba(129,140,248,0.3)',
+                          background: 'rgba(129,140,248,0.08)', color: '#818cf8',
                           fontSize: 12, fontWeight: 600, cursor: 'pointer',
                           fontFamily: "'DM Sans', sans-serif",
                         }}
@@ -269,8 +250,8 @@ export default function GestionLubricantes() {
                         onClick={() => setConfirmId(l.id)}
                         style={{
                           padding: '5px 12px', borderRadius: 6,
-                          border: '1px solid #EF444444',
-                          background: '#EF444411', color: '#EF4444',
+                          border: '1px solid rgba(239,68,68,0.3)',
+                          background: 'rgba(239,68,68,0.08)', color: '#EF4444',
                           fontSize: 12, fontWeight: 600, cursor: 'pointer',
                           fontFamily: "'DM Sans', sans-serif",
                         }}
@@ -285,7 +266,7 @@ export default function GestionLubricantes() {
           </table>
         </div>
 
-        <div style={{ marginTop: 12, color: '#4A5568', fontSize: 12 }}>
+        <div style={{ marginTop: 12, color: '#4a5070', fontSize: 12 }}>
           {lubricantes.length} lubricante{lubricantes.length !== 1 ? 's' : ''} registrado{lubricantes.length !== 1 ? 's' : ''}
         </div>
       </div>

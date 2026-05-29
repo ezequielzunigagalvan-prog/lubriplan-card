@@ -2,7 +2,6 @@ import { useState } from 'react'
 import { NavLink, useNavigate } from 'react-router-dom'
 import { useAdmin } from '../context/AdminContext'
 
-
 const NAV_ITEMS = [
   {
     to: '/admin/dashboard',
@@ -60,12 +59,11 @@ export default function AdminLayout({ children, titulo }) {
   return (
     <div style={{
       position: 'fixed', inset: 0, zIndex: 50,
-      background: '#0A0C0F',
+      background: '#0c0a1e',
       display: 'flex',
       overflow: 'hidden',
       fontFamily: "'DM Sans', sans-serif",
     }}>
-      {/* Mobile overlay */}
       {sidebarOpen && (
         <div
           onClick={() => setSidebarOpen(false)}
@@ -81,22 +79,22 @@ export default function AdminLayout({ children, titulo }) {
         className={`admin-sidebar${sidebarOpen ? ' open' : ''}`}
         style={{
           width: 240,
-          background: '#111418',
+          background: '#13112a',
           display: 'flex',
           flexDirection: 'column',
-          borderRight: '1px solid #1E2535',
+          borderRight: '1px solid #2a2850',
           flexShrink: 0,
           zIndex: 60,
         }}
       >
         <div style={{
           height: 64, display: 'flex', alignItems: 'center', gap: 12,
-          padding: '0 20px', borderBottom: '1px solid #1E2535', flexShrink: 0,
+          padding: '0 20px', borderBottom: '1px solid #2a2850', flexShrink: 0,
         }}>
           <img src="/logo.jpeg" alt="LubriPlan" style={{ width: 36, height: 36, borderRadius: '50%', objectFit: 'cover', flexShrink: 0 }} />
           <div>
-            <div style={{ color: '#F4A020', fontFamily: "'Bebas Neue', sans-serif", fontSize: 18, letterSpacing: 2, lineHeight: 1 }}>LUBRIPLAN</div>
-            <div style={{ color: '#4A5568', fontSize: 10, letterSpacing: 1, textTransform: 'uppercase', marginTop: 2 }}>Admin</div>
+            <div style={{ color: '#818cf8', fontFamily: "'Bebas Neue', sans-serif", fontSize: 18, letterSpacing: 2, lineHeight: 1 }}>LUBRIPLAN</div>
+            <div style={{ color: '#4a5070', fontSize: 10, letterSpacing: 1, textTransform: 'uppercase', marginTop: 2 }}>Admin</div>
           </div>
         </div>
 
@@ -110,8 +108,8 @@ export default function AdminLayout({ children, titulo }) {
                 display: 'flex', alignItems: 'center', gap: 12,
                 padding: '10px 14px', borderRadius: 8,
                 textDecoration: 'none', fontSize: 14, fontWeight: 500,
-                background: isActive ? 'rgba(244,160,32,0.12)' : 'transparent',
-                color: isActive ? '#F4A020' : '#7A8BA8',
+                background: isActive ? 'rgba(99,102,241,0.15)' : 'transparent',
+                color: isActive ? '#818cf8' : '#8892b0',
                 transition: 'background 0.15s, color 0.15s',
               })}
             >
@@ -121,12 +119,12 @@ export default function AdminLayout({ children, titulo }) {
           ))}
         </nav>
 
-        <div style={{ padding: '16px 12px', borderTop: '1px solid #1E2535' }}>
+        <div style={{ padding: '16px 12px', borderTop: '1px solid #2a2850' }}>
           <button onClick={handleLogout} style={{
             display: 'flex', alignItems: 'center', gap: 12,
             padding: '10px 14px', width: '100%',
             borderRadius: 8, border: 'none',
-            background: 'transparent', color: '#4A5568',
+            background: 'transparent', color: '#4a5070',
             cursor: 'pointer', fontSize: 14, fontWeight: 500,
           }}>
             <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -144,14 +142,14 @@ export default function AdminLayout({ children, titulo }) {
         <header style={{
           height: 64, flexShrink: 0,
           display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-          padding: '0 24px', borderBottom: '1px solid #1E2535',
+          padding: '0 24px', borderBottom: '1px solid #2a2850',
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
             <button
               className="admin-menu-btn"
               onClick={() => setSidebarOpen(!sidebarOpen)}
               style={{
-                background: 'none', border: 'none', color: '#7A8BA8',
+                background: 'none', border: 'none', color: '#8892b0',
                 cursor: 'pointer', padding: 4, display: 'flex',
               }}
             >
@@ -159,15 +157,15 @@ export default function AdminLayout({ children, titulo }) {
                 <line x1="3" y1="6" x2="21" y2="6" /><line x1="3" y1="12" x2="21" y2="12" /><line x1="3" y1="18" x2="21" y2="18" />
               </svg>
             </button>
-            <h1 style={{ color: '#E8EDF5', fontSize: 17, fontWeight: 600, margin: 0 }}>
+            <h1 style={{ color: '#e8eeff', fontSize: 17, fontWeight: 600, margin: 0 }}>
               {titulo || 'Panel de Administración'}
             </h1>
           </div>
           <button onClick={handleLogout} style={{
             display: 'flex', alignItems: 'center', gap: 8,
             padding: '7px 14px', borderRadius: 8,
-            border: '1px solid #2A3346', background: 'transparent',
-            color: '#7A8BA8', cursor: 'pointer', fontSize: 13,
+            border: '1px solid #2a2850', background: 'transparent',
+            color: '#8892b0', cursor: 'pointer', fontSize: 13,
           }}>
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />

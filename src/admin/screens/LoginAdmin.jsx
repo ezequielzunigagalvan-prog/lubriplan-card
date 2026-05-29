@@ -5,10 +5,10 @@ import { useAdmin } from '../context/AdminContext'
 function LogoMark() {
   return (
     <svg viewBox="0 0 64 64" fill="none" style={{ width: 64, height: 64 }}>
-      <rect width="64" height="64" rx="12" fill="#F4A020" />
-      <path d="M16 48V20h10c4 0 7 1 9 3s3 5 3 9c0 4-1 7-3 9s-5 3-9 3H16z" fill="#0A0C0F" />
-      <path d="M22 42V26h4c2 0 3 .5 4 1.5S31 30 31 32c0 3-.5 5-1.5 6.5S27 40 25 40h-1v2h-2z" fill="#F4A020" />
-      <rect x="38" y="20" width="6" height="28" fill="#0A0C0F" />
+      <rect width="64" height="64" rx="12" fill="#6366f1" />
+      <path d="M16 48V20h10c4 0 7 1 9 3s3 5 3 9c0 4-1 7-3 9s-5 3-9 3H16z" fill="#0c0a1e" />
+      <path d="M22 42V26h4c2 0 3 .5 4 1.5S31 30 31 32c0 3-.5 5-1.5 6.5S27 40 25 40h-1v2h-2z" fill="#818cf8" />
+      <rect x="38" y="20" width="6" height="28" fill="#0c0a1e" />
     </svg>
   )
 }
@@ -43,7 +43,7 @@ export default function LoginAdmin() {
   return (
     <div style={{
       position: 'fixed', inset: 0, zIndex: 50,
-      background: '#0A0C0F',
+      background: '#0c0a1e',
       display: 'flex', alignItems: 'center', justifyContent: 'center',
       fontFamily: "'DM Sans', sans-serif",
       padding: 24,
@@ -53,20 +53,20 @@ export default function LoginAdmin() {
           <LogoMark />
           <div style={{
             fontFamily: "'Bebas Neue', sans-serif",
-            fontSize: 28, letterSpacing: 4, color: '#F4A020', lineHeight: 1, marginTop: 16,
+            fontSize: 28, letterSpacing: 4, color: '#818cf8', lineHeight: 1, marginTop: 16,
           }}>
             LUBRIPLAN
           </div>
-          <div style={{ color: '#4A5568', fontSize: 12, letterSpacing: 2, marginTop: 4, textTransform: 'uppercase' }}>
+          <div style={{ color: '#4a5070', fontSize: 12, letterSpacing: 2, marginTop: 4, textTransform: 'uppercase' }}>
             Panel de Administración
           </div>
         </div>
 
         <div style={{
-          background: '#111418', borderRadius: 16,
-          border: '1px solid #1E2535', padding: '32px 28px',
+          background: '#13112a', borderRadius: 16,
+          border: '1px solid #2a2850', padding: '32px 28px',
         }}>
-          <h2 style={{ color: '#E8EDF5', fontSize: 18, fontWeight: 600, margin: '0 0 24px', textAlign: 'center' }}>
+          <h2 style={{ color: '#e8eeff', fontSize: 18, fontWeight: 600, margin: '0 0 24px', textAlign: 'center' }}>
             Iniciar sesión
           </h2>
           <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
@@ -108,7 +108,7 @@ export default function LoginAdmin() {
               disabled={loading}
               style={{
                 marginTop: 8, padding: '14px',
-                background: loading ? '#8B6014' : '#F4A020', color: '#0A0C0F',
+                background: loading ? '#4338ca' : '#6366f1', color: '#fff',
                 border: 'none', borderRadius: 10,
                 fontSize: 15, fontWeight: 700,
                 cursor: loading ? 'not-allowed' : 'pointer',
@@ -120,7 +120,7 @@ export default function LoginAdmin() {
           </form>
         </div>
 
-        <p style={{ textAlign: 'center', color: '#2A3346', fontSize: 12, marginTop: 24, lineHeight: 1.6 }}>
+        <p style={{ textAlign: 'center', color: '#2a2850', fontSize: 12, marginTop: 24, lineHeight: 1.6 }}>
           ¿Eres técnico? No necesitas iniciar sesión.<br />
           Escanea el QR del equipo directamente con tu celular.
         </p>
@@ -130,14 +130,14 @@ export default function LoginAdmin() {
 }
 
 const labelStyle = {
-  display: 'block', color: '#7A8BA8', fontSize: 12,
+  display: 'block', color: '#8892b0', fontSize: 12,
   letterSpacing: 0.5, marginBottom: 8, textTransform: 'uppercase',
 }
 
 const inputStyle = {
   width: '100%', padding: '12px 14px',
-  background: '#0A0C0F', border: '1px solid #2A3346',
-  borderRadius: 8, color: '#E8EDF5', fontSize: 15,
+  background: '#0c0a1e', border: '1px solid #2a2850',
+  borderRadius: 8, color: '#e8eeff', fontSize: 15,
   outline: 'none', boxSizing: 'border-box',
   fontFamily: "'DM Sans', sans-serif",
 }
