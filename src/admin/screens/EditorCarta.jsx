@@ -248,23 +248,47 @@ export default function EditorCarta() {
   const [dragOver, setDragOver]     = useState(false)
   const [imgError, setImgError]     = useState(null)
   const [imgNaturalSize, setImgNaturalSize] = useState(null)
+  const [editorImgRect, setEditorImgRect] = useState(null)
   const [hoveredId, setHoveredId]   = useState(null)
 
   // Drag-to-move state
   const [draggingId, setDraggingId] = useState(null)
   const dragMovedRef  = useRef(false)
-  const dragStartRef  = useRef(null)  // { x, y } in % coords at drag start
 
   const containerRef = useRef(null)  // outer click-handler div
-  const overlayRef   = useRef(null)  // inner aspect-ratio div (used for getCoords)
   const fileInputRef = useRef(null)
 
   const imgActiva    = imagenes[imgActivaIdx] || null
   const selectedPunto = puntos.find(p => p.id === selectedId)
 
+  // ── Compute editorImgRect: pixel rect of image rendered by objectFit:contain ─
+  const computeRect = useCallback(() => {
+    const container = containerRef.current
+    if (!container || !imgNaturalSize) { setEditorImgRect(null); return }
+    const { width: cW, height: cH } = container.getBoundingClientRect()
+    if (!cW || !cH) return
+    const { w: iW, h: iH } = imgNaturalSize
+    const iA = iW / iH, cA = cW / cH
+    let rW, rH, oX, oY
+    if (iA > cA) { rW = cW; rH = cW / iA; oX = 0; oY = (cH - rH) / 2 }
+    else         { rH = cH; rW = cH * iA; oX = (cW - rW) / 2; oY = 0 }
+    setEditorImgRect({ left: oX, top: oY, width: rW, height: rH })
+  }, [imgNaturalSize])
+
+  // Recompute when imgNaturalSize changes or container resizes
+  useEffect(() => { computeRect() }, [computeRect])
+  useEffect(() => {
+    const el = containerRef.current
+    if (!el || !imgNaturalSize) return
+    const ro = new ResizeObserver(computeRect)
+    ro.observe(el)
+    return () => ro.disconnect()
+  }, [imgNaturalSize, computeRect])
+
   // ── Detect natural size (works for cached base64 images too) ─────────────
   useEffect(() => {
     setImgNaturalSize(null)
+    setEditorImgRect(null)
     if (!imgActiva) return
     let cancelled = false
     let tries = 0
@@ -305,21 +329,19 @@ export default function EditorCarta() {
     )
   }
 
-  // ── getCoords: uses overlayRef so coords are ALWAYS pixel-perfect ─────────
-  // The overlay div covers exactly the rendered image area via CSS aspect-ratio.
-  // Reading its BoundingClientRect eliminates all manual geometry math.
+  // ── getCoords: maps viewport click → percentage within image area ─────────
+  // Uses editorImgRect (pixel rect of rendered image inside container) + the
+  // container's viewport position. Always accurate; no CSS side-effects.
   const getCoords = useCallback((e) => {
-    const overlay = overlayRef.current
-    if (!overlay) return null
-    const rect = overlay.getBoundingClientRect()
-    if (!rect.width || !rect.height) return null
-    const relX = Math.max(0, Math.min(rect.width,  e.clientX - rect.left))
-    const relY = Math.max(0, Math.min(rect.height, e.clientY - rect.top))
+    if (!editorImgRect || !containerRef.current) return null
+    const cRect = containerRef.current.getBoundingClientRect()
+    const relX = Math.max(0, Math.min(editorImgRect.width,  e.clientX - cRect.left - editorImgRect.left))
+    const relY = Math.max(0, Math.min(editorImgRect.height, e.clientY - cRect.top  - editorImgRect.top))
     return {
-      x: Math.round((relX / rect.width)  * 100),
-      y: Math.round((relY / rect.height) * 100),
+      x: Math.round((relX / editorImgRect.width)  * 100),
+      y: Math.round((relY / editorImgRect.height) * 100),
     }
-  }, [])
+  }, [editorImgRect])
 
   // ── Image handlers ────────────────────────────────────────────────────────
   const handleFileLoad = async (file, replaceIdx = null) => {
@@ -357,8 +379,7 @@ export default function EditorCarta() {
 
   // ── Canvas: add point / draw arrow ───────────────────────────────────────
   const handleCanvasClick = useCallback((e) => {
-    // Block if image not ready, or a drag just finished
-    if (!imgActiva || !imgNaturalSize || !overlayRef.current) return
+    if (!imgActiva) return
     if (draggingId || dragMovedRef.current) { dragMovedRef.current = false; return }
 
     const coords = getCoords(e)
@@ -394,7 +415,7 @@ export default function EditorCarta() {
       setDrawStart(null)
       setPreviewEnd(null)
     }
-  }, [herramienta, drawStart, imgActiva, imgActivaIdx, imgNaturalSize, draggingId, getCoords, id, actualizarImagenesEquipo])
+  }, [herramienta, drawStart, imgActiva, imgActivaIdx, draggingId, editorImgRect, getCoords, id, actualizarImagenesEquipo])
 
   const handleCanvasMouseMove = useCallback((e) => {
     // Update arrow preview
@@ -523,7 +544,7 @@ export default function EditorCarta() {
   const cursorCanvas = draggingId
     ? 'grabbing'
     : herramienta === 'punto'
-      ? (imgNaturalSize ? 'crosshair' : 'default')
+      ? (editorImgRect ? 'crosshair' : 'default')
       : drawStart ? 'crosshair' : 'cell'
 
   // ── RENDER ────────────────────────────────────────────────────────────────
@@ -760,23 +781,20 @@ export default function EditorCarta() {
                   draggable={false}
                 />
 
-                {/* ── Overlay: rendered ONLY when image natural size is known ── */}
-                {/* Uses CSS aspect-ratio so it perfectly matches objectFit:contain */}
-                {imgNaturalSize && (
-                  <div style={{
-                    position: 'absolute', inset: 0,
-                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    pointerEvents: 'none',
-                  }}>
-                    <div
-                      ref={overlayRef}
-                      style={{
-                        position: 'relative',
-                        maxWidth: '100%', maxHeight: '100%',
-                        aspectRatio: `${imgNaturalSize.w} / ${imgNaturalSize.h}`,
-                        pointerEvents: 'none',
-                      }}
-                    >
+                {/* ── Overlay: pixel-perfect rect matching objectFit:contain area ── */}
+                {/* editorImgRect is computed via JS (ResizeObserver + rAF), not CSS.  */}
+                {/* CSS aspect-ratio on a flex item collapses to 0×0 without content. */}
+                {editorImgRect && (
+                  <div
+                    style={{
+                      position: 'absolute',
+                      left: editorImgRect.left,
+                      top: editorImgRect.top,
+                      width: editorImgRect.width,
+                      height: editorImgRect.height,
+                      pointerEvents: 'none',
+                    }}
+                  >
                       {/* SVG: arrows + preview */}
                       <svg style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', pointerEvents: 'none', overflow: 'visible' }}>
                         <defs>
@@ -871,7 +889,6 @@ export default function EditorCarta() {
                           </button>
                         )
                       })}
-                    </div>
                   </div>
                 )}
 
