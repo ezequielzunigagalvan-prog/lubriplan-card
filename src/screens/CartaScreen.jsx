@@ -129,13 +129,15 @@ export default function CartaScreen() {
   const navigate = useNavigate()
   const { equipos, editarTecnico } = useAdmin()
 
-  const imgElRef = useRef(null)
-  const swipeStartX = useRef(null)
+  const imgElRef  = useRef(null)
+  const heroRef   = useRef(null)
+  const swipeStartX   = useRef(null)
   const imagenesCountRef = useRef(0)
 
-  const [puntoActivo, setPuntoActivo] = useState(null)
+  const [puntoActivo,  setPuntoActivo]  = useState(null)
   const [imgActivaIdx, setImgActivaIdx] = useState(0)
   const [imgNaturalSize, setImgNaturalSize] = useState(null)
+  const [viewerImgRect,  setViewerImgRect]  = useState(null)
   const [listaAbierta, setListaAbierta] = useState(false)
 
   useEffect(() => {
@@ -149,6 +151,7 @@ export default function CartaScreen() {
   // Get natural dimensions — works for both sync (data URL) and async image decoding
   useEffect(() => {
     setImgNaturalSize(null)
+    setViewerImgRect(null)
     const img = imgElRef.current
     if (!img) return
     if (img.naturalWidth > 0 && img.naturalHeight > 0) {
@@ -176,6 +179,29 @@ export default function CartaScreen() {
       setImgNaturalSize({ w: e.target.naturalWidth, h: e.target.naturalHeight })
     }
   }, [])
+
+  // Compute pixel rect of rendered image (objectFit:contain) inside hero
+  const computeHeroRect = useCallback(() => {
+    const hero = heroRef.current
+    if (!hero || !imgNaturalSize) { setViewerImgRect(null); return }
+    const { width: cW, height: cH } = hero.getBoundingClientRect()
+    if (!cW || !cH) return
+    const { w: iW, h: iH } = imgNaturalSize
+    const iA = iW / iH, cA = cW / cH
+    let rW, rH, oX, oY
+    if (iA > cA) { rW = cW; rH = cW / iA; oX = 0; oY = (cH - rH) / 2 }
+    else         { rH = cH; rW = cH * iA; oX = (cW - rW) / 2; oY = 0 }
+    setViewerImgRect({ left: oX, top: oY, width: rW, height: rH })
+  }, [imgNaturalSize])
+
+  useEffect(() => { computeHeroRect() }, [computeHeroRect])
+  useEffect(() => {
+    const el = heroRef.current
+    if (!el || !imgNaturalSize) return
+    const ro = new ResizeObserver(computeHeroRect)
+    ro.observe(el)
+    return () => ro.disconnect()
+  }, [imgNaturalSize, computeHeroRect])
 
   const handleHeroTouchStart = useCallback((e) => {
     swipeStartX.current = e.touches[0].clientX
@@ -258,6 +284,7 @@ export default function CartaScreen() {
 
       {/* ══ HERO ══ */}
       <div
+        ref={heroRef}
         onTouchStart={handleHeroTouchStart}
         onTouchEnd={handleHeroTouchEnd}
         style={{
@@ -302,56 +329,50 @@ export default function CartaScreen() {
           pointerEvents: 'none', zIndex: 6,
         }} />
 
-        {/* ── CSS aspect-ratio overlay: perfectly matches objectFit:contain image area ── */}
-        {imgActiva && imgNaturalSize && (
+        {/* ── Overlay: pixel-perfect rect matching objectFit:contain area ── */}
+        {/* viewerImgRect computed via JS (ResizeObserver). CSS aspect-ratio  */}
+        {/* alone collapses to 0×0 on flex items without explicit dimensions.  */}
+        {imgActiva && viewerImgRect && (
           <div style={{
             position: 'absolute',
-            inset: 0,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
+            left: viewerImgRect.left,
+            top: viewerImgRect.top,
+            width: viewerImgRect.width,
+            height: viewerImgRect.height,
             zIndex: 8,
             pointerEvents: 'none',
           }}>
-            <div style={{
-              position: 'relative',
-              maxWidth: '100%',
-              maxHeight: '100%',
-              aspectRatio: `${imgNaturalSize.w} / ${imgNaturalSize.h}`,
-              pointerEvents: 'none',
-            }}>
-              {/* SVG arrows */}
-              <svg style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', pointerEvents: 'none', overflow: 'visible' }}>
-                <defs>
-                  <marker id="arrowhead-view" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
-                    <polygon points="0 0, 8 3, 0 6" fill={ORANGE} />
-                  </marker>
-                </defs>
-                {flechas.map(f => (
-                  <line
-                    key={f.id}
-                    x1={`${f.x1}%`} y1={`${f.y1}%`}
-                    x2={`${f.x2}%`} y2={`${f.y2}%`}
-                    stroke={ORANGE}
-                    strokeWidth="2.5"
-                    strokeLinecap="round"
-                    strokeDasharray={f.tipo === 'linea' ? '7 5' : undefined}
-                    markerEnd={f.tipo === 'flecha' ? 'url(#arrowhead-view)' : undefined}
-                    opacity="0.9"
-                  />
-                ))}
-              </svg>
-              {/* Point markers */}
-              {puntosDeLaImagen.map((punto) => (
-                <PuntoMarcador
-                  key={punto.id}
-                  punto={punto}
-                  globalIndex={equipo.puntos.indexOf(punto)}
-                  activo={puntoActivo?.id === punto.id}
-                  onClick={() => setPuntoActivo(puntoActivo?.id === punto.id ? null : punto)}
+            {/* SVG arrows */}
+            <svg style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', pointerEvents: 'none', overflow: 'visible' }}>
+              <defs>
+                <marker id="arrowhead-view" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+                  <polygon points="0 0, 8 3, 0 6" fill={ORANGE} />
+                </marker>
+              </defs>
+              {flechas.map(f => (
+                <line
+                  key={f.id}
+                  x1={`${f.x1}%`} y1={`${f.y1}%`}
+                  x2={`${f.x2}%`} y2={`${f.y2}%`}
+                  stroke={ORANGE}
+                  strokeWidth="2.5"
+                  strokeLinecap="round"
+                  strokeDasharray={f.tipo === 'linea' ? '7 5' : undefined}
+                  markerEnd={f.tipo === 'flecha' ? 'url(#arrowhead-view)' : undefined}
+                  opacity="0.9"
                 />
               ))}
-            </div>
+            </svg>
+            {/* Point markers */}
+            {puntosDeLaImagen.map((punto) => (
+              <PuntoMarcador
+                key={punto.id}
+                punto={punto}
+                globalIndex={equipo.puntos.indexOf(punto)}
+                activo={puntoActivo?.id === punto.id}
+                onClick={() => setPuntoActivo(puntoActivo?.id === punto.id ? null : punto)}
+              />
+            ))}
           </div>
         )}
 
