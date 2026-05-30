@@ -2,7 +2,7 @@ import { useRef } from 'react'
 import { QRCodeSVG, QRCodeCanvas } from 'qrcode.react'
 
 export default function QRModal({ equipoId, equipoNombre, onClose }) {
-  const url = `${window.location.origin}/?equipo=${equipoId}`
+  const url = `${window.location.origin}/pin?equipo=${equipoId}`
   const isLocalhost = ['localhost', '127.0.0.1'].includes(window.location.hostname)
   const canvasRef = useRef(null)
 
