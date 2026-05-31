@@ -16,6 +16,7 @@ export default function PinScreen() {
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
   const equipoParam = searchParams.get('equipo')
+  const eqParam = searchParams.get('eq')
   const { tecnicos } = useAdmin()
 
   const handleKey = useCallback((key) => {
@@ -34,7 +35,7 @@ export default function PinScreen() {
       if (tecnico) {
         sessionStorage.setItem('tecnicoActivoId', tecnico.id)
         if (equipoParam) {
-          navigate(`/carta/${equipoParam}`)
+          navigate(`/carta/${equipoParam}${eqParam ? '?eq=' + eqParam : ''}`)
         } else {
           navigate('/areas')
         }

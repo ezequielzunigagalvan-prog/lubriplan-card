@@ -1,5 +1,5 @@
 import { useState, useMemo, useCallback, useRef, useEffect } from 'react'
-import { useParams, useNavigate } from 'react-router-dom'
+import { useParams, useNavigate, useSearchParams } from 'react-router-dom'
 import { FRECUENCIAS } from '../data/equipos'
 import { useAdmin } from '../admin/context/AdminContext'
 import EquipoSVG from '../components/EquipoSVG'
@@ -124,9 +124,20 @@ function PuntoRow({ punto, globalIndex, onClick }) {
 }
 
 // ---------- Main screen ----------
+function decodeEquipoFromParam(encoded) {
+  try {
+    const b64 = encoded.replace(/-/g, '+').replace(/_/g, '/')
+    const padded = b64 + '==='.slice((b64.length + 3) % 4)
+    return JSON.parse(decodeURIComponent(escape(atob(padded))))
+  } catch {
+    return null
+  }
+}
+
 export default function CartaScreen() {
   const { id } = useParams()
   const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
   const { equipos, editarTecnico } = useAdmin()
 
   const imgElRef  = useRef(null)
@@ -217,7 +228,18 @@ export default function CartaScreen() {
     swipeStartX.current = null
   }, [])
 
-  const equipo = equipos.find(e => e.id === id)
+  let equipo = equipos.find(e => e.id === id)
+
+  // Fallback: decode equipo text data from QR URL param (works cross-device, no images)
+  if (!equipo) {
+    const eqParam = searchParams.get('eq')
+    if (eqParam) {
+      const decoded = decodeEquipoFromParam(eqParam)
+      if (decoded?.id === id) {
+        equipo = { ...decoded, imagenes: [], imagenUrl: null }
+      }
+    }
+  }
 
   if (!equipo) {
     return (

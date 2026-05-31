@@ -2,6 +2,7 @@ import { useState, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import AdminLayout from '../components/AdminLayout'
 import ConfirmModal from '../components/ConfirmModal'
+import QRModal from '../components/QRModal'
 import { useAdmin } from '../context/AdminContext'
 
 const PALETTE = [
@@ -29,7 +30,7 @@ function ActionBtn({ color, children, onClick }) {
   )
 }
 
-function EquipoRow({ equipo, isLast, onEdit, onCarta, onDelete }) {
+function EquipoRow({ equipo, isLast, onEdit, onCarta, onDelete, onQR }) {
   return (
     <div
       style={{
@@ -71,6 +72,7 @@ function EquipoRow({ equipo, isLast, onEdit, onCarta, onDelete }) {
       </span>
 
       <div style={{ gridColumn: '6', display: 'flex', gap: 6, justifyContent: 'flex-end' }}>
+        <ActionBtn color="#06B6D4" onClick={onQR}>QR</ActionBtn>
         <ActionBtn color="#3B82F6" onClick={onCarta}>Carta</ActionBtn>
         <ActionBtn color="#818cf8" onClick={onEdit}>Editar</ActionBtn>
         <ActionBtn color="#EF4444" onClick={onDelete}>Eliminar</ActionBtn>
@@ -79,7 +81,7 @@ function EquipoRow({ equipo, isLast, onEdit, onCarta, onDelete }) {
   )
 }
 
-function AreaSection({ area, equipos, color, defaultOpen, onEdit, onCarta, onDelete }) {
+function AreaSection({ area, equipos, color, defaultOpen, onEdit, onCarta, onDelete, onQR }) {
   const [open, setOpen] = useState(defaultOpen)
 
   return (
@@ -135,6 +137,7 @@ function AreaSection({ area, equipos, color, defaultOpen, onEdit, onCarta, onDel
               onCarta={() => onCarta(equipo.id)}
               onEdit={() => onEdit(equipo.id)}
               onDelete={() => onDelete(equipo.id)}
+              onQR={() => onQR(equipo)}
             />
           ))}
         </>
@@ -148,6 +151,7 @@ export default function ListaEquipos() {
   const navigate = useNavigate()
   const [busqueda, setBusqueda] = useState('')
   const [confirmId, setConfirmId] = useState(null)
+  const [qrEquipo, setQrEquipo] = useState(null)
 
   const equipoAEliminar = equipos.find(e => e.id === confirmId)
 
@@ -247,6 +251,7 @@ export default function ListaEquipos() {
                 onCarta={(id) => navigate(`/admin/equipos/${id}/carta`)}
                 onEdit={(id) => navigate(`/admin/equipos/${id}/editar`)}
                 onDelete={(id) => setConfirmId(id)}
+                onQR={(equipo) => setQrEquipo(equipo)}
               />
             ))}
           </div>
@@ -260,6 +265,10 @@ export default function ListaEquipos() {
           onConfirm={() => { eliminarEquipo(confirmId); setConfirmId(null) }}
           onCancel={() => setConfirmId(null)}
         />
+      )}
+
+      {qrEquipo && (
+        <QRModal equipo={qrEquipo} onClose={() => setQrEquipo(null)} />
       )}
     </AdminLayout>
   )

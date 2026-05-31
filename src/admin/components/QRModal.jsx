@@ -1,16 +1,50 @@
 import { useRef } from 'react'
 import { QRCodeSVG, QRCodeCanvas } from 'qrcode.react'
 
-export default function QRModal({ equipoId, equipoNombre, onClose }) {
-  const url = `${window.location.origin}/pin?equipo=${equipoId}`
-  const isLocalhost = ['localhost', '127.0.0.1'].includes(window.location.hostname)
+// Encodes minimal equipo data (no images) as URL-safe base64
+export function encodeEquipoForQR(equipo) {
+  try {
+    const minimal = {
+      id: equipo.id,
+      codigo: equipo.codigo || '',
+      nombre: equipo.nombre,
+      area: equipo.area,
+      imagen: equipo.imagen || 'motor',
+      puntos: (equipo.puntos || []).map(p => ({
+        id: p.id,
+        nombre: p.nombre,
+        frecuencia: p.frecuencia,
+        lubricante: p.lubricante,
+        cantidad: p.cantidad,
+        unidad: p.unidad,
+        metodo: p.metodo,
+        x: p.x,
+        y: p.y,
+        ...(p.notas ? { notas: p.notas } : {}),
+        ...(p.imagenId ? { imagenId: p.imagenId } : {}),
+      })),
+    }
+    return btoa(unescape(encodeURIComponent(JSON.stringify(minimal))))
+      .replace(/\+/g, '-')
+      .replace(/\//g, '_')
+      .replace(/=/g, '')
+  } catch {
+    return ''
+  }
+}
+
+export default function QRModal({ equipo, onClose }) {
+  const eqData = encodeEquipoForQR(equipo)
+  const displayUrl = `${window.location.origin}/pin?equipo=${equipo.id}`
+  const url = eqData ? `${displayUrl}&eq=${eqData}` : displayUrl
+  const isLocalhost = ['localhost', '127.0.0.1', ''].includes(window.location.hostname)
   const canvasRef = useRef(null)
 
   const handleDownload = () => {
     const canvas = canvasRef.current?.querySelector('canvas')
     if (!canvas) return
     const link = document.createElement('a')
-    link.download = `QR-${equipoId}.png`
+    link.download = `QR-${equipo.id}.png`
     link.href = canvas.toDataURL('image/png')
     link.click()
   }
@@ -23,7 +57,7 @@ export default function QRModal({ equipoId, equipoNombre, onClose }) {
     win.document.write(`
       <html>
         <head>
-          <title>QR - ${equipoNombre}</title>
+          <title>QR - ${equipo.nombre}</title>
           <style>
             body { margin: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; font-family: sans-serif; }
             img { width: 260px; height: 260px; }
@@ -32,9 +66,9 @@ export default function QRModal({ equipoId, equipoNombre, onClose }) {
           </style>
         </head>
         <body onload="window.print(); window.close()">
-          <h2>${equipoNombre}</h2>
+          <h2>${equipo.nombre}</h2>
           <img src="${dataUrl}" />
-          <p>${url}</p>
+          <p>${displayUrl}</p>
         </body>
       </html>
     `)
@@ -54,20 +88,20 @@ export default function QRModal({ equipoId, equipoNombre, onClose }) {
         textAlign: 'center',
       }}>
         <h3 style={{ color: '#e8eeff', fontSize: 16, fontWeight: 600, margin: '0 0 4px' }}>Código QR</h3>
-        <p style={{ color: '#8892b0', fontSize: 13, margin: '0 0 20px' }}>{equipoNombre}</p>
+        <p style={{ color: '#8892b0', fontSize: 13, margin: '0 0 20px' }}>{equipo.nombre}</p>
 
         <div ref={canvasRef} style={{ display: 'none' }}>
-          <QRCodeCanvas value={url} size={400} />
+          <QRCodeCanvas value={url} size={400} level="M" />
         </div>
 
         <div style={{
           background: '#fff', borderRadius: 8, padding: 16,
           display: 'inline-block', marginBottom: 12,
         }}>
-          <QRCodeSVG value={url} size={200} />
+          <QRCodeSVG value={url} size={200} level="M" />
         </div>
 
-        <p style={{ color: '#4a5070', fontSize: 11, margin: '0 0 12px', wordBreak: 'break-all' }}>{url}</p>
+        <p style={{ color: '#4a5070', fontSize: 11, margin: '0 0 12px', wordBreak: 'break-all' }}>{displayUrl}</p>
 
         {isLocalhost && (
           <div style={{

@@ -1121,7 +1121,7 @@ export default function EditorCarta() {
       </div>
 
       {showQR && (
-        <QRModal equipoId={id} equipoNombre={equipo.nombre} onClose={() => setShowQR(false)} />
+        <QRModal equipo={equipo} onClose={() => setShowQR(false)} />
       )}
     </AdminLayout>
   )
