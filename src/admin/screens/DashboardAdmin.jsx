@@ -99,16 +99,10 @@ function SyncModal({ equipos, tecnicos, onClose }) {
   const handleGenerar = useCallback(async () => {
     setFase('generando')
     const equiposConImgs = await Promise.all(equipos.map(async (e) => {
-      let imagenes = []
-      try {
-        const raw = localStorage.getItem(`masterlub_imgs_${e.id}`)
-        if (raw) {
-          const imgs = JSON.parse(raw)
-          imagenes = await Promise.all(imgs.map(async (img) => ({
-            ...img, url: await compressImage(img.url),
-          })))
-        }
-      } catch {}
+      // Use images already loaded in state (from IndexedDB) — no localStorage needed
+      const imagenes = await Promise.all((e.imagenes || []).map(async (img) => ({
+        ...img, url: await compressImage(img.url),
+      })))
       return { id: e.id, codigo: e.codigo, nombre: e.nombre, area: e.area,
                imagen: e.imagen, activo: e.activo, puntos: e.puntos, imagenes }
     }))
