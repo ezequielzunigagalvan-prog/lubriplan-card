@@ -214,6 +214,19 @@ export function AdminProvider({ children }) {
     setTecnicos(prev => prev.map(t => t.id === id ? { ...t, activo: !t.activo } : t))
   }, [])
 
+  const importarConfig = useCallback((data) => {
+    if (data.equipos?.length) {
+      setEquipos(data.equipos.map(e => ({
+        ...e,
+        imagenes: e.imagenes || [],
+        imagenUrl: (e.imagenes || [])[0]?.url || null,
+      })))
+    }
+    if (data.tecnicos?.length) {
+      setTecnicos(data.tecnicos)
+    }
+  }, [])
+
   return (
     <AdminContext.Provider value={{
       isLoggedIn, login, logout, cambiarCredenciales,
@@ -221,6 +234,7 @@ export function AdminProvider({ children }) {
       actualizarPuntos, actualizarImagenEquipo, actualizarImagenesEquipo,
       tecnicos, crearTecnico, editarTecnico, eliminarTecnico, toggleTecnico,
       lubricantes, crearLubricante, editarLubricante, eliminarLubricante,
+      importarConfig,
     }}>
       {children}
     </AdminContext.Provider>

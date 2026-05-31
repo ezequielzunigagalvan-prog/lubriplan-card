@@ -1,7 +1,8 @@
-import { useMemo, useState } from 'react'
+import { useMemo, useState, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import AdminLayout from '../components/AdminLayout'
 import { useAdmin } from '../context/AdminContext'
+import { QRCodeSVG } from 'qrcode.react'
 
 function CambiarCredencialesModal({ onClose, onSave }) {
   const [form, setForm] = useState({ email: '', password: '', confirmar: '' })
@@ -63,6 +64,143 @@ const PALETTE = [
   '#818cf8', '#22C55E', '#3B82F6', '#A855F7',
   '#EF4444', '#06B6D4', '#FB923C', '#EC4899',
 ]
+
+function compressImage(dataUrl, maxDim = 900, quality = 0.65) {
+  return new Promise((resolve) => {
+    if (!dataUrl?.startsWith('data:')) { resolve(dataUrl); return }
+    const img = new Image()
+    img.onload = () => {
+      const scale = Math.min(1, maxDim / Math.max(img.width || 1, img.height || 1))
+      const w = Math.round(img.width * scale)
+      const h = Math.round(img.height * scale)
+      const canvas = document.createElement('canvas')
+      canvas.width = w; canvas.height = h
+      canvas.getContext('2d').drawImage(img, 0, 0, w, h)
+      resolve(canvas.toDataURL('image/jpeg', quality))
+    }
+    img.onerror = () => resolve(dataUrl)
+    img.src = dataUrl
+  })
+}
+
+function SyncModal({ equipos, tecnicos, onClose }) {
+  const [fase, setFase] = useState('idle') // idle | generando | listo
+  const [syncUrl, setSyncUrl] = useState('')
+  const [copiado, setCopiado] = useState(false)
+
+  const handleGenerar = useCallback(async () => {
+    setFase('generando')
+    const equiposConImgs = await Promise.all(equipos.map(async (e) => {
+      let imagenes = []
+      try {
+        const raw = localStorage.getItem(`masterlub_imgs_${e.id}`)
+        if (raw) {
+          const imgs = JSON.parse(raw)
+          imagenes = await Promise.all(imgs.map(async (img) => ({
+            ...img,
+            url: await compressImage(img.url),
+          })))
+        }
+      } catch {}
+      return { id: e.id, codigo: e.codigo, nombre: e.nombre, area: e.area,
+               imagen: e.imagen, activo: e.activo, puntos: e.puntos, imagenes }
+    }))
+
+    const tecnicosMin = tecnicos.map(({ id, nombre, pin, activo, ultimaConsulta }) =>
+      ({ id, nombre, pin, activo, ultimaConsulta }))
+
+    const json = JSON.stringify({ version: 1, equipos: equiposConImgs, tecnicos: tecnicosMin })
+    const encoded = btoa(unescape(encodeURIComponent(json)))
+      .replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '')
+    setSyncUrl(`${window.location.origin}/sync#${encoded}`)
+    setFase('listo')
+  }, [equipos, tecnicos])
+
+  const handleCopiar = async () => {
+    try { await navigator.clipboard.writeText(syncUrl) } catch {}
+    setCopiado(true)
+    setTimeout(() => setCopiado(false), 2200)
+  }
+
+  return (
+    <div style={{
+      position: 'fixed', inset: 0, zIndex: 300, background: 'rgba(0,0,0,0.75)',
+      display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24,
+    }}>
+      <div style={{
+        background: '#1c1a3a', borderRadius: 14, padding: '28px 24px',
+        maxWidth: 400, width: '100%', border: '1px solid #2a2850',
+      }}>
+        <h3 style={{ color: '#e8eeff', fontSize: 16, fontWeight: 600, margin: '0 0 6px' }}>
+          Compartir configuración
+        </h3>
+        <p style={{ color: '#8892b0', fontSize: 13, margin: '0 0 20px', lineHeight: 1.5 }}>
+          Genera un enlace que incluye todos los equipos <strong style={{ color: '#e8eeff' }}>con sus imágenes</strong> y los PINs de técnicos.
+          Compártelo por WhatsApp o email — cada dispositivo lo importa una sola vez.
+        </p>
+
+        {fase === 'idle' && (
+          <button onClick={handleGenerar} style={{
+            width: '100%', padding: '12px', borderRadius: 9, border: 'none',
+            background: '#6366f1', color: '#fff', fontSize: 14, fontWeight: 700,
+            cursor: 'pointer', fontFamily: "'DM Sans', sans-serif",
+          }}>
+            Generar enlace de sincronización
+          </button>
+        )}
+
+        {fase === 'generando' && (
+          <div style={{ textAlign: 'center', padding: '16px 0' }}>
+            <div style={{
+              width: 36, height: 36, borderRadius: '50%',
+              border: '3px solid #6366f1', borderTopColor: 'transparent',
+              animation: 'spin 0.9s linear infinite', margin: '0 auto 12px',
+            }} />
+            <style>{`@keyframes spin { to { transform: rotate(360deg) } }`}</style>
+            <p style={{ color: '#8892b0', fontSize: 13, margin: 0 }}>
+              Comprimiendo imágenes…
+            </p>
+          </div>
+        )}
+
+        {fase === 'listo' && (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+            <div style={{
+              background: '#fff', borderRadius: 8, padding: 12,
+              display: 'flex', justifyContent: 'center',
+            }}>
+              <QRCodeSVG value={syncUrl} size={160} level="L" />
+            </div>
+            <p style={{ color: '#4a5070', fontSize: 10, margin: 0, wordBreak: 'break-all', lineHeight: 1.4 }}>
+              {syncUrl.length > 80 ? syncUrl.slice(0, 80) + '…' : syncUrl}
+            </p>
+            <button onClick={handleCopiar} style={{
+              width: '100%', padding: '11px', borderRadius: 9, border: 'none',
+              background: copiado ? '#22C55E' : '#6366f1',
+              color: '#fff', fontSize: 14, fontWeight: 700,
+              cursor: 'pointer', fontFamily: "'DM Sans', sans-serif",
+              transition: 'background 0.2s',
+            }}>
+              {copiado ? '✓ Copiado' : 'Copiar enlace'}
+            </button>
+            <p style={{ color: '#4a5070', fontSize: 11, margin: 0, textAlign: 'center' }}>
+              También podés escanear el QR de arriba con la cámara del teléfono.
+            </p>
+          </div>
+        )}
+
+        <button onClick={onClose} style={{
+          width: '100%', marginTop: 12, padding: '10px', borderRadius: 8,
+          border: '1px solid #2a2850', background: 'transparent',
+          color: '#8892b0', fontSize: 13, cursor: 'pointer',
+          fontFamily: "'DM Sans', sans-serif",
+        }}>
+          Cerrar
+        </button>
+      </div>
+    </div>
+  )
+}
 
 function StatCard({ label, value, color, icon }) {
   return (
@@ -134,6 +272,7 @@ export default function DashboardAdmin() {
   const { equipos, tecnicos, cambiarCredenciales } = useAdmin()
   const navigate = useNavigate()
   const [showCreds, setShowCreds] = useState(false)
+  const [showSync, setShowSync] = useState(false)
 
   const totalPuntos = equipos.reduce((acc, e) => acc + (e.puntos?.length || 0), 0)
   const tecnicosActivos = tecnicos.filter(t => t.activo).length
@@ -250,6 +389,19 @@ export default function DashboardAdmin() {
                   </button>
                 ))}
                 <button
+                  onClick={() => setShowSync(true)}
+                  style={{
+                    padding: '11px 16px', borderRadius: 8,
+                    border: '1px solid rgba(6,182,212,0.3)',
+                    background: 'rgba(6,182,212,0.07)',
+                    color: '#06B6D4', fontSize: 13, cursor: 'pointer',
+                    fontFamily: "'DM Sans', sans-serif", textAlign: 'left',
+                    fontWeight: 600,
+                  }}
+                >
+                  Compartir configuración →
+                </button>
+                <button
                   onClick={() => setShowCreds(true)}
                   style={{
                     padding: '11px 16px', borderRadius: 8,
@@ -310,6 +462,13 @@ export default function DashboardAdmin() {
         <CambiarCredencialesModal
           onClose={() => setShowCreds(false)}
           onSave={(email, password) => cambiarCredenciales(email, password)}
+        />
+      )}
+      {showSync && (
+        <SyncModal
+          equipos={equipos}
+          tecnicos={tecnicos}
+          onClose={() => setShowSync(false)}
         />
       )}
     </AdminLayout>
