@@ -33,8 +33,25 @@ function ChevronRight({ color = '#8892b0' }) {
   )
 }
 
-function AreaCard({ area, count, color, onClick }) {
+function WarningDot() {
+  return (
+    <div
+      title="Hay equipos sin puntos configurados"
+      style={{
+        width: 8,
+        height: 8,
+        borderRadius: '50%',
+        background: '#FB923C',
+        flexShrink: 0,
+        boxShadow: '0 0 4px #FB923Caa',
+      }}
+    />
+  )
+}
+
+function AreaCard({ area, count, puntos, sinConfigurar, color, onClick }) {
   const ref = useRef(null)
+  const hasWarning = sinConfigurar > 0
 
   function handlePointerDown() {
     if (ref.current) {
@@ -70,13 +87,14 @@ function AreaCard({ area, count, color, onClick }) {
         padding: 0,
       }}
     >
-      {/* Colored folder tab strip */}
+      {/* Colored folder tab strip — 6px, rounded top corners */}
       <div
         style={{
-          height: 4,
+          height: 6,
           background: `linear-gradient(90deg, ${color}, ${color}99)`,
           width: '100%',
           flexShrink: 0,
+          borderRadius: '0',
         }}
       />
 
@@ -90,20 +108,27 @@ function AreaCard({ area, count, color, onClick }) {
           flex: 1,
         }}
       >
-        {/* Icon circle */}
-        <div
-          style={{
-            width: 46,
-            height: 46,
-            borderRadius: 12,
-            background: color + '18',
-            border: `1px solid ${color}35`,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-          }}
-        >
-          <BuildingIcon color={color} />
+        {/* Icon circle + warning dot row */}
+        <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between' }}>
+          <div
+            style={{
+              width: 46,
+              height: 46,
+              borderRadius: 12,
+              background: color + '18',
+              border: `1px solid ${color}35`,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}
+          >
+            <BuildingIcon color={color} />
+          </div>
+          {hasWarning && (
+            <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+              <WarningDot />
+            </div>
+          )}
         </div>
 
         {/* Area name */}
@@ -131,36 +156,37 @@ function AreaCard({ area, count, color, onClick }) {
           </div>
         </div>
 
-        {/* Footer row */}
+        {/* Footer row: "X equipos · Y puntos" + chevron */}
         <div
           style={{
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
+            gap: 4,
           }}
         >
-          <div
-            style={{
-              display: 'flex',
-              gap: 4,
-              alignItems: 'center',
-            }}
-          >
-            {Array.from({ length: Math.min(count, 4) }).map((_, i) => (
-              <div
-                key={i}
-                style={{
-                  width: 6,
-                  height: 6,
-                  borderRadius: '50%',
-                  background: color,
-                  opacity: 0.6 + i * 0.1,
-                }}
-              />
-            ))}
-            {count > 4 && (
-              <span style={{ fontSize: 11, color: color, marginLeft: 2 }}>+{count - 4}</span>
-            )}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 4, flexWrap: 'wrap' }}>
+            <span
+              style={{
+                fontSize: 11,
+                color: color,
+                fontFamily: "'DM Sans', sans-serif",
+                fontWeight: 600,
+              }}
+            >
+              {count} equipo{count !== 1 ? 's' : ''}
+            </span>
+            <span style={{ fontSize: 11, color: '#2a2850', fontWeight: 700 }}>·</span>
+            <span
+              style={{
+                fontSize: 11,
+                color: color + 'cc',
+                fontFamily: "'DM Sans', sans-serif",
+                fontWeight: 500,
+              }}
+            >
+              {puntos} punto{puntos !== 1 ? 's' : ''}
+            </span>
           </div>
           <ChevronRight color={color + 'AA'} />
         </div>
@@ -240,9 +266,15 @@ export default function AreasScreen() {
   const areas = useMemo(() => {
     const map = {}
     equiposActivos.forEach(e => {
-      map[e.area] = (map[e.area] || 0) + 1
+      if (!map[e.area]) {
+        map[e.area] = { count: 0, puntos: 0, sinConfigurar: 0 }
+      }
+      map[e.area].count += 1
+      const numPuntos = Array.isArray(e.puntos) ? e.puntos.length : 0
+      map[e.area].puntos += numPuntos
+      if (numPuntos === 0) map[e.area].sinConfigurar += 1
     })
-    return Object.entries(map).map(([nombre, count]) => ({ nombre, count }))
+    return Object.entries(map).map(([nombre, stats]) => ({ nombre, ...stats }))
   }, [equiposActivos])
 
   const areasFiltradas = useMemo(() => {
@@ -261,6 +293,11 @@ export default function AreasScreen() {
   }, [equiposActivos, busquedaRapida])
 
   const modoRapido = busquedaRapida.trim().length > 0
+
+  const totalPuntos = useMemo(
+    () => equiposActivos.reduce((acc, e) => acc + (Array.isArray(e.puntos) ? e.puntos.length : 0), 0),
+    [equiposActivos]
+  )
 
   return (
     <div
@@ -296,7 +333,7 @@ export default function AreasScreen() {
               LUBRIPLAN
             </div>
             <div style={{ fontSize: 12, color: '#8892b0', marginTop: 4 }}>
-              {areas.length} área{areas.length !== 1 ? 's' : ''} · {equiposActivos.length} equipos
+              {areas.length} área{areas.length !== 1 ? 's' : ''} · {equiposActivos.length} equipos · {totalPuntos} puntos
             </div>
           </div>
           <button
@@ -414,7 +451,7 @@ export default function AreasScreen() {
         ) : (
           /* Normal areas grid */
           <div>
-            {/* Area search */}
+            {/* Area filter search */}
             <div style={{ position: 'relative', marginBottom: 16 }}>
               <svg
                 width="15" height="15" viewBox="0 0 15 15" fill="none"
@@ -460,11 +497,13 @@ export default function AreasScreen() {
               </div>
             ) : (
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
-                {areasFiltradas.map(({ nombre, count }, idx) => (
+                {areasFiltradas.map(({ nombre, count, puntos, sinConfigurar }, idx) => (
                   <AreaCard
                     key={nombre}
                     area={nombre}
                     count={count}
+                    puntos={puntos}
+                    sinConfigurar={sinConfigurar}
                     color={PALETTE[idx % PALETTE.length]}
                     onClick={() => navigate(`/equipos?area=${encodeURIComponent(nombre)}`)}
                   />

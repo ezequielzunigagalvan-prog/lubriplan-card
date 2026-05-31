@@ -3,22 +3,26 @@ import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useAdmin } from '../admin/context/AdminContext'
 
 function EquipoCard({ equipo, onClick }) {
+  const numPuntos = Array.isArray(equipo.puntos) ? equipo.puntos.length : 0
+  const tieneImagen = equipo.imagenes?.length > 0 || !!equipo.imagenUrl
+
   return (
     <button
       onClick={onClick}
       style={{
         display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'flex-start',
-        gap: 6,
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 14,
         width: '100%',
         background: '#13112a',
         border: '1px solid #2a2850',
-        borderRadius: 16,
-        padding: '18px 18px 16px',
+        borderRadius: 14,
+        padding: '16px 16px',
         cursor: 'pointer',
         textAlign: 'left',
         transition: 'border-color 0.15s, background 0.15s',
+        boxSizing: 'border-box',
       }}
       onPointerDown={e => {
         e.currentTarget.style.borderColor = '#6366f1'
@@ -33,39 +37,103 @@ function EquipoCard({ equipo, onClick }) {
         e.currentTarget.style.background = '#13112a'
       }}
     >
-      <span style={{
-        fontFamily: "'DM Sans', sans-serif",
-        fontWeight: 600,
-        fontSize: 16,
-        color: '#e8eeff',
-        lineHeight: 1.3,
-      }}>
-        {equipo.nombre}
-      </span>
-
-      <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-        <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
-          <path
-            d="M6.5 1.5C4.3 1.5 2.5 3.3 2.5 5.5C2.5 8.2 6.5 12 6.5 12C6.5 12 10.5 8.2 10.5 5.5C10.5 3.3 8.7 1.5 6.5 1.5Z"
-            stroke="#8892b0"
-            strokeWidth="1.2"
-          />
-          <circle cx="6.5" cy="5.5" r="1.5" stroke="#8892b0" strokeWidth="1.2" />
-        </svg>
-        <span style={{ fontSize: 13, color: '#8892b0', fontWeight: 400 }}>
-          {equipo.codigo}
-        </span>
+      {/* Left: code badge */}
+      <div
+        style={{
+          flexShrink: 0,
+          background: 'rgba(99,102,241,0.12)',
+          border: '1px solid rgba(99,102,241,0.28)',
+          borderRadius: 8,
+          padding: '6px 9px',
+          fontFamily: 'monospace',
+          fontSize: 12,
+          fontWeight: 700,
+          color: '#818cf8',
+          letterSpacing: 1,
+          minWidth: 66,
+          textAlign: 'center',
+          lineHeight: 1.4,
+        }}
+      >
+        {equipo.codigo || '—'}
       </div>
 
-      <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 2 }}>
-        <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-          <circle cx="7" cy="7" r="5.5" stroke="#818cf8" strokeWidth="1.2" />
-          <circle cx="7" cy="7" r="2" fill="#818cf8" />
-        </svg>
-        <span style={{ fontSize: 13, color: '#818cf8', fontWeight: 500 }}>
-          {equipo.puntos.length} punto{equipo.puntos.length !== 1 ? 's' : ''} de lubricación
-        </span>
+      {/* Center: name + meta row */}
+      <div style={{ flex: 1, minWidth: 0 }}>
+        <div
+          style={{
+            fontFamily: "'DM Sans', sans-serif",
+            fontWeight: 700,
+            fontSize: 14,
+            color: '#e8eeff',
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            whiteSpace: 'nowrap',
+            lineHeight: 1.35,
+            marginBottom: 5,
+          }}
+        >
+          {equipo.nombre}
+        </div>
+
+        {/* Meta row: points + image indicator */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
+          {/* Points count */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+            <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
+              <circle cx="6.5" cy="6.5" r="5" stroke="#818cf8" strokeWidth="1.2" />
+              <circle cx="6.5" cy="6.5" r="1.8" fill="#818cf8" />
+            </svg>
+            <span style={{
+              fontSize: 12,
+              color: '#818cf8',
+              fontFamily: "'DM Sans', sans-serif",
+              fontWeight: 500,
+            }}>
+              {numPuntos} punto{numPuntos !== 1 ? 's' : ''}
+            </span>
+          </div>
+
+          {/* Image indicator */}
+          {tieneImagen ? (
+            <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+              <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
+                <rect x="1.5" y="2.5" width="10" height="8" rx="1.5" stroke="#06B6D4" strokeWidth="1.2" />
+                <circle cx="4.5" cy="5.5" r="1" fill="#06B6D4" />
+                <path d="M1.5 9L4 6.5l2.5 2 2-2L11.5 9" stroke="#06B6D4" strokeWidth="1.1" strokeLinejoin="round" />
+              </svg>
+              <span style={{
+                fontSize: 12,
+                color: '#06B6D4',
+                fontFamily: "'DM Sans', sans-serif",
+                fontWeight: 500,
+              }}>
+                Con imagen
+              </span>
+            </div>
+          ) : (
+            <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+              <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
+                <rect x="1.5" y="2.5" width="10" height="8" rx="1.5" stroke="#4a5060" strokeWidth="1.2" />
+                <path d="M1.5 9L4 6.5l2.5 2 2-2L11.5 9" stroke="#4a5060" strokeWidth="1.1" strokeLinejoin="round" />
+              </svg>
+              <span style={{
+                fontSize: 12,
+                color: '#4a5060',
+                fontFamily: "'DM Sans', sans-serif",
+                fontWeight: 400,
+              }}>
+                Sin imagen
+              </span>
+            </div>
+          )}
+        </div>
       </div>
+
+      {/* Right: chevron */}
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" style={{ flexShrink: 0 }}>
+        <path d="M6 4l4 4-4 4" stroke="#8892b0" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+      </svg>
     </button>
   )
 }
@@ -87,6 +155,8 @@ export default function EquiposScreen() {
     })
   }, [equipos, busqueda, areaParam])
 
+  const titulo = areaParam || 'Todos los equipos'
+
   return (
     <div style={{
       display: 'flex',
@@ -105,77 +175,73 @@ export default function EquiposScreen() {
       }}>
         <div style={{
           display: 'flex',
-          alignItems: 'flex-start',
-          justifyContent: 'space-between',
+          alignItems: 'center',
+          gap: 12,
         }}>
-          <div>
-            <div style={{
-              fontFamily: "'Bebas Neue', sans-serif",
-              fontSize: 24,
-              letterSpacing: 3,
-              color: '#818cf8',
-              lineHeight: 1,
-            }}>
-              LUBRIPLAN
-            </div>
-            <div style={{ fontSize: 12, color: '#8892b0', marginTop: 2 }}>
-              {equiposFiltrados.length} equipo{equiposFiltrados.length !== 1 ? 's' : ''} encontrado{equiposFiltrados.length !== 1 ? 's' : ''}
-            </div>
-          </div>
+          {/* Left: back arrow */}
           <button
             onClick={() => navigate('/areas')}
             style={{
+              flexShrink: 0,
+              width: 40,
+              height: 40,
               background: '#13112a',
               border: '1px solid #2a2850',
-              borderRadius: 10,
-              padding: '10px 16px',
+              borderRadius: 12,
               cursor: 'pointer',
               display: 'flex',
               alignItems: 'center',
-              gap: 6,
+              justifyContent: 'center',
               color: '#8892b0',
-              fontSize: 13,
-              fontWeight: 500,
-              fontFamily: "'DM Sans', sans-serif",
             }}
+            onPointerDown={e => { e.currentTarget.style.borderColor = '#6366f1'; e.currentTarget.style.background = '#1c1a3a' }}
+            onPointerUp={e => { e.currentTarget.style.borderColor = '#2a2850'; e.currentTarget.style.background = '#13112a' }}
+            onPointerLeave={e => { e.currentTarget.style.borderColor = '#2a2850'; e.currentTarget.style.background = '#13112a' }}
           >
-            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-              <path d="M2 8H14M2 8L6 4M2 8L6 12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+            <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+              <path d="M11 4L6 9l5 5" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
             </svg>
-            Áreas
           </button>
-        </div>
 
-        {areaParam && (
-          <div style={{ marginTop: 14, display: 'flex', alignItems: 'center', gap: 8 }}>
-            <div style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: 6,
-              background: 'rgba(99,102,241,0.1)',
-              border: '1px solid rgba(99,102,241,0.25)',
-              borderRadius: 20,
-              padding: '5px 12px',
-            }}>
-              <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
-                <rect x="1" y="5" width="10" height="6" rx="1.5" stroke="#818cf8" strokeWidth="1.2" />
-                <path d="M1 6.5l5-3.5 5 3.5" stroke="#818cf8" strokeWidth="1.2" strokeLinejoin="round" />
-              </svg>
-              <span style={{
-                fontSize: 13,
-                fontWeight: 600,
-                color: '#818cf8',
+          {/* Center: area title */}
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <div
+              style={{
                 fontFamily: "'DM Sans', sans-serif",
-              }}>
-                {areaParam}
-              </span>
+                fontWeight: 700,
+                fontSize: 17,
+                color: '#e8eeff',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                whiteSpace: 'nowrap',
+                lineHeight: 1.3,
+              }}
+            >
+              {titulo}
             </div>
           </div>
-        )}
+
+          {/* Right: count badge */}
+          <div
+            style={{
+              flexShrink: 0,
+              background: 'rgba(99,102,241,0.14)',
+              border: '1px solid rgba(99,102,241,0.28)',
+              borderRadius: 20,
+              padding: '4px 11px',
+              fontFamily: "'DM Sans', sans-serif",
+              fontSize: 13,
+              fontWeight: 700,
+              color: '#818cf8',
+            }}
+          >
+            {equiposFiltrados.length}
+          </div>
+        </div>
       </div>
 
       {/* Search */}
-      <div style={{ padding: '16px 20px 16px', background: '#0c0a1e', flexShrink: 0 }}>
+      <div style={{ padding: '14px 20px', background: '#0c0a1e', flexShrink: 0 }}>
         <div style={{ position: 'relative' }}>
           <svg width="17" height="17" viewBox="0 0 17 17" fill="none"
             style={{ position: 'absolute', left: 14, top: '50%', transform: 'translateY(-50%)' }}>
@@ -194,7 +260,7 @@ export default function EquiposScreen() {
               border: '1px solid #2a2850',
               borderRadius: 12,
               paddingLeft: 42,
-              paddingRight: 16,
+              paddingRight: busqueda ? 40 : 16,
               color: '#e8eeff',
               fontSize: 15,
               fontFamily: "'DM Sans', sans-serif",
@@ -202,6 +268,18 @@ export default function EquiposScreen() {
               boxSizing: 'border-box',
             }}
           />
+          {busqueda && (
+            <button
+              onClick={() => setBusqueda('')}
+              style={{
+                position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)',
+                background: 'none', border: 'none', color: '#8892b0',
+                cursor: 'pointer', fontSize: 18, lineHeight: 1, padding: 4,
+              }}
+            >
+              ×
+            </button>
+          )}
         </div>
       </div>
 
@@ -228,8 +306,12 @@ export default function EquiposScreen() {
               <circle cx="24" cy="24" r="20" stroke="#2a2850" strokeWidth="2" />
               <path d="M24 16v10M24 32h.01" stroke="#8892b0" strokeWidth="2" strokeLinecap="round" />
             </svg>
-            <span style={{ fontSize: 15 }}>
-              {busqueda ? `Sin resultados para "${busqueda}"` : 'No hay equipos en esta área'}
+            <span style={{ fontSize: 15, textAlign: 'center', lineHeight: 1.5 }}>
+              {busqueda
+                ? `Sin resultados para "${busqueda}"`
+                : areaParam
+                  ? `No hay equipos en "${areaParam}"`
+                  : 'No hay equipos registrados'}
             </span>
           </div>
         ) : (
