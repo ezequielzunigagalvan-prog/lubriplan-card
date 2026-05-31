@@ -4,7 +4,7 @@ import AdminLayout from '../components/AdminLayout'
 import ConfirmModal from '../components/ConfirmModal'
 import QRModal from '../components/QRModal'
 import { useAdmin } from '../context/AdminContext'
-import { convertToBase64 } from '../../utils/imageUtils'
+import { uploadImagen, deleteImagen } from '../../api/cardApi'
 import { METODOS as METODOS_DATA } from '../../data/equipos'
 
 const LUBRICANTES_DATALIST_ID = 'lubricantes-list'
@@ -348,31 +348,40 @@ export default function EditorCarta() {
     if (!file || !file.type.startsWith('image/')) return
     setImgError(null)
     try {
-      const base64 = await convertToBase64(file)
-      const newImg = { id: `img-${Date.now()}`, url: base64, flechas: [] }
+      // Sube al servidor — devuelve { id, url, flechas: [] }
+      const uploaded = await uploadImagen(id, file)
+
       setImagenes(prev => {
         let next
         if (replaceIdx !== null) {
-          next = prev.map((img, i) => i === replaceIdx ? { ...img, url: base64 } : img)
+          // Si reemplaza, elimina la imagen anterior del servidor
+          if (prev[replaceIdx]?.id) {
+            deleteImagen(id, prev[replaceIdx].id).catch(console.error)
+          }
+          next = prev.map((img, i) => i === replaceIdx ? uploaded : img)
         } else {
-          next = [...prev, newImg]
+          next = [...prev, uploaded]
           setTimeout(() => setImgActivaIdx(next.length - 1), 0)
         }
         actualizarImagenesEquipo(id, next)
         return next
       })
-    } catch {
-      setImgError('La imagen no debe superar 2 MB.')
+    } catch (err) {
+      setImgError(err.message || 'Error subiendo imagen.')
+      console.error('[handleFileLoad]', err)
     }
   }
 
   const handleDeleteImage = useCallback((idx) => {
     setImagenes(prev => {
-      const deletedId = prev[idx]?.id
+      const deleted = prev[idx]
+      if (deleted?.id) {
+        deleteImagen(id, deleted.id).catch(console.error)
+      }
       const next = prev.filter((_, i) => i !== idx)
       actualizarImagenesEquipo(id, next)
       if (imgActivaIdx >= next.length) setImgActivaIdx(Math.max(0, next.length - 1))
-      if (deletedId) setPuntos(pts => pts.map(p => p.imagenId === deletedId ? { ...p, imagenId: null } : p))
+      if (deleted?.id) setPuntos(pts => pts.map(p => p.imagenId === deleted.id ? { ...p, imagenId: null } : p))
       return next
     })
   }, [id, actualizarImagenesEquipo, imgActivaIdx])

@@ -4,7 +4,6 @@ import PinScreen from './screens/PinScreen'
 import AreasScreen from './screens/AreasScreen'
 import EquiposScreen from './screens/EquiposScreen'
 import CartaScreen from './screens/CartaScreen'
-import SyncPage from './screens/SyncPage'
 import { AdminProvider } from './admin/context/AdminContext'
 import ProtectedRoute from './admin/components/ProtectedRoute'
 import LoginAdmin from './admin/screens/LoginAdmin'
@@ -24,7 +23,6 @@ export default function App() {
           <Route path="/" element={<LandingPage />} />
 
           {/* Técnico routes */}
-          <Route path="/sync" element={<SyncPage />} />
           <Route path="/pin" element={<PinScreen />} />
           <Route path="/areas" element={<AreasScreen />} />
           <Route path="/equipos" element={<EquiposScreen />} />

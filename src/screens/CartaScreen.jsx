@@ -1,7 +1,7 @@
 import { useState, useMemo, useCallback, useRef, useEffect } from 'react'
-import { useParams, useNavigate, useSearchParams } from 'react-router-dom'
+import { useParams, useNavigate } from 'react-router-dom'
 import { FRECUENCIAS } from '../data/equipos'
-import { useAdmin } from '../admin/context/AdminContext'
+import { getEquipo } from '../api/cardApi'
 import EquipoSVG from '../components/EquipoSVG'
 import BottomSheet from '../components/BottomSheet'
 
@@ -137,8 +137,9 @@ function decodeEquipoFromParam(encoded) {
 export default function CartaScreen() {
   const { id } = useParams()
   const navigate = useNavigate()
-  const [searchParams] = useSearchParams()
-  const { equipos, editarTecnico } = useAdmin()
+  const [equipo,   setEquipo]   = useState(null)
+  const [fetching, setFetching] = useState(true)
+  const [fetchErr, setFetchErr] = useState(null)
 
   const imgElRef  = useRef(null)
   const heroRef   = useRef(null)
@@ -151,12 +152,15 @@ export default function CartaScreen() {
   const [viewerImgRect,  setViewerImgRect]  = useState(null)
   const [listaAbierta, setListaAbierta] = useState(false)
 
+  // Carga el equipo desde la API pública (funciona en cualquier dispositivo)
   useEffect(() => {
-    const tecId = sessionStorage.getItem('tecnicoActivoId')
-    if (tecId) {
-      editarTecnico(tecId, { ultimaConsulta: new Date().toISOString().split('T')[0] })
-    }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    setFetching(true)
+    setFetchErr(null)
+    setEquipo(null)
+    getEquipo(id)
+      .then(setEquipo)
+      .catch(err => setFetchErr(err.message))
+      .finally(() => setFetching(false))
   }, [id])
 
   // Get natural dimensions — works for both sync (data URL) and async image decoding
@@ -228,20 +232,17 @@ export default function CartaScreen() {
     swipeStartX.current = null
   }, [])
 
-  let equipo = equipos.find(e => e.id === id)
-
-  // Fallback: decode equipo text data from QR URL param (works cross-device, no images)
-  if (!equipo) {
-    const eqParam = searchParams.get('eq')
-    if (eqParam) {
-      const decoded = decodeEquipoFromParam(eqParam)
-      if (decoded?.id === id) {
-        equipo = { ...decoded, imagenes: [], imagenUrl: null }
-      }
-    }
+  // Pantalla de carga
+  if (fetching) {
+    return (
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', background: BG }}>
+        <div style={{ width: 40, height: 40, borderRadius: '50%', border: `3px solid ${ACCENT}`, borderTopColor: 'transparent', animation: 'spin 0.9s linear infinite' }} />
+        <style>{`@keyframes spin { to { transform: rotate(360deg) } }`}</style>
+      </div>
+    )
   }
 
-  if (!equipo) {
+  if (!equipo || fetchErr) {
     return (
       <div style={{
         display: 'flex', flexDirection: 'column',
@@ -252,7 +253,7 @@ export default function CartaScreen() {
           <circle cx="28" cy="28" r="26" stroke={BORDER} strokeWidth="2" />
           <path d="M28 18v14M28 38h.01" stroke={TEXT_SUB} strokeWidth="2.5" strokeLinecap="round" />
         </svg>
-        <p style={{ fontSize: 16, margin: 0 }}>Equipo no encontrado</p>
+        <p style={{ fontSize: 16, margin: 0 }}>{fetchErr || 'Equipo no encontrado'}</p>
         <button onClick={() => navigate(-1)} style={{
           background: ACCENT, color: '#fff', border: 'none',
           borderRadius: 12, padding: '12px 28px', fontWeight: 700,

@@ -113,13 +113,17 @@ export default function GestionTecnicos() {
   const tecnicoAEditar = modal && modal !== 'nuevo' ? modal : null
   const tecnicoAEliminar = tecnicos.find(t => t.id === confirmId)
 
-  const handleSave = (datos) => {
-    if (tecnicoAEditar) {
-      editarTecnico(tecnicoAEditar.id, datos)
-    } else {
-      crearTecnico(datos)
+  const handleSave = async (datos) => {
+    try {
+      if (tecnicoAEditar) {
+        await editarTecnico(tecnicoAEditar.id, datos)
+      } else {
+        await crearTecnico(datos)
+      }
+      setModal(null)
+    } catch (err) {
+      console.error('[GestionTecnicos]', err)
     }
-    setModal(null)
   }
 
   function ActionBtn({ color, children, onClick }) {

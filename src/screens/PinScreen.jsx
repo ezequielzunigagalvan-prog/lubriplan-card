@@ -1,6 +1,6 @@
 import { useState, useCallback, useEffect } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
-import { useAdmin } from '../admin/context/AdminContext'
+import { validatePin } from '../api/cardApi'
 
 const KEYS = [
   ['1', '2', '3'],
@@ -10,49 +10,48 @@ const KEYS = [
 ]
 
 export default function PinScreen() {
-  const [pin, setPin] = useState('')
-  const [error, setError] = useState(false)
-  const [shake, setShake] = useState(false)
+  const [pin,     setPin]     = useState('')
+  const [error,   setError]   = useState(false)
+  const [shake,   setShake]   = useState(false)
+  const [loading, setLoading] = useState(false)
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
   const equipoParam = searchParams.get('equipo')
-  const eqParam = searchParams.get('eq')
-  const { tecnicos } = useAdmin()
 
-  const handleKey = useCallback((key) => {
+  const handleError = useCallback(() => {
+    if (window.navigator.vibrate) window.navigator.vibrate([100, 50, 100])
+    setShake(true)
+    setError(true)
+    setTimeout(() => { setPin(''); setShake(false); setError(false) }, 800)
+  }, [])
+
+  const handleKey = useCallback(async (key) => {
+    if (loading) return
     if (error) setError(false)
 
-    if (key === 'DEL') {
-      setPin(p => p.slice(0, -1))
-      return
-    }
+    if (key === 'DEL') { setPin(p => p.slice(0, -1)); return }
     if (pin.length >= 4) return
 
     const newPin = pin + key
+    setPin(newPin)
 
     if (newPin.length === 4) {
-      const tecnico = tecnicos.find(t => t.activo && t.pin === newPin)
-      if (tecnico) {
+      setLoading(true)
+      try {
+        const tecnico = await validatePin(newPin)
         sessionStorage.setItem('tecnicoActivoId', tecnico.id)
         if (equipoParam) {
-          navigate(`/carta/${equipoParam}${eqParam ? '?eq=' + eqParam : ''}`)
+          navigate(`/carta/${equipoParam}`)
         } else {
           navigate('/areas')
         }
-      } else {
-        if (window.navigator.vibrate) window.navigator.vibrate([100, 50, 100])
-        setShake(true)
-        setError(true)
-        setTimeout(() => {
-          setPin('')
-          setShake(false)
-          setError(false)
-        }, 800)
+      } catch {
+        handleError()
+      } finally {
+        setLoading(false)
       }
-    } else {
-      setPin(newPin)
     }
-  }, [pin, error, navigate, equipoParam, tecnicos])
+  }, [pin, error, loading, navigate, equipoParam, handleError])
 
   useEffect(() => {
     const handler = (e) => {
@@ -68,7 +67,6 @@ export default function PinScreen() {
       className="flex flex-col items-center justify-between h-full"
       style={{ background: '#0c0a1e', padding: '48px 24px 36px' }}
     >
-      {/* Logo */}
       <div className="flex flex-col items-center gap-4">
         <img
           src="/logo.jpeg"
@@ -77,7 +75,6 @@ export default function PinScreen() {
         />
       </div>
 
-      {/* PIN indicator + error */}
       <div className="flex flex-col items-center gap-6">
         <div className={shake ? 'animate-shake' : ''}>
           <div className="flex gap-4">
@@ -85,12 +82,10 @@ export default function PinScreen() {
               <div
                 key={i}
                 style={{
-                  width: 18,
-                  height: 18,
-                  borderRadius: '50%',
-                  border: `2px solid ${error ? '#EF4444' : '#6366f1'}`,
+                  width: 18, height: 18, borderRadius: '50%',
+                  border: `2px solid ${error ? '#EF4444' : loading ? '#EAB308' : '#6366f1'}`,
                   background: pin.length > i
-                    ? (error ? '#EF4444' : '#6366f1')
+                    ? (error ? '#EF4444' : loading ? '#EAB308' : '#6366f1')
                     : 'transparent',
                   transition: 'background 0.15s, border-color 0.15s',
                 }}
@@ -99,60 +94,46 @@ export default function PinScreen() {
           </div>
         </div>
 
-        {error && (
-          <span
-            style={{
-              color: '#EF4444',
-              fontSize: 14,
-              fontWeight: 500,
-              letterSpacing: 0.5,
-            }}
-          >
+        {loading && (
+          <span style={{ color: '#8892b0', fontSize: 13 }}>Verificando…</span>
+        )}
+        {error && !loading && (
+          <span style={{ color: '#EF4444', fontSize: 14, fontWeight: 500, letterSpacing: 0.5 }}>
             PIN incorrecto
           </span>
         )}
       </div>
 
-      {/* Keypad */}
-      <div
-        style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(3, 1fr)',
-          gap: 12,
-          width: '100%',
-          maxWidth: 300,
-        }}
-      >
+      <div style={{
+        display: 'grid',
+        gridTemplateColumns: 'repeat(3, 1fr)',
+        gap: 12, width: '100%', maxWidth: 300,
+      }}>
         {KEYS.flat().map((key, idx) => {
-          if (key === '') {
-            return <div key={idx} />
-          }
+          if (key === '') return <div key={idx} />
           return (
             <button
               key={idx}
               onClick={() => handleKey(key)}
-              disabled={key === '' || (key !== 'DEL' && pin.length >= 4)}
+              disabled={loading || key === '' || (key !== 'DEL' && pin.length >= 4)}
               style={{
-                height: 76,
-                borderRadius: 16,
-                border: 'none',
+                height: 76, borderRadius: 16, border: 'none',
                 background: key === 'DEL' ? '#1c1a3a' : '#13112a',
                 color: key === 'DEL' ? '#8892b0' : '#e8eeff',
                 fontFamily: key === 'DEL' ? "'DM Sans', sans-serif" : "'Bebas Neue', sans-serif",
                 fontSize: key === 'DEL' ? 13 : 28,
                 fontWeight: key === 'DEL' ? 600 : 400,
                 letterSpacing: key === 'DEL' ? 0.5 : 2,
-                cursor: 'pointer',
-                userSelect: 'none',
-                WebkitUserSelect: 'none',
+                cursor: loading ? 'not-allowed' : 'pointer',
+                userSelect: 'none', WebkitUserSelect: 'none',
                 touchAction: 'manipulation',
                 transition: 'background 0.1s, transform 0.08s',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
                 boxShadow: '0 2px 8px rgba(0,0,0,0.4)',
+                opacity: loading ? 0.6 : 1,
               }}
               onPointerDown={e => {
+                if (loading) return
                 e.currentTarget.style.background = '#6366f1'
                 e.currentTarget.style.color = '#0c0a1e'
                 e.currentTarget.style.transform = 'scale(0.95)'

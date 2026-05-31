@@ -1,42 +1,8 @@
 import { useRef } from 'react'
 import { QRCodeSVG, QRCodeCanvas } from 'qrcode.react'
 
-// Encodes minimal equipo data (no images) as URL-safe base64
-export function encodeEquipoForQR(equipo) {
-  try {
-    const minimal = {
-      id: equipo.id,
-      codigo: equipo.codigo || '',
-      nombre: equipo.nombre,
-      area: equipo.area,
-      imagen: equipo.imagen || 'motor',
-      puntos: (equipo.puntos || []).map(p => ({
-        id: p.id,
-        nombre: p.nombre,
-        frecuencia: p.frecuencia,
-        lubricante: p.lubricante,
-        cantidad: p.cantidad,
-        unidad: p.unidad,
-        metodo: p.metodo,
-        x: p.x,
-        y: p.y,
-        ...(p.notas ? { notas: p.notas } : {}),
-        ...(p.imagenId ? { imagenId: p.imagenId } : {}),
-      })),
-    }
-    return btoa(unescape(encodeURIComponent(JSON.stringify(minimal))))
-      .replace(/\+/g, '-')
-      .replace(/\//g, '_')
-      .replace(/=/g, '')
-  } catch {
-    return ''
-  }
-}
-
 export default function QRModal({ equipo, onClose }) {
-  const eqData = encodeEquipoForQR(equipo)
-  const displayUrl = `${window.location.origin}/pin?equipo=${equipo.id}`
-  const url = eqData ? `${displayUrl}&eq=${eqData}` : displayUrl
+  const url = `${window.location.origin}/pin?equipo=${equipo.id}`
   const isLocalhost = ['localhost', '127.0.0.1', ''].includes(window.location.hostname)
   const canvasRef = useRef(null)
 
@@ -44,7 +10,7 @@ export default function QRModal({ equipo, onClose }) {
     const canvas = canvasRef.current?.querySelector('canvas')
     if (!canvas) return
     const link = document.createElement('a')
-    link.download = `QR-${equipo.id}.png`
+    link.download = `QR-${equipo.codigo || equipo.id}.png`
     link.href = canvas.toDataURL('image/png')
     link.click()
   }
@@ -59,16 +25,16 @@ export default function QRModal({ equipo, onClose }) {
         <head>
           <title>QR - ${equipo.nombre}</title>
           <style>
-            body { margin: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; font-family: sans-serif; }
-            img { width: 260px; height: 260px; }
-            h2 { font-size: 18px; margin: 0 0 8px; }
-            p { font-size: 11px; color: #555; margin: 8px 0 0; word-break: break-all; max-width: 280px; text-align: center; }
+            body { margin:0; display:flex; flex-direction:column; align-items:center; justify-content:center; min-height:100vh; font-family:sans-serif; }
+            img { width:260px; height:260px; }
+            h2 { font-size:18px; margin:0 0 8px; }
+            p  { font-size:11px; color:#555; margin:8px 0 0; word-break:break-all; max-width:280px; text-align:center; }
           </style>
         </head>
         <body onload="window.print(); window.close()">
           <h2>${equipo.nombre}</h2>
           <img src="${dataUrl}" />
-          <p>${displayUrl}</p>
+          <p>${url}</p>
         </body>
       </html>
     `)
@@ -94,14 +60,11 @@ export default function QRModal({ equipo, onClose }) {
           <QRCodeCanvas value={url} size={400} level="M" />
         </div>
 
-        <div style={{
-          background: '#fff', borderRadius: 8, padding: 16,
-          display: 'inline-block', marginBottom: 12,
-        }}>
+        <div style={{ background: '#fff', borderRadius: 8, padding: 16, display: 'inline-block', marginBottom: 12 }}>
           <QRCodeSVG value={url} size={200} level="M" />
         </div>
 
-        <p style={{ color: '#4a5070', fontSize: 11, margin: '0 0 12px', wordBreak: 'break-all' }}>{displayUrl}</p>
+        <p style={{ color: '#4a5070', fontSize: 11, margin: '0 0 12px', wordBreak: 'break-all' }}>{url}</p>
 
         {isLocalhost && (
           <div style={{
@@ -112,37 +75,32 @@ export default function QRModal({ equipo, onClose }) {
               Solo funciona en este dispositivo
             </p>
             <p style={{ color: '#8892b0', fontSize: 11, margin: 0, lineHeight: 1.5 }}>
-              El QR apunta a <strong>localhost</strong>. Para usarlo en otro dispositivo, desplegá la app en un servidor con dominio real.
+              El QR apunta a <strong>localhost</strong>. Para usarlo en otro dispositivo,
+              desplegá la app en Vercel con el backend en Railway.
             </p>
           </div>
         )}
 
         <div style={{ display: 'flex', gap: 8, marginBottom: 10 }}>
           <button onClick={handleDownload} style={{
-            flex: 1, padding: '10px', borderRadius: 8,
-            border: '1px solid #2a2850', background: 'transparent',
-            color: '#e8eeff', cursor: 'pointer', fontSize: 13,
+            flex: 1, padding: '10px', borderRadius: 8, border: '1px solid #2a2850',
+            background: 'transparent', color: '#e8eeff', cursor: 'pointer', fontSize: 13,
             fontFamily: "'DM Sans', sans-serif",
             display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
           }}>
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-              <polyline points="7 10 12 15 17 10" />
-              <line x1="12" y1="15" x2="12" y2="3" />
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
             </svg>
             Descargar
           </button>
           <button onClick={handlePrint} style={{
-            flex: 1, padding: '10px', borderRadius: 8,
-            border: '1px solid #2a2850', background: 'transparent',
-            color: '#e8eeff', cursor: 'pointer', fontSize: 13,
+            flex: 1, padding: '10px', borderRadius: 8, border: '1px solid #2a2850',
+            background: 'transparent', color: '#e8eeff', cursor: 'pointer', fontSize: 13,
             fontFamily: "'DM Sans', sans-serif",
             display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
           }}>
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <polyline points="6 9 6 2 18 2 18 9" />
-              <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2" />
-              <rect x="6" y="14" width="12" height="8" />
+              <polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/>
             </svg>
             Imprimir
           </button>

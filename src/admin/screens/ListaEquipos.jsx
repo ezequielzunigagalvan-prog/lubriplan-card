@@ -262,7 +262,7 @@ export default function ListaEquipos() {
         <ConfirmModal
           titulo="Eliminar equipo"
           mensaje={`¿Seguro que quieres eliminar "${equipoAEliminar?.nombre}"? Se perderán todos sus puntos de lubricación.`}
-          onConfirm={() => { eliminarEquipo(confirmId); setConfirmId(null) }}
+          onConfirm={async () => { await eliminarEquipo(confirmId).catch(console.error); setConfirmId(null) }}
           onCancel={() => setConfirmId(null)}
         />
       )}

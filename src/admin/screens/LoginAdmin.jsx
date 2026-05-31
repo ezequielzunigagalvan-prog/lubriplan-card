@@ -25,19 +25,17 @@ export default function LoginAdmin() {
     if (isLoggedIn) navigate('/admin/dashboard', { replace: true })
   }, [isLoggedIn, navigate])
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
     setError('')
     setLoading(true)
-    setTimeout(() => {
-      const ok = login(email.trim(), password)
-      if (ok) {
-        navigate('/admin/dashboard', { replace: true })
-      } else {
-        setError('Credenciales incorrectas. Verifica email y contraseña.')
-        setLoading(false)
-      }
-    }, 300)
+    const ok = await login(email.trim(), password)
+    if (ok) {
+      navigate('/admin/dashboard', { replace: true })
+    } else {
+      setError('Credenciales incorrectas. Verifica email y contraseña.')
+      setLoading(false)
+    }
   }
 
   return (

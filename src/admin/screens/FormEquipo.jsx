@@ -41,7 +41,7 @@ export default function FormEquipo() {
     if (errores[campo]) setErrores(prev => ({ ...prev, [campo]: undefined }))
   }
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
     const errs = {}
     if (!form.codigo.trim()) errs.codigo = 'El código es requerido'
@@ -49,12 +49,16 @@ export default function FormEquipo() {
     if (!form.area.trim()) errs.area = 'El área es requerida'
     if (Object.keys(errs).length > 0) { setErrores(errs); return }
 
-    if (isEditing) {
-      editarEquipo(id, form)
-    } else {
-      crearEquipo(form)
+    try {
+      if (isEditing) {
+        await editarEquipo(id, form)
+      } else {
+        await crearEquipo(form)
+      }
+      navigate('/admin/equipos')
+    } catch (err) {
+      setErrores({ general: err.message || 'Error guardando equipo' })
     }
-    navigate('/admin/equipos')
   }
 
   const inputStyle = (hasError = false) => ({
