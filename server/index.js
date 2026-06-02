@@ -11,6 +11,7 @@ const PORT = process.env.PORT || 3001
 
 // ── CORS ──────────────────────────────────────────────────────────────────────
 const allowedOrigins = [
+  process.env.FRONTEND_ORIGIN,
   process.env.FRONTEND_URL,
   'http://localhost:5173',
   'http://localhost:4173',
@@ -24,6 +25,8 @@ app.use(cors({
       cb(null, false)
     }
   },
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
   credentials: true,
 }))
 
