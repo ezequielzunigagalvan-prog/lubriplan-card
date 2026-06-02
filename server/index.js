@@ -18,11 +18,10 @@ const allowedOrigins = [
 
 app.use(cors({
   origin: (origin, cb) => {
-    // Permitir requests sin origin (curl, Postman, mismo origen)
     if (!origin || allowedOrigins.some(o => origin.startsWith(o))) {
       cb(null, true)
     } else {
-      cb(new Error(`CORS: origen no permitido → ${origin}`))
+      cb(null, false)
     }
   },
   credentials: true,
