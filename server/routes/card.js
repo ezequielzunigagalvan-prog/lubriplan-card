@@ -62,7 +62,7 @@ router.post('/auth/admin', async (req, res) => {
   const { email, password } = req.body || {}
   if (
     email    !== (process.env.ADMIN_EMAIL    || 'admin@lubriplan.com') ||
-    password !== (process.env.ADMIN_PASSWORD || 'admin123')
+    password !== (process.env.ADMIN_PASSWORD || 'Admin1234')
   ) {
     return res.status(401).json({ error: 'Credenciales incorrectas' })
   }
