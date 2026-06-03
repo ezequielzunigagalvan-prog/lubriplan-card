@@ -1,10 +1,9 @@
 const express    = require('express')
-const path       = require('path')
-const fs         = require('fs')
 const { v4: uuid } = require('uuid')
 const pool       = require('../db/pool')
 const { requireAuth, signToken } = require('../middleware/auth')
 const upload     = require('../middleware/uploadCard')
+const { uploadBuffer, deleteImage } = require('../lib/cloudinary')
 
 const router = express.Router()
 
@@ -161,14 +160,10 @@ router.put('/equipos/:id', requireAuth, async (req, res) => {
 // Eliminar — requiere auth
 router.delete('/equipos/:id', requireAuth, async (req, res) => {
   try {
-    // Borrar archivos físicos
     const { rows } = await pool.query(
       'SELECT filename FROM imagenes_equipo_card WHERE equipo_id=$1', [req.params.id]
     )
-    rows.forEach(({ filename }) => {
-      const p = path.join(__dirname, '..', 'uploads', 'card', filename)
-      if (fs.existsSync(p)) fs.unlinkSync(p)
-    })
+    await Promise.allSettled(rows.map(({ filename }) => filename && deleteImage(filename)))
     await pool.query('DELETE FROM equipos_card WHERE id=$1', [req.params.id])
     res.json({ ok: true })
   } catch (err) {
@@ -220,8 +215,7 @@ router.put('/equipos/:id/puntos', requireAuth, async (req, res) => {
 router.post('/equipos/:id/imagenes', requireAuth, upload.single('imagen'), async (req, res) => {
   if (!req.file) return res.status(400).json({ error: 'No se recibió archivo de imagen' })
   try {
-    const baseUrl = process.env.BASE_URL || `http://localhost:${process.env.PORT || 3001}`
-    const url = `${baseUrl}/uploads/card/${req.file.filename}`
+    const { url, publicId } = await uploadBuffer(req.file.buffer)
 
     const { rows: maxRows } = await pool.query(
       'SELECT COALESCE(MAX(orden),-1) AS m FROM imagenes_equipo_card WHERE equipo_id=$1',
@@ -232,7 +226,7 @@ router.post('/equipos/:id/imagenes', requireAuth, upload.single('imagen'), async
     const { rows } = await pool.query(
       `INSERT INTO imagenes_equipo_card (equipo_id, filename, url, flechas, orden)
        VALUES ($1,$2,$3,'[]',$4) RETURNING id`,
-      [req.params.id, req.file.filename, url, orden]
+      [req.params.id, publicId, url, orden]
     )
     res.status(201).json({ id: rows[0].id, url, flechas: [] })
   } catch (err) {
@@ -269,8 +263,7 @@ router.delete('/equipos/:id/imagenes/:imgId', requireAuth, async (req, res) => {
     )
     if (!rows.length) return res.status(404).json({ error: 'Imagen no encontrada' })
 
-    const filePath = path.join(__dirname, '..', 'uploads', 'card', rows[0].filename)
-    if (fs.existsSync(filePath)) fs.unlinkSync(filePath)
+    if (rows[0].filename) await deleteImage(rows[0].filename).catch(() => {})
 
     await pool.query('DELETE FROM imagenes_equipo_card WHERE id=$1', [req.params.imgId])
     await pool.query(
