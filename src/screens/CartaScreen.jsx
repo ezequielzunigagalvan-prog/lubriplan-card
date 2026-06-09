@@ -232,6 +232,26 @@ export default function CartaScreen() {
     swipeStartX.current = null
   }, [])
 
+  // Hooks que dependen de equipo — deben estar antes de cualquier early return
+  const imageIds = useMemo(
+    () => new Set((equipo?.imagenes || []).map(img => img.id)),
+    [equipo?.imagenes]
+  )
+
+  const frecuenciasPresentes = useMemo(() => {
+    const present = new Set((equipo?.puntos || []).map(p => p.frecuencia))
+    return Object.entries(FRECUENCIAS).filter(([k]) => present.has(k))
+  }, [equipo?.puntos])
+
+  useEffect(() => {
+    if (!equipo) return
+    const imgs = equipo.imagenes?.length > 0
+      ? equipo.imagenes
+      : equipo.imagenUrl ? [{ id: 'legacy', url: equipo.imagenUrl, flechas: [] }] : []
+    if (imgs.length === 0) setListaAbierta(true)
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [equipo?.id])
+
   // Pantalla de carga
   if (fetching) {
     return (
@@ -276,7 +296,6 @@ export default function CartaScreen() {
   const imgActiva = imagenes[imgActivaIdx] || null
   const flechas = imgActiva?.flechas || []
 
-  const imageIds = useMemo(() => new Set(imagenes.map(img => img.id)), [imagenes])
   const puntosDeLaImagen = imagenes.length === 0
     ? equipo.puntos
     : equipo.puntos.filter(p =>
@@ -285,16 +304,6 @@ export default function CartaScreen() {
           (!imageIds.has(p.imagenId) && imgActivaIdx === 0)
         )
       )
-
-  useEffect(() => {
-    if (imagenes.length === 0) setListaAbierta(true)
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [equipo.id])
-
-  const frecuenciasPresentes = useMemo(() => {
-    const present = new Set(equipo.puntos.map(p => p.frecuencia))
-    return Object.entries(FRECUENCIAS).filter(([k]) => present.has(k))
-  }, [equipo.puntos])
 
   const puntoActivoGlobalIdx = puntoActivo ? equipo.puntos.indexOf(puntoActivo) : -1
 

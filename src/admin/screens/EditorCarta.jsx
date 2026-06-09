@@ -395,7 +395,7 @@ export default function EditorCarta() {
     if (!coords) return
 
     if (herramienta === 'punto') {
-      const newId = `p-${Date.now()}`
+      const newId = crypto.randomUUID()
       setPuntos(prev => {
         const nuevo = {
           id: newId, numero: prev.length + 1,
@@ -444,11 +444,9 @@ export default function EditorCarta() {
   const handleCanvasMouseUp = useCallback(() => {
     if (draggingId) {
       if (dragMovedRef.current) {
-        // Persist moved position
-        setPuntos(prev => {
-          actualizarPuntos(id, prev)
-          return prev
-        })
+        let latestPuntos
+        setPuntos(prev => { latestPuntos = prev; return prev })
+        actualizarPuntos(id, latestPuntos)
       }
       setDraggingId(null)
     }
