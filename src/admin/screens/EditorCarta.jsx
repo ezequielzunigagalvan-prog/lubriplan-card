@@ -3,6 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom'
 import AdminLayout from '../components/AdminLayout'
 import ConfirmModal from '../components/ConfirmModal'
 import QRModal from '../components/QRModal'
+import PDFTemplate from '../components/PDFTemplate'
 import { useAdmin } from '../context/AdminContext'
 import { uploadImagen, deleteImagen } from '../../api/cardApi'
 import { METODOS as METODOS_DATA } from '../../data/equipos'
@@ -533,15 +534,30 @@ export default function EditorCarta() {
     try {
       const html2canvas = (await import('html2canvas')).default
       const { jsPDF } = await import('jspdf')
-      const el = document.getElementById('carta-export-area')
-      const canvas = await html2canvas(el, { backgroundColor: '#13112a', scale: 1.5 })
-      const pdf = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' })
-      const imgData = canvas.toDataURL('image/jpeg', 0.85)
+      const el = document.getElementById('pdf-template')
+      if (!el) return
+
+      // Tiempo para que el QR canvas y las imágenes terminen de renderizar
+      await new Promise(r => setTimeout(r, 300))
+
+      const canvas = await html2canvas(el, {
+        backgroundColor: '#ffffff',
+        scale: 2,
+        useCORS: true,
+        allowTaint: false,
+        logging: false,
+      })
+
+      const imgData = canvas.toDataURL('image/jpeg', 0.92)
+      const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'letter' })
       const pdfW = pdf.internal.pageSize.getWidth()
       const pdfH = (canvas.height * pdfW) / canvas.width
       pdf.addImage(imgData, 'JPEG', 0, 0, pdfW, pdfH)
       pdf.save(`carta-${equipo.nombre.replace(/\s+/g, '-')}.pdf`)
-    } catch { alert('Error al generar el PDF') }
+    } catch (err) {
+      console.error('[PDF]', err)
+      alert('Error al generar el PDF')
+    }
   }
 
   const puntosDeLaImagen = puntos.filter(p =>
@@ -1130,6 +1146,8 @@ export default function EditorCarta() {
       {showQR && (
         <QRModal equipo={equipo} onClose={() => setShowQR(false)} />
       )}
+
+      <PDFTemplate equipo={equipo} imagenes={imagenes} puntos={puntos} />
     </AdminLayout>
   )
 }
