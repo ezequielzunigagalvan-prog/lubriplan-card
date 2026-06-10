@@ -8,6 +8,9 @@ function token() {
 
 function authHeaders() {
   const t = token()
+  console.log('[auth] adminToken en localStorage:', localStorage.getItem('adminToken'))
+  console.log('[auth] token() devuelve:', t)
+  console.log('[auth] Authorization header se incluye:', !!t)
   return {
     'Content-Type': 'application/json',
     ...(t ? { Authorization: `Bearer ${t}` } : {}),
