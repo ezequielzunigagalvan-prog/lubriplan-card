@@ -138,24 +138,79 @@ function EquipoCard({ equipo, onClick }) {
   )
 }
 
+function SubAreaCard({ subArea, count, color, onClick }) {
+  return (
+    <button
+      onClick={onClick}
+      style={{
+        display: 'flex', alignItems: 'center', gap: 12,
+        width: '100%', background: '#13112a',
+        border: '1px solid #2a2850', borderRadius: 14,
+        padding: '14px 16px', cursor: 'pointer', textAlign: 'left',
+        transition: 'border-color 0.15s, background 0.15s',
+      }}
+      onPointerDown={e => { e.currentTarget.style.borderColor = color; e.currentTarget.style.background = '#1c1a3a' }}
+      onPointerUp={e => { e.currentTarget.style.borderColor = '#2a2850'; e.currentTarget.style.background = '#13112a' }}
+      onPointerLeave={e => { e.currentTarget.style.borderColor = '#2a2850'; e.currentTarget.style.background = '#13112a' }}
+    >
+      <div style={{ width: 36, height: 36, borderRadius: 10, background: color + '18', border: `1px solid ${color}35`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+          <rect x="2" y="7" width="12" height="7" rx="1.5" stroke={color} strokeWidth="1.3" />
+          <path d="M2 8L8 4l6 4" stroke={color} strokeWidth="1.3" strokeLinejoin="round" />
+        </svg>
+      </div>
+      <div style={{ flex: 1, minWidth: 0 }}>
+        <div style={{ fontSize: 14, fontWeight: 600, color: '#e8eeff', fontFamily: "'DM Sans', sans-serif", overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+          {subArea}
+        </div>
+        <div style={{ fontSize: 12, color: '#8892b0', marginTop: 2 }}>{count} equipo{count !== 1 ? 's' : ''}</div>
+      </div>
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" style={{ flexShrink: 0 }}>
+        <path d="M6 4l4 4-4 4" stroke="#8892b0" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+      </svg>
+    </button>
+  )
+}
+
+const SUB_PALETTE = ['#818cf8', '#22C55E', '#3B82F6', '#A855F7', '#EF4444', '#06B6D4', '#FB923C', '#EC4899']
+
 export default function EquiposScreen() {
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
-  const areaParam = searchParams.get('area') || ''
+  const areaParam   = searchParams.get('area')    || ''
+  const subAreaParam = searchParams.get('subarea') || ''
   const { equipos } = useAdmin()
   const [busqueda, setBusqueda] = useState('')
 
+  const equiposDelArea = useMemo(() =>
+    equipos.filter(e => e.activo !== false && (!areaParam || e.area === areaParam)),
+    [equipos, areaParam]
+  )
+
+  // Si el área tiene sub-áreas y aún no eligieron una, mostramos sub-áreas
+  const subAreas = useMemo(() => {
+    const map = {}
+    equiposDelArea.forEach(e => {
+      if (e.subArea) {
+        if (!map[e.subArea]) map[e.subArea] = 0
+        map[e.subArea]++
+      }
+    })
+    return Object.entries(map).map(([nombre, count]) => ({ nombre, count }))
+  }, [equiposDelArea])
+
+  const mostrarSubAreas = subAreas.length > 0 && !subAreaParam && !busqueda.trim()
+
   const equiposFiltrados = useMemo(() => {
-    return equipos.filter(e => {
-      if (e.activo === false) return false
-      const matchArea = !areaParam || e.area === areaParam
+    return equiposDelArea.filter(e => {
+      const matchSub = !subAreaParam || e.subArea === subAreaParam
       const q = busqueda.toLowerCase()
       const matchBusqueda = !q || e.nombre.toLowerCase().includes(q) || e.codigo?.toLowerCase().includes(q)
-      return matchArea && matchBusqueda
+      return matchSub && matchBusqueda
     })
-  }, [equipos, busqueda, areaParam])
+  }, [equiposDelArea, busqueda, subAreaParam])
 
-  const titulo = areaParam || 'Todos los equipos'
+  const titulo = subAreaParam || areaParam || 'Todos los equipos'
 
   return (
     <div style={{
@@ -283,44 +338,47 @@ export default function EquiposScreen() {
         </div>
       </div>
 
-      {/* Equipment list */}
-      <div style={{
-        flex: 1,
-        minHeight: 0,
-        overflowY: 'auto',
-        padding: '0 20px 32px',
-        display: 'flex',
-        flexDirection: 'column',
-        gap: 10,
-      }}>
-        {equiposFiltrados.length === 0 ? (
-          <div style={{
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            gap: 12,
-            paddingTop: 60,
-            color: '#8892b0',
-          }}>
+      {/* Sub-áreas o equipos */}
+      <div style={{ flex: 1, minHeight: 0, overflowY: 'auto', padding: '0 20px 32px', display: 'flex', flexDirection: 'column', gap: 10 }}>
+        {mostrarSubAreas ? (
+          <>
+            <div style={{ fontSize: 11, color: '#4a5070', padding: '8px 0 4px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: 0.5 }}>
+              Sub-áreas en {areaParam}
+            </div>
+            {subAreas.map(({ nombre, count }, idx) => (
+              <SubAreaCard
+                key={nombre}
+                subArea={nombre}
+                count={count}
+                color={SUB_PALETTE[idx % SUB_PALETTE.length]}
+                onClick={() => navigate(`/equipos?area=${encodeURIComponent(areaParam)}&subarea=${encodeURIComponent(nombre)}`)}
+              />
+            ))}
+            {/* Equipos sin sub-área en este área */}
+            {equiposDelArea.filter(e => !e.subArea).length > 0 && (
+              <>
+                <div style={{ fontSize: 11, color: '#4a5070', padding: '12px 0 4px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: 0.5 }}>
+                  Sin sub-área
+                </div>
+                {equiposDelArea.filter(e => !e.subArea).map(equipo => (
+                  <EquipoCard key={equipo.id} equipo={equipo} onClick={() => navigate(`/carta/${equipo.id}`)} />
+                ))}
+              </>
+            )}
+          </>
+        ) : equiposFiltrados.length === 0 ? (
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12, paddingTop: 60, color: '#8892b0' }}>
             <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
               <circle cx="24" cy="24" r="20" stroke="#2a2850" strokeWidth="2" />
               <path d="M24 16v10M24 32h.01" stroke="#8892b0" strokeWidth="2" strokeLinecap="round" />
             </svg>
             <span style={{ fontSize: 15, textAlign: 'center', lineHeight: 1.5 }}>
-              {busqueda
-                ? `Sin resultados para "${busqueda}"`
-                : areaParam
-                  ? `No hay equipos en "${areaParam}"`
-                  : 'No hay equipos registrados'}
+              {busqueda ? `Sin resultados para "${busqueda}"` : `No hay equipos en "${subAreaParam || areaParam}"`}
             </span>
           </div>
         ) : (
           equiposFiltrados.map(equipo => (
-            <EquipoCard
-              key={equipo.id}
-              equipo={equipo}
-              onClick={() => navigate(`/carta/${equipo.id}`)}
-            />
+            <EquipoCard key={equipo.id} equipo={equipo} onClick={() => navigate(`/carta/${equipo.id}`)} />
           ))
         )}
       </div>

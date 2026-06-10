@@ -30,6 +30,7 @@ export default function FormEquipo() {
     codigo: equipo?.codigo || '',
     nombre: equipo?.nombre || '',
     area: equipo?.area || '',
+    subArea: equipo?.subArea || '',
     descripcion: equipo?.descripcion || '',
     activo: equipo?.activo !== false,
   })
@@ -112,6 +113,16 @@ export default function FormEquipo() {
                 onChange={set('area')}
                 placeholder="Ej: Sala de compresores"
                 style={inputStyle(!!errores.area)}
+              />
+            </Field>
+
+            <Field label="Sub Área (opcional)">
+              <input
+                type="text"
+                value={form.subArea}
+                onChange={set('subArea')}
+                placeholder="Ej: Nivel 2, Sector Norte"
+                style={inputStyle()}
               />
             </Field>
 

@@ -33,6 +33,7 @@ async function buildEquipo(id) {
     codigo:      e.codigo,
     nombre:      e.nombre,
     area:        e.area,
+    subArea:     e.sub_area || null,
     imagen:      e.imagen,
     descripcion: e.descripcion,
     activo:      e.activo,
@@ -122,15 +123,15 @@ router.get('/equipos/:id', async (req, res) => {
 
 // Crear — requiere auth
 router.post('/equipos', requireAuth, async (req, res) => {
-  const { codigo, nombre, area, imagen, descripcion } = req.body || {}
+  const { codigo, nombre, area, subArea, imagen, descripcion } = req.body || {}
   if (!nombre?.trim() || !area?.trim()) {
     return res.status(400).json({ error: 'nombre y area son requeridos' })
   }
   try {
     const { rows } = await pool.query(
-      `INSERT INTO equipos_card (codigo, nombre, area, imagen, descripcion)
-       VALUES ($1,$2,$3,$4,$5) RETURNING id`,
-      [codigo || null, nombre.trim(), area.trim(), imagen || 'motor', descripcion || null]
+      `INSERT INTO equipos_card (codigo, nombre, area, sub_area, imagen, descripcion)
+       VALUES ($1,$2,$3,$4,$5,$6) RETURNING id`,
+      [codigo || null, nombre.trim(), area.trim(), subArea?.trim() || null, imagen || 'motor', descripcion || null]
     )
     res.status(201).json(await buildEquipo(rows[0].id))
   } catch (err) {
@@ -139,15 +140,43 @@ router.post('/equipos', requireAuth, async (req, res) => {
   }
 })
 
+// Importar equipos en lote — requiere auth
+router.post('/equipos/importar', requireAuth, async (req, res) => {
+  const { equipos } = req.body || {}
+  if (!Array.isArray(equipos) || !equipos.length) {
+    return res.status(400).json({ error: 'Se requiere un array de equipos' })
+  }
+  let creados = 0
+  const errores = []
+  for (const eq of equipos) {
+    if (!eq.nombre?.trim() || !eq.area?.trim()) {
+      errores.push({ nombre: eq.nombre, error: 'Nombre y área son requeridos' })
+      continue
+    }
+    try {
+      await pool.query(
+        `INSERT INTO equipos_card (codigo, nombre, area, sub_area, imagen, descripcion)
+         VALUES ($1,$2,$3,$4,'motor',null)`,
+        [eq.codigo?.trim() || null, eq.nombre.trim(), eq.area.trim(), eq.subArea?.trim() || null]
+      )
+      creados++
+    } catch (err) {
+      console.error('[importar equipo]', err)
+      errores.push({ nombre: eq.nombre, error: err.message })
+    }
+  }
+  res.json({ creados, errores })
+})
+
 // Actualizar — requiere auth
 router.put('/equipos/:id', requireAuth, async (req, res) => {
-  const { codigo, nombre, area, imagen, descripcion, activo } = req.body || {}
+  const { codigo, nombre, area, subArea, imagen, descripcion, activo } = req.body || {}
   try {
     const { rowCount } = await pool.query(
       `UPDATE equipos_card
-       SET codigo=$1, nombre=$2, area=$3, imagen=$4, descripcion=$5, activo=$6, updated_at=NOW()
-       WHERE id=$7`,
-      [codigo||null, nombre, area, imagen||'motor', descripcion||null, activo!==false, req.params.id]
+       SET codigo=$1, nombre=$2, area=$3, sub_area=$4, imagen=$5, descripcion=$6, activo=$7, updated_at=NOW()
+       WHERE id=$8`,
+      [codigo||null, nombre, area, subArea?.trim()||null, imagen||'motor', descripcion||null, activo!==false, req.params.id]
     )
     if (!rowCount) return res.status(404).json({ error: 'Equipo no encontrado' })
     res.json(await buildEquipo(req.params.id))

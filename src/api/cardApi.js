@@ -60,6 +60,14 @@ export async function createEquipo(datos) {
   }))
 }
 
+export async function importarEquipos(equipos) {
+  return handle(await fetch(`${BASE}/api/card/equipos/importar`, {
+    method: 'POST',
+    headers: authHeaders(),
+    body: JSON.stringify({ equipos }),
+  }))
+}
+
 export async function updateEquipo(id, datos) {
   return handle(await fetch(`${BASE}/api/card/equipos/${id}`, {
     method: 'PUT',

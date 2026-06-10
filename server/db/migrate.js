@@ -75,6 +75,11 @@ async function migrate() {
       console.log('[DB] Técnicos iniciales creados')
     }
 
+    // Agregar sub_area si no existe (seguro en producción)
+    await client.query(`
+      ALTER TABLE equipos_card ADD COLUMN IF NOT EXISTS sub_area VARCHAR(255)
+    `)
+
     await client.query('COMMIT')
     console.log('[DB] Migración completada correctamente')
   } catch (err) {

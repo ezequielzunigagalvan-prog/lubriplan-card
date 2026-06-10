@@ -13,6 +13,7 @@ import FormEquipo from './admin/screens/FormEquipo'
 import EditorCarta from './admin/screens/EditorCarta'
 import GestionTecnicos from './admin/screens/GestionTecnicos'
 import GestionLubricantes from './admin/screens/GestionLubricantes'
+import ImportarEquipos from './admin/screens/ImportarEquipos'
 
 export default function App() {
   return (
@@ -38,6 +39,7 @@ export default function App() {
           <Route path="/admin/equipos/:id/carta" element={<ProtectedRoute><EditorCarta /></ProtectedRoute>} />
           <Route path="/admin/tecnicos" element={<ProtectedRoute><GestionTecnicos /></ProtectedRoute>} />
           <Route path="/admin/lubricantes" element={<ProtectedRoute><GestionLubricantes /></ProtectedRoute>} />
+          <Route path="/admin/importar" element={<ProtectedRoute><ImportarEquipos /></ProtectedRoute>} />
 
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>

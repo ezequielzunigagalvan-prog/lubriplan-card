@@ -81,8 +81,74 @@ function EquipoRow({ equipo, isLast, onEdit, onCarta, onDelete, onQR }) {
   )
 }
 
+function ColHeader() {
+  return (
+    <div style={{
+      display: 'grid', gridTemplateColumns: '110px 1fr 140px 80px 90px auto',
+      gap: 0, padding: '8px 20px',
+      background: 'rgba(255,255,255,0.02)', borderBottom: '1px solid #2a2850',
+    }}>
+      {['Código', 'Equipo', 'Puntos', 'Estado', '', ''].map((h, i) => (
+        <span key={i} style={{ color: '#4a5070', fontSize: 10, fontWeight: 600, textTransform: 'uppercase', letterSpacing: 0.5 }}>{h}</span>
+      ))}
+    </div>
+  )
+}
+
+function SubAreaSection({ subArea, equipos, color, onEdit, onCarta, onDelete, onQR }) {
+  const [open, setOpen] = useState(true)
+  return (
+    <div style={{ marginLeft: 20, borderLeft: `2px solid ${color}40` }}>
+      <button
+        onClick={() => setOpen(o => !o)}
+        style={{
+          width: '100%', display: 'flex', alignItems: 'center', gap: 10,
+          padding: '9px 16px', background: 'transparent',
+          borderBottom: open ? '1px solid #2a2850' : 'none',
+          cursor: 'pointer', border: 'none', textAlign: 'left',
+        }}
+      >
+        <div style={{ width: 7, height: 7, borderRadius: '50%', background: color + '88', flexShrink: 0 }} />
+        <span style={{ color: '#a5b4c8', fontSize: 13, fontWeight: 600, flex: 1, fontFamily: "'DM Sans', sans-serif" }}>
+          {subArea}
+        </span>
+        <span style={{ fontSize: 11, color: '#4a5070' }}>
+          {equipos.length} equipo{equipos.length !== 1 ? 's' : ''}
+        </span>
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none"
+          style={{ transition: 'transform 0.2s', transform: open ? 'rotate(180deg)' : 'none', flexShrink: 0 }}>
+          <path d="M3 5l4 4 4-4" stroke="#4a5070" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
+        </svg>
+      </button>
+      {open && (
+        <>
+          <ColHeader />
+          {equipos.map((equipo, i) => (
+            <EquipoRow key={equipo.id} equipo={equipo} isLast={i === equipos.length - 1}
+              onCarta={() => onCarta(equipo.id)} onEdit={() => onEdit(equipo.id)}
+              onDelete={() => onDelete(equipo.id)} onQR={() => onQR(equipo)} />
+          ))}
+        </>
+      )}
+    </div>
+  )
+}
+
 function AreaSection({ area, equipos, color, defaultOpen, onEdit, onCarta, onDelete, onQR }) {
   const [open, setOpen] = useState(defaultOpen)
+
+  // Agrupar por sub_area
+  const { sinSubArea, subAreas } = useMemo(() => {
+    const sin = equipos.filter(e => !e.subArea)
+    const map = {}
+    equipos.filter(e => e.subArea).forEach(e => {
+      if (!map[e.subArea]) map[e.subArea] = []
+      map[e.subArea].push(e)
+    })
+    return { sinSubArea: sin, subAreas: Object.entries(map) }
+  }, [equipos])
+
+  const tieneSubAreas = subAreas.length > 0
 
   return (
     <div style={{ background: '#13112a', border: '1px solid #2a2850', borderRadius: 12, overflow: 'hidden' }}>
@@ -103,6 +169,11 @@ function AreaSection({ area, equipos, color, defaultOpen, onEdit, onCarta, onDel
         <span style={{ color: '#e8eeff', fontSize: 14, fontWeight: 700, flex: 1, fontFamily: "'DM Sans', sans-serif" }}>
           {area}
         </span>
+        {tieneSubAreas && (
+          <span style={{ fontSize: 11, color: '#4a5070', marginRight: 4 }}>
+            {subAreas.length} sub-área{subAreas.length !== 1 ? 's' : ''}
+          </span>
+        )}
         <span style={{
           padding: '2px 10px', borderRadius: 20, fontSize: 12,
           background: `${color}18`, color, fontWeight: 600,
@@ -118,28 +189,28 @@ function AreaSection({ area, equipos, color, defaultOpen, onEdit, onCarta, onDel
 
       {open && (
         <>
-          <div style={{
-            display: 'grid',
-            gridTemplateColumns: '110px 1fr 140px 80px 90px auto',
-            gap: 0, padding: '8px 20px',
-            background: 'rgba(255,255,255,0.02)',
-            borderBottom: '1px solid #2a2850',
-          }}>
-            {['Código', 'Equipo', 'Puntos', 'Estado', '', ''].map((h, i) => (
-              <span key={i} style={{ color: '#4a5070', fontSize: 10, fontWeight: 600, textTransform: 'uppercase', letterSpacing: 0.5 }}>{h}</span>
-            ))}
-          </div>
-          {equipos.map((equipo, i) => (
-            <EquipoRow
-              key={equipo.id}
-              equipo={equipo}
-              isLast={i === equipos.length - 1}
-              onCarta={() => onCarta(equipo.id)}
-              onEdit={() => onEdit(equipo.id)}
-              onDelete={() => onDelete(equipo.id)}
-              onQR={() => onQR(equipo)}
-            />
+          {/* Sub-áreas */}
+          {subAreas.map(([subArea, eqs]) => (
+            <SubAreaSection key={subArea} subArea={subArea} equipos={eqs} color={color}
+              onCarta={onCarta} onEdit={onEdit} onDelete={onDelete} onQR={onQR} />
           ))}
+
+          {/* Equipos sin sub-área */}
+          {sinSubArea.length > 0 && (
+            <>
+              {tieneSubAreas && (
+                <div style={{ padding: '7px 20px', background: 'rgba(255,255,255,0.01)', borderTop: '1px solid #2a2850' }}>
+                  <span style={{ color: '#4a5070', fontSize: 10, fontWeight: 600, textTransform: 'uppercase', letterSpacing: 0.5 }}>Sin sub-área</span>
+                </div>
+              )}
+              <ColHeader />
+              {sinSubArea.map((equipo, i) => (
+                <EquipoRow key={equipo.id} equipo={equipo} isLast={i === sinSubArea.length - 1}
+                  onCarta={() => onCarta(equipo.id)} onEdit={() => onEdit(equipo.id)}
+                  onDelete={() => onDelete(equipo.id)} onQR={() => onQR(equipo)} />
+              ))}
+            </>
+          )}
         </>
       )}
     </div>
