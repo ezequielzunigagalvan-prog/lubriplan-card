@@ -279,11 +279,14 @@ function PasoRevisar({ filas, equiposExistentes, onConfirmar, onCancelar }) {
 // ── Pantalla paso 3: progreso y resultado ─────────────────────────────────────
 
 function PasoImportar({ filas, onDone }) {
-  const navigate  = useNavigate()
-  const [estado,  setEstado]  = useState('idle') // idle | cargando | done | error
-  const [resultado, setResult] = useState(null)
+  const navigate    = useNavigate()
+  const [estado,    setEstado]  = useState('cargando')
+  const [resultado, setResult]  = useState(null)
+  const hasStarted  = useRef(false)
 
   const ejecutar = useCallback(async () => {
+    if (hasStarted.current) return
+    hasStarted.current = true
     setEstado('cargando')
     try {
       const res = await importarEquipos(filas)
@@ -292,12 +295,13 @@ function PasoImportar({ filas, onDone }) {
       onDone()
     } catch (err) {
       console.error('[importar]', err)
+      hasStarted.current = false
       setEstado('error')
     }
   }, [filas, onDone])
 
-  // Auto-ejecutar al montar
-  useEffect(() => { ejecutar() }, [ejecutar])
+  // Solo corre una vez al montar — deps vacías evitan el loop
+  useEffect(() => { ejecutar() }, [])
 
   return (
     <div style={{ maxWidth: 480, textAlign: 'center' }}>
@@ -338,7 +342,7 @@ function PasoImportar({ filas, onDone }) {
           <div style={{ fontSize: 32 }}>❌</div>
           <div style={{ color: '#EF4444', fontSize: 16, fontWeight: 600 }}>Error en la importación</div>
           <div style={{ color: '#4a5070', fontSize: 13 }}>Revisá los logs del servidor o intentá de nuevo.</div>
-          <button onClick={ejecutar} style={{ padding: '10px 20px', background: '#6366f1', border: 'none', borderRadius: 8, color: '#fff', fontSize: 13, cursor: 'pointer', fontFamily: "'DM Sans', sans-serif" }}>
+          <button onClick={() => { hasStarted.current = false; ejecutar() }} style={{ padding: '10px 20px', background: '#6366f1', border: 'none', borderRadius: 8, color: '#fff', fontSize: 13, cursor: 'pointer', fontFamily: "'DM Sans', sans-serif" }}>
             Reintentar
           </button>
         </div>
@@ -355,9 +359,9 @@ export default function ImportarEquipos() {
   const [filas, setFilas] = useState([])
   const [filasValidas, setFilasValidas] = useState([])
 
-  const handleFileParsed = (rows) => { setFilas(rows); setPaso(2) }
-  const handleConfirmar  = (rows) => { setFilasValidas(rows); setPaso(3) }
-  const handleDone       = () => { recargar?.() }
+  const handleFileParsed = useCallback((rows) => { setFilas(rows); setPaso(2) }, [])
+  const handleConfirmar  = useCallback((rows) => { setFilasValidas(rows); setPaso(3) }, [])
+  const handleDone       = useCallback(() => { recargar?.() }, [recargar])
 
   return (
     <AdminLayout titulo="Importar equipos">
