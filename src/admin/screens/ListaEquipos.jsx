@@ -30,21 +30,33 @@ function ActionBtn({ color, children, onClick }) {
   )
 }
 
-function EquipoRow({ equipo, isLast, onEdit, onCarta, onDelete, onQR }) {
+function EquipoRow({ equipo, isLast, onEdit, onCarta, onDelete, onQR, isSelected, onToggleSelect }) {
   return (
     <div
       style={{
         display: 'grid',
-        gridTemplateColumns: '110px 1fr 140px 80px 90px auto',
+        gridTemplateColumns: '28px 110px 1fr 140px 80px 90px auto',
         alignItems: 'center',
         gap: 0,
         padding: '13px 20px',
         borderBottom: isLast ? 'none' : '1px solid #2a2850',
         transition: 'background 0.1s',
+        background: isSelected ? 'rgba(99,102,241,0.08)' : 'transparent',
       }}
-      onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,255,255,0.02)'}
-      onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+      onMouseEnter={e => !isSelected && (e.currentTarget.style.background = 'rgba(255,255,255,0.02)')}
+      onMouseLeave={e => !isSelected && (e.currentTarget.style.background = 'transparent')}
     >
+      <input
+        type="checkbox"
+        checked={isSelected}
+        onChange={onToggleSelect}
+        style={{
+          width: 18,
+          height: 18,
+          cursor: 'pointer',
+          accentColor: '#818cf8',
+        }}
+      />
       <span style={{ fontFamily: 'monospace', fontSize: 13, fontWeight: 700, color: '#818cf8', letterSpacing: 1 }}>
         {equipo.codigo || '—'}
       </span>
@@ -81,13 +93,24 @@ function EquipoRow({ equipo, isLast, onEdit, onCarta, onDelete, onQR }) {
   )
 }
 
-function ColHeader() {
+function ColHeader({ onSelectAll, allSelected }) {
   return (
     <div style={{
-      display: 'grid', gridTemplateColumns: '110px 1fr 140px 80px 90px auto',
+      display: 'grid', gridTemplateColumns: '28px 110px 1fr 140px 80px 90px auto',
       gap: 0, padding: '8px 20px',
       background: 'rgba(255,255,255,0.02)', borderBottom: '1px solid #2a2850',
     }}>
+      <input
+        type="checkbox"
+        checked={allSelected}
+        onChange={onSelectAll}
+        style={{
+          width: 18,
+          height: 18,
+          cursor: 'pointer',
+          accentColor: '#818cf8',
+        }}
+      />
       {['Código', 'Equipo', 'Puntos', 'Estado', '', ''].map((h, i) => (
         <span key={i} style={{ color: '#4a5070', fontSize: 10, fontWeight: 600, textTransform: 'uppercase', letterSpacing: 0.5 }}>{h}</span>
       ))}
@@ -95,7 +118,7 @@ function ColHeader() {
   )
 }
 
-function SubAreaSection({ subArea, equipos, color, onEdit, onCarta, onDelete, onQR }) {
+function SubAreaSection({ subArea, equipos, color, onEdit, onCarta, onDelete, onQR, seleccionados, onToggleSelect }) {
   const [open, setOpen] = useState(true)
   return (
     <div style={{ marginLeft: 20, borderLeft: `2px solid ${color}40` }}>
@@ -126,7 +149,8 @@ function SubAreaSection({ subArea, equipos, color, onEdit, onCarta, onDelete, on
           {equipos.map((equipo, i) => (
             <EquipoRow key={equipo.id} equipo={equipo} isLast={i === equipos.length - 1}
               onCarta={() => onCarta(equipo.id)} onEdit={() => onEdit(equipo.id)}
-              onDelete={() => onDelete(equipo.id)} onQR={() => onQR(equipo)} />
+              onDelete={() => onDelete(equipo.id)} onQR={() => onQR(equipo)}
+              isSelected={seleccionados.has(equipo.id)} onToggleSelect={() => onToggleSelect(equipo.id)} />
           ))}
         </>
       )}
@@ -134,7 +158,7 @@ function SubAreaSection({ subArea, equipos, color, onEdit, onCarta, onDelete, on
   )
 }
 
-function AreaSection({ area, equipos, color, defaultOpen, onEdit, onCarta, onDelete, onQR }) {
+function AreaSection({ area, equipos, color, defaultOpen, onEdit, onCarta, onDelete, onQR, seleccionados, onToggleSelect }) {
   const [open, setOpen] = useState(defaultOpen)
 
   // Agrupar por sub_area
@@ -192,7 +216,8 @@ function AreaSection({ area, equipos, color, defaultOpen, onEdit, onCarta, onDel
           {/* Sub-áreas */}
           {subAreas.map(([subArea, eqs]) => (
             <SubAreaSection key={subArea} subArea={subArea} equipos={eqs} color={color}
-              onCarta={onCarta} onEdit={onEdit} onDelete={onDelete} onQR={onQR} />
+              onCarta={onCarta} onEdit={onEdit} onDelete={onDelete} onQR={onQR}
+              seleccionados={seleccionados} onToggleSelect={onToggleSelect} />
           ))}
 
           {/* Equipos sin sub-área */}
@@ -207,7 +232,8 @@ function AreaSection({ area, equipos, color, defaultOpen, onEdit, onCarta, onDel
               {sinSubArea.map((equipo, i) => (
                 <EquipoRow key={equipo.id} equipo={equipo} isLast={i === sinSubArea.length - 1}
                   onCarta={() => onCarta(equipo.id)} onEdit={() => onEdit(equipo.id)}
-                  onDelete={() => onDelete(equipo.id)} onQR={() => onQR(equipo)} />
+                  onDelete={() => onDelete(equipo.id)} onQR={() => onQR(equipo)}
+                  isSelected={seleccionados.has(equipo.id)} onToggleSelect={() => onToggleSelect(equipo.id)} />
               ))}
             </>
           )}
@@ -218,13 +244,60 @@ function AreaSection({ area, equipos, color, defaultOpen, onEdit, onCarta, onDel
 }
 
 export default function ListaEquipos() {
-  const { equipos, eliminarEquipo } = useAdmin()
+  const { equipos, eliminarEquipo, eliminarEquiposMasivo, exportarEquipos } = useAdmin()
   const navigate = useNavigate()
   const [busqueda, setBusqueda] = useState('')
   const [confirmId, setConfirmId] = useState(null)
   const [qrEquipo, setQrEquipo] = useState(null)
+  const [seleccionados, setSeleccionados] = useState(new Set())
+  const [exportando, setExportando] = useState(false)
+  const [eliminandoMasivo, setEliminandoMasivo] = useState(false)
 
   const equipoAEliminar = equipos.find(e => e.id === confirmId)
+
+  const toggleSeleccion = (id) => {
+    const nuevo = new Set(seleccionados)
+    if (nuevo.has(id)) {
+      nuevo.delete(id)
+    } else {
+      nuevo.add(id)
+    }
+    setSeleccionados(nuevo)
+  }
+
+  const seleccionarTodos = () => {
+    if (seleccionados.size === equipos.length) {
+      setSeleccionados(new Set())
+    } else {
+      setSeleccionados(new Set(equipos.map(e => e.id)))
+    }
+  }
+
+  const handleExportarEquipos = async () => {
+    try {
+      setExportando(true)
+      await exportarEquipos()
+    } catch (err) {
+      alert(`Error al exportar: ${err.message}`)
+    } finally {
+      setExportando(false)
+    }
+  }
+
+  const handleEliminarMasivo = async () => {
+    if (seleccionados.size === 0) return
+    if (!window.confirm(`¿Seguro que querés eliminar ${seleccionados.size} equipo${seleccionados.size !== 1 ? 's' : ''}? Esta acción no se puede deshacer.`)) return
+
+    try {
+      setEliminandoMasivo(true)
+      await eliminarEquiposMasivo(Array.from(seleccionados))
+      setSeleccionados(new Set())
+    } catch (err) {
+      alert(`Error al eliminar: ${err.message}`)
+    } finally {
+      setEliminandoMasivo(false)
+    }
+  }
 
   const areaGroups = useMemo(() => {
     const q = busqueda.toLowerCase().trim()
@@ -289,6 +362,67 @@ export default function ListaEquipos() {
             </span>
           </div>
 
+          {seleccionados.size > 0 ? (
+            <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+              <span style={{
+                padding: '7px 14px', borderRadius: 8,
+                background: 'rgba(99,102,241,0.1)', border: '1px solid rgba(99,102,241,0.2)',
+                color: '#818cf8', fontSize: 13, fontWeight: 600,
+                fontFamily: "'DM Sans', sans-serif",
+              }}>
+                {seleccionados.size} seleccionado{seleccionados.size !== 1 ? 's' : ''}
+              </span>
+              <button
+                onClick={() => setSeleccionados(new Set())}
+                style={{
+                  padding: '10px 14px', borderRadius: 8, border: '1px solid #2a2850',
+                  background: 'transparent', color: '#8892b0',
+                  fontSize: 13, cursor: 'pointer',
+                  fontFamily: "'DM Sans', sans-serif", flexShrink: 0,
+                }}
+              >
+                Limpiar
+              </button>
+              <button
+                onClick={handleEliminarMasivo}
+                disabled={eliminandoMasivo}
+                style={{
+                  padding: '10px 16px', borderRadius: 8, border: 'none',
+                  background: eliminandoMasivo ? '#666' : '#EF4444', color: '#fff',
+                  fontSize: 13, fontWeight: 700, cursor: eliminandoMasivo ? 'not-allowed' : 'pointer',
+                  fontFamily: "'DM Sans', sans-serif", flexShrink: 0,
+                }}
+              >
+                {eliminandoMasivo ? 'Eliminando...' : `🗑️ Eliminar (${seleccionados.size})`}
+              </button>
+            </div>
+          ) : totalEquipos > 0 && (
+            <button
+              onClick={seleccionarTodos}
+              style={{
+                padding: '10px 14px', borderRadius: 8, border: '1px solid #2a2850',
+                background: 'transparent', color: '#8892b0',
+                fontSize: 13, cursor: 'pointer',
+                fontFamily: "'DM Sans', sans-serif", flexShrink: 0,
+              }}
+            >
+              ☑️ Seleccionar todos
+            </button>
+          )}
+
+          <button
+            onClick={handleExportarEquipos}
+            disabled={exportando || equipos.length === 0}
+            style={{
+              padding: '10px 16px', borderRadius: 8, border: '1px solid #2a2850',
+              background: 'transparent', color: exportando ? '#666' : '#8892b0',
+              fontSize: 13, cursor: exportando || equipos.length === 0 ? 'not-allowed' : 'pointer',
+              fontFamily: "'DM Sans', sans-serif", flexShrink: 0,
+            }}
+          >
+            {exportando ? '📥 Exportando...' : '📥 Exportar Excel'}
+          </button>
+
           <button
             onClick={() => navigate('/admin/equipos/nuevo')}
             style={{
@@ -323,6 +457,8 @@ export default function ListaEquipos() {
                 onEdit={(id) => navigate(`/admin/equipos/${id}/editar`)}
                 onDelete={(id) => setConfirmId(id)}
                 onQR={(equipo) => setQrEquipo(equipo)}
+                seleccionados={seleccionados}
+                onToggleSelect={toggleSeleccion}
               />
             ))}
           </div>

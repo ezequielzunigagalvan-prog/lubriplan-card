@@ -89,6 +89,32 @@ export function AdminProvider({ children }) {
     }
   }, [])
 
+  const eliminarEquiposMasivo = useCallback(async (ids) => {
+    try {
+      const res = await api.deleteEquiposMasivo(ids)
+      setEquipos(prev => prev.filter(e => !ids.includes(e.id)))
+      return res.eliminados
+    } catch (err) {
+      console.error('[eliminarEquiposMasivo]', err)
+      throw err
+    }
+  }, [])
+
+  const exportarEquipos = useCallback(async () => {
+    try {
+      const blob = await api.exportarEquipos()
+      const url = window.URL.createObjectURL(blob)
+      const link = document.createElement('a')
+      link.href = url
+      link.download = `equipos-${new Date().toISOString().slice(0, 10)}.xlsx`
+      link.click()
+      window.URL.revokeObjectURL(url)
+    } catch (err) {
+      console.error('[exportarEquipos]', err)
+      throw err
+    }
+  }, [])
+
   // ── Puntos ──────────────────────────────────────────────────────────────────
   const actualizarPuntos = useCallback(async (equipoId, puntos) => {
     try {
@@ -182,7 +208,7 @@ export function AdminProvider({ children }) {
   return (
     <AdminContext.Provider value={{
       isLoggedIn, login, logout,
-      equipos, crearEquipo, editarEquipo, eliminarEquipo,
+      equipos, crearEquipo, editarEquipo, eliminarEquipo, eliminarEquiposMasivo, exportarEquipos,
       actualizarPuntos, actualizarImagenesEquipo,
       tecnicos, crearTecnico, editarTecnico, eliminarTecnico, toggleTecnico,
       lubricantes, crearLubricante, editarLubricante, eliminarLubricante,

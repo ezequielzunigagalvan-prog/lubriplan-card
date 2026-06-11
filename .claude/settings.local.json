@@ -34,7 +34,9 @@
       "Bash(taskkill /f /im node.exe)",
       "Bash(del \"src\\\\screens\\\\SyncPage.jsx\" \"src\\\\utils\\\\imageStore.js\")",
       "Bash(Remove-Item \"C:\\\\Users\\\\ferga\\\\Documents\\\\lubriplan-card\\\\src\\\\screens\\\\SyncPage.jsx\" -ErrorAction SilentlyContinue)",
-      "Bash(Remove-Item \"C:\\\\Users\\\\ferga\\\\Documents\\\\lubriplan-card\\\\src\\\\utils\\\\imageStore.js\" -ErrorAction SilentlyContinue)"
+      "Bash(Remove-Item \"C:\\\\Users\\\\ferga\\\\Documents\\\\lubriplan-card\\\\src\\\\utils\\\\imageStore.js\" -ErrorAction SilentlyContinue)",
+      "Skill(run)",
+      "Bash(npm list *)"
     ]
   }
 }

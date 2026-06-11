@@ -83,6 +83,22 @@ export async function deleteEquipo(id) {
   }))
 }
 
+export async function deleteEquiposMasivo(ids) {
+  return handle(await fetch(`${BASE}/api/card/equipos/eliminar-masivo`, {
+    method: 'POST',
+    headers: authHeaders(),
+    body: JSON.stringify({ ids }),
+  }))
+}
+
+export async function exportarEquipos() {
+  const token = localStorage.getItem('adminToken')
+  const headers = token ? { Authorization: `Bearer ${token}` } : {}
+  const res = await fetch(`${BASE}/api/card/equipos/exportar`, { headers })
+  if (!res.ok) throw new Error(`Error ${res.status}`)
+  return res.blob()
+}
+
 // ── Puntos ────────────────────────────────────────────────────────────────────
 
 export async function updatePuntos(equipoId, puntos) {

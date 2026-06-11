@@ -4,6 +4,8 @@ const pool       = require('../db/pool')
 const { requireAuth, signToken } = require('../middleware/auth')
 const upload     = require('../middleware/uploadCard')
 const { uploadBuffer, deleteImage } = require('../lib/cloudinary')
+const { authLimiter, pinLimiter } = require('../middleware/rateLimiter')
+const XLSX = require('xlsx')
 
 const router = express.Router()
 
@@ -37,6 +39,7 @@ async function buildEquipo(id) {
     imagen:      e.imagen,
     descripcion: e.descripcion,
     activo:      e.activo,
+    createdAt:   e.created_at,
     imagenes,
     imagenUrl:   imagenes[0]?.url || null,
     puntos: pts.rows.map(p => ({
@@ -58,7 +61,7 @@ async function buildEquipo(id) {
 // ── Auth ─────────────────────────────────────────────────────────────────────
 
 // Login admin → devuelve JWT
-router.post('/auth/admin', async (req, res) => {
+router.post('/auth/admin', authLimiter, async (req, res) => {
   const { email, password } = req.body || {}
   if (
     email    !== (process.env.ADMIN_EMAIL    || 'admin@lubriplan.com') ||
@@ -71,7 +74,7 @@ router.post('/auth/admin', async (req, res) => {
 })
 
 // Validar PIN técnico — PÚBLICO
-router.post('/auth/pin', async (req, res) => {
+router.post('/auth/pin', pinLimiter, async (req, res) => {
   const { pin } = req.body || {}
   if (!pin || !/^\d{4}$/.test(pin)) {
     return res.status(400).json({ error: 'PIN debe ser 4 dígitos' })
@@ -106,6 +109,46 @@ router.get('/equipos', requireAuth, async (_req, res) => {
   } catch (err) {
     console.error('[GET equipos]', err)
     res.status(500).json({ error: 'Error obteniendo equipos' })
+  }
+})
+
+// Exportar todos a Excel — requiere auth
+router.get('/equipos/exportar', requireAuth, async (_req, res) => {
+  try {
+    const { rows } = await pool.query(
+      'SELECT id FROM equipos_card ORDER BY area, nombre'
+    )
+    const equipos = await Promise.all(rows.map(r => buildEquipo(r.id)))
+
+    const datos = equipos.filter(Boolean).map(e => ({
+      'Código': e.codigo || '',
+      'Nombre': e.nombre,
+      'Área': e.area,
+      'Sub-área': e.subArea || '',
+      'Estado': e.activo ? 'Activo' : 'Inactivo',
+      'Puntos': e.puntos?.length || 0,
+      'Imágenes': e.imagenes?.length || 0,
+      'Creado': new Date(e.createdAt || Date.now()).toLocaleDateString('es-AR'),
+    }))
+
+    const ws = XLSX.utils.json_to_sheet(datos)
+    ws['!cols'] = [
+      { wch: 12 }, { wch: 30 }, { wch: 20 },
+      { wch: 15 }, { wch: 10 }, { wch: 8 },
+      { wch: 8 }, { wch: 12 }
+    ]
+    const wb = XLSX.utils.book_new()
+    XLSX.utils.book_append_sheet(wb, ws, 'Equipos')
+
+    const buffer = XLSX.write(wb, { bookType: 'xlsx', type: 'buffer' })
+    const timestamp = new Date().toISOString().slice(0, 10)
+
+    res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+    res.setHeader('Content-Disposition', `attachment; filename="equipos-${timestamp}.xlsx"`)
+    res.send(buffer)
+  } catch (err) {
+    console.error('[GET exportar]', err)
+    res.status(500).json({ error: 'Error exportando equipos' })
   }
 })
 
@@ -198,6 +241,32 @@ router.delete('/equipos/:id', requireAuth, async (req, res) => {
   } catch (err) {
     console.error('[DELETE equipo]', err)
     res.status(500).json({ error: 'Error eliminando equipo' })
+  }
+})
+
+// Eliminar múltiples equipos — requiere auth
+router.post('/equipos/eliminar-masivo', requireAuth, async (req, res) => {
+  const { ids } = req.body || {}
+  if (!Array.isArray(ids) || !ids.length) {
+    return res.status(400).json({ error: 'Se requiere un array de IDs' })
+  }
+  if (ids.length > 500) {
+    return res.status(400).json({ error: 'Máximo 500 equipos por operación' })
+  }
+  try {
+    const { rows: imgs } = await pool.query(
+      'SELECT DISTINCT filename FROM imagenes_equipo_card WHERE equipo_id = ANY($1)',
+      [ids]
+    )
+    await Promise.allSettled(imgs.map(({ filename }) => filename && deleteImage(filename)))
+    const { rowCount } = await pool.query(
+      'DELETE FROM equipos_card WHERE id = ANY($1)',
+      [ids]
+    )
+    res.json({ eliminados: rowCount })
+  } catch (err) {
+    console.error('[DELETE masivo]', err)
+    res.status(500).json({ error: 'Error eliminando equipos' })
   }
 })
 
