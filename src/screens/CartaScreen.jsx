@@ -566,7 +566,8 @@ export default function CartaScreen() {
                       transition: 'width 0.2s, background 0.2s',
                     }}
                   />
-              ))}
+                ))}
+              </div>
             </div>
           </>
         )}
