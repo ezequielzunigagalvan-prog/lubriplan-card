@@ -276,6 +276,22 @@ router.post('/equipos/eliminar-masivo', requireAuth, async (req, res) => {
 router.put('/equipos/:id/puntos', requireAuth, async (req, res) => {
   const { puntos } = req.body || {}
   try {
+    // Validar puntos
+    if (Array.isArray(puntos)) {
+      for (const p of puntos) {
+        if (!p.nombre?.trim()) return res.status(400).json({ error: 'Punto sin nombre' })
+        const cantidad = parseFloat(p.cantidad) || 0
+        if (p.cantidad !== undefined && p.cantidad !== null && p.cantidad !== '' && cantidad <= 0) {
+          return res.status(400).json({ error: `Cantidad debe ser > 0 (punto: ${p.nombre})` })
+        }
+        const x = parseFloat(p.x) || 0
+        const y = parseFloat(p.y) || 0
+        if (x < 0 || x > 100 || y < 0 || y > 100) {
+          return res.status(400).json({ error: `Posición inválida X,Y (punto: ${p.nombre}). Debe estar entre 0 y 100.` })
+        }
+      }
+    }
+
     await pool.query('DELETE FROM puntos_lubricacion_card WHERE equipo_id=$1', [req.params.id])
     if (Array.isArray(puntos) && puntos.length) {
       for (const p of puntos) {
@@ -290,11 +306,11 @@ router.put('/equipos/:id/puntos', requireAuth, async (req, res) => {
             p.nombre,
             p.frecuencia || null,
             p.lubricante || null,
-            p.cantidad   || 0,
+            parseFloat(p.cantidad) || 0,
             p.unidad     || null,
             p.metodo     || null,
-            p.x || 0,
-            p.y || 0,
+            parseFloat(p.x) || 0,
+            parseFloat(p.y) || 0,
             p.notas || null,
           ]
         )

@@ -526,19 +526,23 @@ export default function CartaScreen() {
 
             <div style={{
               position: 'absolute', bottom: 14, left: 0, right: 0,
-              display: 'flex', justifyContent: 'center', gap: 6, zIndex: 12,
+              display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 12, zIndex: 12,
             }}>
-              {imagenes.map((_, i) => (
-                <button
-                  key={i}
-                  onClick={() => setImgActivaIdx(i)}
-                  style={{
-                    width: i === imgActivaIdx ? 20 : 6, height: 6, borderRadius: 3,
-                    background: i === imgActivaIdx ? ACCENT_L : 'rgba(255,255,255,0.3)',
-                    border: 'none', cursor: 'pointer', padding: 0,
-                    transition: 'width 0.2s, background 0.2s',
-                  }}
-                />
+              <span style={{ fontSize: 11, color: TEXT_SUB, fontWeight: 600 }}>
+                Imagen {imgActivaIdx + 1}/{imagenes.length}
+              </span>
+              <div style={{ display: 'flex', gap: 6 }}>
+                {imagenes.map((_, i) => (
+                  <button
+                    key={i}
+                    onClick={() => setImgActivaIdx(i)}
+                    style={{
+                      width: i === imgActivaIdx ? 20 : 6, height: 6, borderRadius: 3,
+                      background: i === imgActivaIdx ? ACCENT_L : 'rgba(255,255,255,0.3)',
+                      border: 'none', cursor: 'pointer', padding: 0,
+                      transition: 'width 0.2s, background 0.2s',
+                    }}
+                  />
               ))}
             </div>
           </>

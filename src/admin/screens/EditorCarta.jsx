@@ -49,10 +49,24 @@ function PuntoForm({ punto, onSave, onDelete, onClose, lubricantes }) {
     notas:     punto?.notas     || '',
   })
   const [confirmDelete, setConfirmDelete] = useState(false)
+  const [error, setError] = useState('')
   const set = (k) => (e) => setForm(p => ({ ...p, [k]: e.target.value }))
   const handleSave = () => {
-    if (!form.nombre.trim()) return
-    onSave({ ...punto, ...form, cantidad: parseFloat(form.cantidad) || 0 })
+    setError('')
+    if (!form.nombre.trim()) {
+      setError('El nombre del punto es requerido')
+      return
+    }
+    const cantidad = parseFloat(form.cantidad) || 0
+    if (form.cantidad && cantidad <= 0) {
+      setError('La cantidad debe ser mayor a 0')
+      return
+    }
+    if (form.cantidad && cantidad > 99999) {
+      setError('La cantidad es demasiado grande')
+      return
+    }
+    onSave({ ...punto, ...form, cantidad })
   }
 
   return (
@@ -138,9 +152,14 @@ function PuntoForm({ punto, onSave, onDelete, onClose, lubricantes }) {
       </div>
 
       <div style={{ padding: '12px 16px', borderTop: '1px solid #2a2850', display: 'flex', flexDirection: 'column', gap: 8, flexShrink: 0 }}>
+        {error && (
+          <div style={{ background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.3)', borderRadius: 6, padding: '8px 12px', color: '#EF4444', fontSize: 12 }}>
+            {error}
+          </div>
+        )}
         <button
           onClick={handleSave}
-          disabled={!form.nombre.trim()}
+          disabled={!form.nombre.trim() || !!error}
           style={{
             padding: '11px',
             background: form.nombre.trim() ? '#6366f1' : '#2a2850',
