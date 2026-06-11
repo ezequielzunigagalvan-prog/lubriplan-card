@@ -391,6 +391,75 @@ router.delete('/equipos/:id/imagenes/:imgId', requireAuth, async (req, res) => {
   }
 })
 
+// ── Histórico de Lubricaciones ────────────────────────────────────────────
+
+// Registrar lubricación — requiere auth
+router.post('/lubricaciones/registrar', requireAuth, async (req, res) => {
+  const { puntoId, equipoId, tecnicoId, notas } = req.body || {}
+  if (!puntoId || !equipoId || !tecnicoId) {
+    return res.status(400).json({ error: 'Faltan campos requeridos' })
+  }
+  try {
+    const { rows } = await pool.query(
+      `INSERT INTO lubricaciones_historial (punto_id, equipo_id, tecnico_id, notas)
+       VALUES ($1,$2,$3,$4) RETURNING *`,
+      [puntoId, equipoId, tecnicoId, notas || null]
+    )
+    res.status(201).json(rows[0])
+  } catch (err) {
+    console.error('[POST lubricacion]', err)
+    res.status(500).json({ error: 'Error registrando lubricación' })
+  }
+})
+
+// Obtener histórico de equipo — requiere auth
+router.get('/equipos/:id/lubricaciones', requireAuth, async (req, res) => {
+  try {
+    const { rows } = await pool.query(
+      `SELECT * FROM lubricaciones_historial
+       WHERE equipo_id=$1
+       ORDER BY fecha DESC, hora DESC LIMIT 50`,
+      [req.params.id]
+    )
+    res.json(rows.map(r => ({
+      id: r.id,
+      puntoId: r.punto_id,
+      equipoId: r.equipo_id,
+      tecnicoId: r.tecnico_id,
+      fecha: r.fecha,
+      hora: r.hora,
+      notas: r.notas,
+      createdAt: r.created_at,
+    })))
+  } catch (err) {
+    console.error('[GET lubricaciones]', err)
+    res.status(500).json({ error: 'Error obteniendo histórico' })
+  }
+})
+
+// Obtener última lubricación de un punto — requiere auth
+router.get('/puntos/:id/ultima-lubricacion', requireAuth, async (req, res) => {
+  try {
+    const { rows } = await pool.query(
+      `SELECT * FROM lubricaciones_historial
+       WHERE punto_id=$1
+       ORDER BY fecha DESC, hora DESC LIMIT 1`,
+      [req.params.id]
+    )
+    if (rows.length === 0) return res.json(null)
+    const r = rows[0]
+    res.json({
+      id: r.id,
+      fecha: r.fecha,
+      hora: r.hora,
+      notas: r.notas,
+    })
+  } catch (err) {
+    console.error('[GET ultima-lubricacion]', err)
+    res.status(500).json({ error: 'Error obteniendo última lubricación' })
+  }
+})
+
 // ── Técnicos ───────────────────────────────────────────────────────────────────
 
 router.get('/tecnicos', requireAuth, async (_req, res) => {

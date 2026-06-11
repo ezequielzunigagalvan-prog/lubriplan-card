@@ -427,7 +427,10 @@ export default function CartaScreen() {
           display: 'flex', alignItems: 'center', gap: 10,
         }}>
           <button
-            onClick={() => navigate(-1)}
+            onClick={() => {
+              sessionStorage.removeItem('tecnicoActivoId')
+              navigate('/pin', { replace: true })
+            }}
             style={{
               width: 38, height: 38, borderRadius: 10,
               background: 'rgba(12,10,30,0.8)',
@@ -437,6 +440,7 @@ export default function CartaScreen() {
               display: 'flex', alignItems: 'center', justifyContent: 'center',
               cursor: 'pointer', flexShrink: 0, color: TEXT,
             }}
+            title="Volver"
           >
             <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
               <path d="M12 3L6 9L12 15" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
@@ -478,12 +482,31 @@ export default function CartaScreen() {
               display: 'flex', alignItems: 'center', justifyContent: 'center',
               cursor: 'pointer', flexShrink: 0, color: 'rgba(255,255,255,0.55)',
             }}
+            title="Imprimir"
           >
             <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
               <path d="M5 6V2h8v4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
               <rect x="2" y="6" width="14" height="9" rx="2" stroke="currentColor" strokeWidth="1.5" />
               <path d="M5 11h8M5 14h5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
             </svg>
+          </button>
+
+          <button
+            onClick={() => {
+              sessionStorage.removeItem('tecnicoActivoId')
+              navigate('/pin', { replace: true })
+            }}
+            style={{
+              padding: '8px 14px', borderRadius: 10,
+              background: 'rgba(239,68,68,0.15)',
+              border: '1px solid rgba(239,68,68,0.3)',
+              color: '#EF4444', fontSize: 12, fontWeight: 600,
+              cursor: 'pointer', flexShrink: 0,
+              fontFamily: "'DM Sans', sans-serif",
+            }}
+            title="Cerrar sesión"
+          >
+            Salir
           </button>
         </div>
 

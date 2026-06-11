@@ -172,3 +172,25 @@ export async function toggleTecnico(id) {
     headers: authHeaders(),
   }))
 }
+
+// ── Lubricaciones ─────────────────────────────────────────────────────────
+
+export async function registrarLubricacion(puntoId, equipoId, tecnicoId, notas) {
+  return handle(await fetch(`${BASE}/api/card/lubricaciones/registrar`, {
+    method: 'POST',
+    headers: authHeaders(),
+    body: JSON.stringify({ puntoId, equipoId, tecnicoId, notas }),
+  }))
+}
+
+export async function obtenerHistoricoEquipo(equipoId) {
+  return handle(await fetch(`${BASE}/api/card/equipos/${equipoId}/lubricaciones`, {
+    headers: authHeaders(),
+  }))
+}
+
+export async function obtenerUltimaLubricacion(puntoId) {
+  return handle(await fetch(`${BASE}/api/card/puntos/${puntoId}/ultima-lubricacion`, {
+    headers: authHeaders(),
+  }))
+}

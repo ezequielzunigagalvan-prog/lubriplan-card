@@ -80,6 +80,25 @@ async function migrate() {
       ALTER TABLE equipos_card ADD COLUMN IF NOT EXISTS sub_area VARCHAR(255)
     `)
 
+    // Tabla de histórico de lubricaciones
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS lubricaciones_historial (
+        id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        punto_id    UUID NOT NULL REFERENCES puntos_lubricacion_card(id) ON DELETE CASCADE,
+        equipo_id   UUID NOT NULL REFERENCES equipos_card(id) ON DELETE CASCADE,
+        tecnico_id  UUID REFERENCES tecnicos_card(id) ON DELETE SET NULL,
+        fecha       DATE NOT NULL DEFAULT CURRENT_DATE,
+        hora        TIME,
+        notas       TEXT,
+        created_at  TIMESTAMP DEFAULT NOW()
+      )
+    `)
+
+    // Índices para queries rápidas
+    await client.query(`CREATE INDEX IF NOT EXISTS idx_lubricaciones_equipo ON lubricaciones_historial(equipo_id)`)
+    await client.query(`CREATE INDEX IF NOT EXISTS idx_lubricaciones_punto ON lubricaciones_historial(punto_id)`)
+    await client.query(`CREATE INDEX IF NOT EXISTS idx_lubricaciones_fecha ON lubricaciones_historial(fecha)`)
+
     await client.query('COMMIT')
     console.log('[DB] Migración completada correctamente')
   } catch (err) {

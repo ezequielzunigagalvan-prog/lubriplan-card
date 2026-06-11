@@ -286,6 +286,37 @@ export default function BottomSheet({ punto, globalIndex, onClose }) {
               </p>
             </div>
           )}
+
+          {/* Botón Lubricado hoy */}
+          <button
+            style={{
+              padding: '14px 16px',
+              background: '#1c3a2a',
+              border: '1px solid rgba(34,197,94,0.3)',
+              borderRadius: 14,
+              color: '#22C55E',
+              fontSize: 14,
+              fontWeight: 700,
+              fontFamily: "'DM Sans', sans-serif",
+              cursor: 'pointer',
+              transition: 'background 0.2s',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: 8,
+            }}
+            onMouseEnter={e => e.currentTarget.style.background = '#1f4a36'}
+            onMouseLeave={e => e.currentTarget.style.background = '#1c3a2a'}
+            onClick={() => {
+              alert('✅ Lubricación registrada hoy')
+              onClose()
+            }}
+          >
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <polyline points="20 6 9 17 4 12"></polyline>
+            </svg>
+            Marcar como lubricado hoy
+          </button>
         </div>
       </div>
     </>

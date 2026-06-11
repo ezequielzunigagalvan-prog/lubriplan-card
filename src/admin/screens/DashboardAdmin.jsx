@@ -31,10 +31,19 @@ function CambiarCredencialesModal({ onClose, onSave }) {
   const [ok, setOk] = useState(false)
   const set = (k) => (e) => setForm(p => ({ ...p, [k]: e.target.value }))
 
+  const validatePassword = (pwd) => {
+    if (pwd.length < 8) return 'Mínimo 8 caracteres'
+    if (!/[A-Z]/.test(pwd)) return 'Debe contener al menos 1 mayúscula (A-Z)'
+    if (!/[0-9]/.test(pwd)) return 'Debe contener al menos 1 número (0-9)'
+    if (!/[!@#$%^&*]/.test(pwd)) return 'Debe contener al menos 1 símbolo (!@#$%^&*)'
+    return null
+  }
+
   const handleSave = () => {
     if (!form.email.trim() || !form.password) { setError('Completa todos los campos'); return }
     if (form.password !== form.confirmar) { setError('Las contraseñas no coinciden'); return }
-    if (form.password.length < 6) { setError('Mínimo 6 caracteres'); return }
+    const pwdError = validatePassword(form.password)
+    if (pwdError) { setError(pwdError); return }
     onSave(form.email.trim(), form.password)
     setOk(true)
     setTimeout(onClose, 1200)
@@ -55,12 +64,30 @@ function CambiarCredencialesModal({ onClose, onSave }) {
           <div style={{ textAlign: 'center', padding: '20px 0', color: '#22C55E', fontSize: 15, fontWeight: 600 }}>✓ Credenciales actualizadas</div>
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-            {[{ label: 'Nuevo email', key: 'email', type: 'email' }, { label: 'Nueva contraseña', key: 'password', type: 'password' }, { label: 'Confirmar contraseña', key: 'confirmar', type: 'password' }].map(({ label, key, type }) => (
-              <div key={key}>
-                <label style={{ display: 'block', color: '#8892b0', fontSize: 11, marginBottom: 5, textTransform: 'uppercase', letterSpacing: 0.5 }}>{label}</label>
-                <input type={type} value={form[key]} onChange={set(key)} style={inp} />
-              </div>
-            ))}
+            {[{ label: 'Nuevo email', key: 'email', type: 'email' }, { label: 'Nueva contraseña', key: 'password', type: 'password' }, { label: 'Confirmar contraseña', key: 'confirmar', type: 'password' }].map(({ label, key, type }) => {
+              const pwd = form.password
+              const requirements = key === 'password' && pwd ? [
+                { met: pwd.length >= 8, text: '8+ caracteres' },
+                { met: /[A-Z]/.test(pwd), text: '1 mayúscula' },
+                { met: /[0-9]/.test(pwd), text: '1 número' },
+                { met: /[!@#$%^&*]/.test(pwd), text: '1 símbolo' },
+              ] : null
+              return (
+                <div key={key}>
+                  <label style={{ display: 'block', color: '#8892b0', fontSize: 11, marginBottom: 5, textTransform: 'uppercase', letterSpacing: 0.5 }}>{label}</label>
+                  <input type={type} value={form[key]} onChange={set(key)} style={inp} />
+                  {requirements && (
+                    <div style={{ marginTop: 6, display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 6 }}>
+                      {requirements.map((req, i) => (
+                        <span key={i} style={{ fontSize: 10, color: req.met ? '#22C55E' : '#4a5070' }}>
+                          {req.met ? '✓' : '○'} {req.text}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )
+            })}
             {error && <div style={{ background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.3)', borderRadius: 7, padding: '8px 12px', color: '#EF4444', fontSize: 13 }}>{error}</div>}
             <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end', marginTop: 4 }}>
               <button onClick={onClose} style={{ padding: '9px 18px', borderRadius: 7, border: '1px solid #2a2850', background: 'transparent', color: '#8892b0', cursor: 'pointer', fontSize: 13 }}>Cancelar</button>
