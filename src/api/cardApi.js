@@ -194,3 +194,9 @@ export async function obtenerUltimaLubricacion(puntoId) {
     headers: authHeaders(),
   }))
 }
+
+export async function obtenerLubricacionesRecientes() {
+  return handle(await fetch(`${BASE}/api/card/lubricaciones/recientes`, {
+    headers: authHeaders(),
+  }))
+}

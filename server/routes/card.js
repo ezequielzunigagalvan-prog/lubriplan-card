@@ -412,6 +412,37 @@ router.post('/lubricaciones/registrar', requireAuth, async (req, res) => {
   }
 })
 
+// Obtener lubricaciones recientes — requiere auth
+router.get('/lubricaciones/recientes', requireAuth, async (req, res) => {
+  try {
+    const { rows } = await pool.query(`
+      SELECT
+        lh.id, lh.fecha, lh.hora,
+        p.nombre as punto_nombre,
+        e.nombre as equipo_nombre, e.id as equipo_id,
+        t.nombre as tecnico_nombre
+      FROM lubricaciones_historial lh
+      JOIN puntos_lubricacion_card p ON lh.punto_id = p.id
+      JOIN equipos_card e ON lh.equipo_id = e.id
+      LEFT JOIN tecnicos_card t ON lh.tecnico_id = t.id
+      ORDER BY lh.fecha DESC, lh.hora DESC
+      LIMIT 20
+    `)
+    res.json(rows.map(r => ({
+      id: r.id,
+      fecha: r.fecha,
+      hora: r.hora,
+      puntoNombre: r.punto_nombre,
+      equipoNombre: r.equipo_nombre,
+      equipoId: r.equipo_id,
+      tecnicoNombre: r.tecnico_nombre,
+    })))
+  } catch (err) {
+    console.error('[GET lubricaciones recientes]', err)
+    res.status(500).json({ error: 'Error obteniendo histórico' })
+  }
+})
+
 // Obtener histórico de equipo — requiere auth
 router.get('/equipos/:id/lubricaciones', requireAuth, async (req, res) => {
   try {
