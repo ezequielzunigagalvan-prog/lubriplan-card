@@ -443,28 +443,56 @@ router.get('/lubricaciones/recientes', requireAuth, async (req, res) => {
   }
 })
 
-// Obtener histórico de equipo — requiere auth
+// Obtener histórico de equipo con puntos — requiere auth
 router.get('/equipos/:id/lubricaciones', requireAuth, async (req, res) => {
   try {
-    const { rows } = await pool.query(
-      `SELECT * FROM lubricaciones_historial
-       WHERE equipo_id=$1
-       ORDER BY fecha DESC, hora DESC LIMIT 50`,
-      [req.params.id]
-    )
+    const { rows } = await pool.query(`
+      SELECT
+        lh.id, lh.fecha, lh.hora,
+        p.nombre as punto_nombre,
+        t.nombre as tecnico_nombre
+      FROM lubricaciones_historial lh
+      JOIN puntos_lubricacion_card p ON lh.punto_id = p.id
+      LEFT JOIN tecnicos_card t ON lh.tecnico_id = t.id
+      WHERE lh.equipo_id=$1
+      ORDER BY lh.fecha DESC, lh.hora DESC
+      LIMIT 50
+    `, [req.params.id])
     res.json(rows.map(r => ({
       id: r.id,
-      puntoId: r.punto_id,
-      equipoId: r.equipo_id,
-      tecnicoId: r.tecnico_id,
+      puntoNombre: r.punto_nombre,
+      tecnicoNombre: r.tecnico_nombre,
       fecha: r.fecha,
       hora: r.hora,
-      notas: r.notas,
-      createdAt: r.created_at,
     })))
   } catch (err) {
-    console.error('[GET lubricaciones]', err)
+    console.error('[GET lubricaciones equipo]', err)
     res.status(500).json({ error: 'Error obteniendo histórico' })
+  }
+})
+
+// Obtener estadísticas de lubricación por equipo (últimos 30 días)
+router.get('/equipos/:id/estadisticas-lubricacion', requireAuth, async (req, res) => {
+  try {
+    const { rows } = await pool.query(`
+      SELECT
+        DATE(lh.fecha) as fecha,
+        COUNT(*) as total_lubricaciones,
+        COUNT(DISTINCT lh.punto_id) as puntos_unicos
+      FROM lubricaciones_historial lh
+      WHERE lh.equipo_id=$1
+        AND lh.fecha >= CURRENT_DATE - INTERVAL '30 days'
+      GROUP BY DATE(lh.fecha)
+      ORDER BY fecha DESC
+    `, [req.params.id])
+    res.json(rows.map(r => ({
+      fecha: r.fecha,
+      totalLubricaciones: parseInt(r.total_lubricaciones),
+      puntosUnicos: parseInt(r.puntos_unicos),
+    })))
+  } catch (err) {
+    console.error('[GET estadisticas]', err)
+    res.status(500).json({ error: 'Error obteniendo estadísticas' })
   }
 })
 

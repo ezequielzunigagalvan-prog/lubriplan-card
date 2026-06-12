@@ -2,7 +2,7 @@ import { useMemo, useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import AdminLayout from '../components/AdminLayout'
 import { useAdmin } from '../context/AdminContext'
-import { obtenerLubricacionesRecientes } from '../../api/cardApi'
+import { obtenerLubricacionesRecientes, obtenerHistoricoEquipo, obtenerEstadisticasLubricacion } from '../../api/cardApi'
 
 const FREQ_ORDER = ['DAILY', 'WEEKLY', 'BIWEEKLY', 'MONTHLY', 'BIMONTHLY', 'QUARTERLY', 'SEMIANNUAL', 'ANNUAL']
 const FREQ_META = {
@@ -145,12 +145,26 @@ export default function DashboardAdmin() {
   const navigate = useNavigate()
   const [showCreds, setShowCreds] = useState(false)
   const [lubricacionesRecientes, setLubricacionesRecientes] = useState([])
+  const [equipoSeleccionado, setEquipoSeleccionado] = useState(null)
+  const [historicoEquipo, setHistoricoEquipo] = useState([])
+  const [estadisticasEquipo, setEstadisticasEquipo] = useState([])
 
   useEffect(() => {
     obtenerLubricacionesRecientes()
       .then(setLubricacionesRecientes)
       .catch(err => console.error('Error cargando lubricaciones:', err))
   }, [])
+
+  useEffect(() => {
+    if (!equipoSeleccionado) return
+    Promise.all([
+      obtenerHistoricoEquipo(equipoSeleccionado),
+      obtenerEstadisticasLubricacion(equipoSeleccionado)
+    ]).then(([hist, est]) => {
+      setHistoricoEquipo(hist || [])
+      setEstadisticasEquipo(est || [])
+    }).catch(err => console.error('Error cargando datos equipo:', err))
+  }, [equipoSeleccionado])
 
   const stats = useMemo(() => {
     const activos = equipos.filter(e => e.activo !== false)
@@ -394,6 +408,122 @@ export default function DashboardAdmin() {
                     </div>
                   ))}
                 </div>
+              )}
+            </div>
+
+            {/* Histórico por Equipo */}
+            <div style={{ background: '#13112a', borderRadius: 12, border: '1px solid #2a2850', padding: '16px' }}>
+              <p style={{ color: '#e8eeff', fontSize: 15, fontWeight: 700, margin: '0 0 12px' }}>
+                📊 Histórico de Lubricación por Equipo
+              </p>
+
+              {/* Selector de Equipo */}
+              <select
+                value={equipoSeleccionado || ''}
+                onChange={(e) => setEquipoSeleccionado(e.target.value || null)}
+                style={{
+                  width: '100%',
+                  padding: '10px 12px',
+                  background: '#0c0a1e',
+                  border: '1px solid #2a2850',
+                  borderRadius: 8,
+                  color: '#e8eeff',
+                  fontFamily: "'DM Sans', sans-serif",
+                  fontSize: 13,
+                  marginBottom: 16,
+                  cursor: 'pointer',
+                }}
+              >
+                <option value="">Selecciona un equipo...</option>
+                {equipos.filter(e => e.activo !== false).map(e => (
+                  <option key={e.id} value={e.id}>
+                    {e.nombre} ({e.puntos?.length || 0} puntos)
+                  </option>
+                ))}
+              </select>
+
+              {!equipoSeleccionado ? (
+                <p style={{ color: '#4a5070', fontSize: 13, margin: 0 }}>Selecciona un equipo para ver su histórico</p>
+              ) : (
+                <>
+                  {/* Gráfico de Tendencia */}
+                  {estadisticasEquipo.length > 0 && (
+                    <div style={{ background: '#0c0a1e', borderRadius: 8, padding: 12, marginBottom: 16, border: '1px solid #2a2850' }}>
+                      <p style={{ color: '#8892b0', fontSize: 11, fontWeight: 600, margin: '0 0 10px', textTransform: 'uppercase' }}>
+                        Últimos 30 días
+                      </p>
+                      <div style={{ display: 'flex', alignItems: 'flex-end', gap: 4, height: 80 }}>
+                        {estadisticasEquipo.reverse().slice(-30).map((stat, i) => {
+                          const maxVal = Math.max(...estadisticasEquipo.map(s => s.totalLubricaciones), 1)
+                          const altura = (stat.totalLubricaciones / maxVal) * 100
+                          return (
+                            <div
+                              key={i}
+                              style={{
+                                flex: 1,
+                                height: `${altura || 5}%`,
+                                background: '#6366f1',
+                                borderRadius: 2,
+                                minHeight: altura > 0 ? 4 : 2,
+                                cursor: 'pointer',
+                                opacity: 0.8,
+                                transition: 'opacity 0.2s',
+                              }}
+                              title={`${stat.fecha}: ${stat.totalLubricaciones} lubricaciones`}
+                              onMouseEnter={(e) => e.currentTarget.style.opacity = '1'}
+                              onMouseLeave={(e) => e.currentTarget.style.opacity = '0.8'}
+                            />
+                          )
+                        })}
+                      </div>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 10, color: '#4a5070', marginTop: 8 }}>
+                        <span>Hace 30 días</span>
+                        <span>Hoy</span>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Tabla de Histórico */}
+                  <div style={{ maxHeight: 200, overflowY: 'auto' }}>
+                    <p style={{ color: '#8892b0', fontSize: 11, fontWeight: 600, margin: '0 0 8px', textTransform: 'uppercase' }}>
+                      Últimas lubricaciones
+                    </p>
+                    {historicoEquipo.length === 0 ? (
+                      <p style={{ color: '#4a5070', fontSize: 12, margin: 0 }}>Sin lubricaciones registradas</p>
+                    ) : (
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                        {historicoEquipo.slice(0, 10).map((hub, i) => (
+                          <div key={i} style={{
+                            background: '#0c0a1e',
+                            borderRadius: 6,
+                            padding: '8px 10px',
+                            border: '1px solid #2a2850',
+                            display: 'flex',
+                            justifyContent: 'space-between',
+                            fontSize: 12,
+                          }}>
+                            <div>
+                              <div style={{ color: '#e8eeff', fontWeight: 600 }}>
+                                {hub.puntoNombre}
+                              </div>
+                              <div style={{ color: '#4a5070', fontSize: 11, marginTop: 1 }}>
+                                {hub.tecnicoNombre || 'Técnico'} • {hub.fecha}
+                              </div>
+                            </div>
+                            <div style={{ color: '#22C55E', fontWeight: 600 }}>
+                              ✓
+                            </div>
+                          </div>
+                        ))}
+                        {historicoEquipo.length > 10 && (
+                          <p style={{ color: '#4a5070', fontSize: 11, margin: '8px 0 0', textAlign: 'center' }}>
+                            +{historicoEquipo.length - 10} más
+                          </p>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                </>
               )}
             </div>
 
