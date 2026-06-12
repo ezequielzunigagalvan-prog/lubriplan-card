@@ -2,11 +2,33 @@ import { useRef } from 'react'
 import { QRCodeSVG, QRCodeCanvas } from 'qrcode.react'
 
 export default function QRModal({ equipo, onClose }) {
-  const baseUrl = import.meta.env.VITE_QR_BASE_URL || window.location.origin
-  // QR apunta al PIN del equipo, NO a la carta directamente
-  // Si la carta cambia, el PIN sigue igual → QR nunca se vuelve obsoleto
-  const url = `${baseUrl}/pin?equipo=${equipo.id}`
+  // Obtener URL base del QR
+  // 1. Primero intenta usar VITE_QR_BASE_URL (variable de entorno - para producción)
+  // 2. Si estamos en localhost, intenta usar la IP local (192.168.x.x)
+  // 3. Si no hay IP local disponible, fallback a localhost (no funcionará en otro dispositivo)
+
+  let baseUrl = import.meta.env.VITE_QR_BASE_URL
   const isLocalhost = ['localhost', '127.0.0.1', ''].includes(window.location.hostname)
+
+  if (!baseUrl) {
+    if (isLocalhost) {
+      // En localhost, obtener IP local desde sessionStorage (si está disponible)
+      // Esta IP se obtiene del servidor backend en el primer fetch
+      const localIp = sessionStorage.getItem('localIp')
+      if (localIp) {
+        baseUrl = `http://${localIp}:5173`
+      } else {
+        // Fallback: intentar obtener la IP local desde window.location
+        // Nota: esto solo funciona si accediste al servidor por IP, no por localhost
+        baseUrl = window.location.origin
+      }
+    } else {
+      // En producción, usar origin (ej: https://tudominio.com)
+      baseUrl = window.location.origin
+    }
+  }
+
+  const url = `${baseUrl}/pin?equipo=${equipo.id}`
   const canvasRef = useRef(null)
 
   const handleDownload = () => {
@@ -72,14 +94,19 @@ export default function QRModal({ equipo, onClose }) {
         {isLocalhost && (
           <div style={{
             background: 'rgba(234,179,8,0.08)', border: '1px solid rgba(234,179,8,0.25)',
-            borderRadius: 8, padding: '10px 14px', marginBottom: 16, textAlign: 'left',
+            borderRadius: 8, padding: '12px 14px', marginBottom: 16, textAlign: 'left',
           }}>
-            <p style={{ color: '#EAB308', fontSize: 12, margin: 0, fontWeight: 600, marginBottom: 4 }}>
-              Solo funciona en este dispositivo
+            <p style={{ color: '#EAB308', fontSize: 12, margin: 0, fontWeight: 600, marginBottom: 6 }}>
+              ⚠️ QR solo funciona en este dispositivo
+            </p>
+            <p style={{ color: '#8892b0', fontSize: 11, margin: 0, lineHeight: 1.5, marginBottom: 8 }}>
+              El QR apunta a <strong>localhost</strong> que no es accesible desde otros dispositivos.
             </p>
             <p style={{ color: '#8892b0', fontSize: 11, margin: 0, lineHeight: 1.5 }}>
-              El QR apunta a <strong>localhost</strong>. Para usarlo en otro dispositivo,
-              desplegá la app en Vercel con el backend en Railway.
+              <strong>Soluciones:</strong><br/>
+              • <strong>Opción 1:</strong> Usa tu IP local: <code>http://192.168.x.x:5173</code><br/>
+              • <strong>Opción 2:</strong> Deploy a Vercel/Railway (producción)<br/>
+              • <strong>Opción 3:</strong> En .env, setea <code>VITE_QR_BASE_URL=http://tu-ip:5173</code>
             </p>
           </div>
         )}
