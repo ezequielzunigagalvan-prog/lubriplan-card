@@ -201,12 +201,6 @@ export async function obtenerLubricacionesRecientes() {
   }))
 }
 
-export async function obtenerHistoricoEquipo(equipoId) {
-  return handle(await fetch(`${BASE}/api/card/equipos/${equipoId}/lubricaciones`, {
-    headers: authHeaders(),
-  }))
-}
-
 export async function obtenerEstadisticasLubricacion(equipoId) {
   return handle(await fetch(`${BASE}/api/card/equipos/${equipoId}/estadisticas-lubricacion`, {
     headers: authHeaders(),
