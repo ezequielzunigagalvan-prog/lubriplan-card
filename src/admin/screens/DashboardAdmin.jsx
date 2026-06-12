@@ -1,7 +1,8 @@
-import { useMemo, useState } from 'react'
+import { useMemo, useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import AdminLayout from '../components/AdminLayout'
 import { useAdmin } from '../context/AdminContext'
+import { obtenerLubricacionesRecientes } from '../../api/cardApi'
 
 const FREQ_ORDER = ['DAILY', 'WEEKLY', 'BIWEEKLY', 'MONTHLY', 'BIMONTHLY', 'QUARTERLY', 'SEMIANNUAL', 'ANNUAL']
 const FREQ_META = {
@@ -143,6 +144,13 @@ export default function DashboardAdmin() {
   const { equipos, tecnicos, cambiarCredenciales } = useAdmin()
   const navigate = useNavigate()
   const [showCreds, setShowCreds] = useState(false)
+  const [lubricacionesRecientes, setLubricacionesRecientes] = useState([])
+
+  useEffect(() => {
+    obtenerLubricacionesRecientes()
+      .then(setLubricacionesRecientes)
+      .catch(err => console.error('Error cargando lubricaciones:', err))
+  }, [])
 
   const stats = useMemo(() => {
     const activos = equipos.filter(e => e.activo !== false)
@@ -349,6 +357,43 @@ export default function DashboardAdmin() {
                     </div>
                   </div>
                 ))
+              )}
+            </div>
+
+            {/* Lubricaciones Recientes */}
+            <div style={{ background: '#13112a', borderRadius: 12, border: '1px solid #2a2850', padding: '16px' }}>
+              <p style={{ color: '#e8eeff', fontSize: 15, fontWeight: 700, margin: '0 0 12px', display: 'flex', alignItems: 'center', gap: 8 }}>
+                ✓ Lubricaciones Recientes
+              </p>
+              {lubricacionesRecientes.length === 0 ? (
+                <p style={{ color: '#4a5070', fontSize: 13, margin: 0 }}>Sin registros aún</p>
+              ) : (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                  {lubricacionesRecientes.map((lub, i) => (
+                    <div key={i} style={{
+                      background: '#0c0a1e',
+                      borderRadius: 8,
+                      padding: '10px 12px',
+                      border: '1px solid #2a2850',
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'center',
+                      fontSize: 12,
+                    }}>
+                      <div style={{ flex: 1 }}>
+                        <div style={{ color: '#e8eeff', fontWeight: 600 }}>
+                          {lub.equipoNombre} · {lub.puntoNombre}
+                        </div>
+                        <div style={{ color: '#4a5070', fontSize: 11, marginTop: 2 }}>
+                          {lub.tecnicoNombre || 'Técnico'} • {lub.fecha}
+                        </div>
+                      </div>
+                      <div style={{ color: '#22C55E', fontWeight: 600, fontSize: 11 }}>
+                        Lubricado
+                      </div>
+                    </div>
+                  ))}
+                </div>
               )}
             </div>
 
