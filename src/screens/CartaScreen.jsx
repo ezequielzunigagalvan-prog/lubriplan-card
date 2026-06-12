@@ -682,6 +682,8 @@ export default function CartaScreen() {
           punto={puntoActivo}
           globalIndex={puntoActivoGlobalIdx}
           onClose={() => setPuntoActivo(null)}
+          equipoId={id}
+          tecnicoId={sessionStorage.getItem('tecnicoActivoId')}
         />
       )}
     </div>

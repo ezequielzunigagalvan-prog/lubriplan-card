@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { FRECUENCIAS, METODOS } from '../data/equipos'
+import { registrarLubricacion } from '../api/cardApi'
 
 function MetodoIcon({ metodo }) {
   const icons = {
@@ -45,11 +46,14 @@ function MetodoIcon({ metodo }) {
   return icons[metodo] || icons.grasa
 }
 
-export default function BottomSheet({ punto, globalIndex, onClose }) {
+export default function BottomSheet({ punto, globalIndex, onClose, equipoId, tecnicoId }) {
   const sheetRef = useRef(null)
   const startYRef = useRef(null)
   const [dragging, setDragging] = useState(false)
   const [translateY, setTranslateY] = useState(0)
+  const [registrando, setRegistrando] = useState(false)
+  const [error, setError] = useState(null)
+  const [exito, setExito] = useState(false)
 
   useEffect(() => {
     const onKeyDown = (e) => {
@@ -291,32 +295,64 @@ export default function BottomSheet({ punto, globalIndex, onClose }) {
           <button
             style={{
               padding: '14px 16px',
-              background: '#1c3a2a',
-              border: '1px solid rgba(34,197,94,0.3)',
+              background: exito ? '#1f6b3f' : registrando ? '#164030' : '#1c3a2a',
+              border: `1px solid ${exito ? 'rgba(34,197,94,0.6)' : 'rgba(34,197,94,0.3)'}`,
               borderRadius: 14,
               color: '#22C55E',
               fontSize: 14,
               fontWeight: 700,
               fontFamily: "'DM Sans', sans-serif",
-              cursor: 'pointer',
-              transition: 'background 0.2s',
+              cursor: registrando ? 'wait' : 'pointer',
+              transition: 'background 0.2s, border 0.2s',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
               gap: 8,
+              opacity: registrando ? 0.7 : 1,
             }}
-            onMouseEnter={e => e.currentTarget.style.background = '#1f4a36'}
-            onMouseLeave={e => e.currentTarget.style.background = '#1c3a2a'}
-            onClick={() => {
-              alert('✅ Lubricación registrada hoy')
-              onClose()
+            onMouseEnter={e => !registrando && (e.currentTarget.style.background = '#1f4a36')}
+            onMouseLeave={e => !registrando && (e.currentTarget.style.background = '#1c3a2a')}
+            onClick={async () => {
+              setRegistrando(true)
+              setError(null)
+              setExito(false)
+              try {
+                const tecId = tecnicoId || sessionStorage.getItem('tecnicoActivoId')
+                if (!tecId || !equipoId || !punto.id) {
+                  throw new Error('Faltan datos para registrar lubricación')
+                }
+                await registrarLubricacion(punto.id, equipoId, tecId, null)
+                setExito(true)
+                setTimeout(() => {
+                  setExito(false)
+                  onClose()
+                }, 1500)
+              } catch (err) {
+                setError(err.message)
+              } finally {
+                setRegistrando(false)
+              }
             }}
+            disabled={registrando}
           >
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <polyline points="20 6 9 17 4 12"></polyline>
+              <polyline points={exito ? '20 6 9 17 4 12' : '20 6 9 17 4 12'}></polyline>
             </svg>
-            Marcar como lubricado hoy
+            {registrando ? 'Registrando...' : exito ? '✓ Registrado' : 'Marcar como lubricado hoy'}
           </button>
+          {error && (
+            <div style={{
+              background: 'rgba(239,68,68,0.1)',
+              border: '1px solid rgba(239,68,68,0.3)',
+              borderRadius: 8,
+              padding: '8px 12px',
+              color: '#EF4444',
+              fontSize: 12,
+              marginTop: 8,
+            }}>
+              {error}
+            </div>
+          )}
         </div>
       </div>
     </>
