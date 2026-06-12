@@ -36,7 +36,9 @@
       "Bash(Remove-Item \"C:\\\\Users\\\\ferga\\\\Documents\\\\lubriplan-card\\\\src\\\\screens\\\\SyncPage.jsx\" -ErrorAction SilentlyContinue)",
       "Bash(Remove-Item \"C:\\\\Users\\\\ferga\\\\Documents\\\\lubriplan-card\\\\src\\\\utils\\\\imageStore.js\" -ErrorAction SilentlyContinue)",
       "Skill(run)",
-      "Bash(npm list *)"
+      "Bash(npm list *)",
+      "Bash(curl -v \"http://192.168.1.100:5173/pin?equipo=36d75c46-2b02-459c-9e98-c93ee1c34357\"+)",
+      "Bash(curl -s \"http://localhost:5173/pin?equipo=36d75c46-2b02-459c-9e98-c93ee1c34357\")"
     ]
   }
 }

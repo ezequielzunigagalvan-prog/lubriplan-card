@@ -2,33 +2,11 @@ import { useRef } from 'react'
 import { QRCodeSVG, QRCodeCanvas } from 'qrcode.react'
 
 export default function QRModal({ equipo, onClose }) {
-  // Obtener URL base del QR
-  // 1. Primero intenta usar VITE_QR_BASE_URL (variable de entorno - para producción)
-  // 2. Si estamos en localhost, intenta usar la IP local (192.168.x.x)
-  // 3. Si no hay IP local disponible, fallback a localhost (no funcionará en otro dispositivo)
-
-  let baseUrl = import.meta.env.VITE_QR_BASE_URL
-  const isLocalhost = ['localhost', '127.0.0.1', ''].includes(window.location.hostname)
-
-  if (!baseUrl) {
-    if (isLocalhost) {
-      // En localhost, obtener IP local desde sessionStorage (si está disponible)
-      // Esta IP se obtiene del servidor backend en el primer fetch
-      const localIp = sessionStorage.getItem('localIp')
-      if (localIp) {
-        baseUrl = `http://${localIp}:5173`
-      } else {
-        // Fallback: intentar obtener la IP local desde window.location
-        // Nota: esto solo funciona si accediste al servidor por IP, no por localhost
-        baseUrl = window.location.origin
-      }
-    } else {
-      // En producción, usar origin (ej: https://tudominio.com)
-      baseUrl = window.location.origin
-    }
-  }
-
+  const baseUrl = import.meta.env.VITE_QR_BASE_URL || window.location.origin
+  // QR apunta al PIN del equipo, NO a la carta directamente
+  // Si la carta cambia, el PIN sigue igual → QR nunca se vuelve obsoleto
   const url = `${baseUrl}/pin?equipo=${equipo.id}`
+  const isLocalhost = ['localhost', '127.0.0.1', ''].includes(window.location.hostname)
   const canvasRef = useRef(null)
 
   const handleDownload = () => {
