@@ -5,7 +5,7 @@ const FONT = 'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-ser
 // ─── QA data ─────────────────────────────────────────────────────────────
 const BOT_INTRO = {
   text: '¡Hola! Soy el asistente de LubriPlan Card. Puedo responderte cualquier consulta sobre la plataforma. ¿Por dónde quieres empezar?',
-  chips: ['¿Qué es LubriPlan Card?', '¿Cuánto cuesta?', '¿Necesita instalación?', '¿Incluye historial?'],
+  chips: ['¿Qué es LubriPlan Card?', '¿Necesita instalación?', '¿Incluye historial?'],
 }
 
 const QA = {
@@ -13,43 +13,39 @@ const QA = {
     text: 'LubriPlan Card es una herramienta de visualización de cartas de lubricación industrial. El técnico escanea el QR del equipo y accede a su ficha: puntos de lubricación, lubricantes, frecuencias y procedimientos.\n\nEs una solución de solo consulta — no incluye historial, rutas ni alertas. Esas funciones están disponibles integrando con LubriPlan en el Plan Pro.',
     chips: ['¿Necesita instalación?', '¿Qué incluye cada plan?', '¿Incluye historial?'],
   },
-  '¿Cuánto cuesta?': {
-    text: 'Los planes arrancan en $80 MXN por equipo (mínimo 20 equipos, pago único).\n\n• Básico: $80/equipo hasta 30 equipos\n• Estándar: $350/equipo ilimitado\n• Pro: $350/equipo + suscripción LubriPlan\n• Personalizado: precio a convenir para 100+ equipos\n\nTodos son pagos únicos (excepto Pro que incluye suscripción mensual a LubriPlan). IVA no incluido.',
-    chips: ['¿Qué incluye el plan Estándar?', '¿Qué es el plan Pro?', '¿Qué incluye el mantenimiento?'],
-  },
   '¿Necesita instalación?': {
     text: 'No. El técnico solo necesita la cámara de su celular para escanear el QR. Accede directamente desde el navegador, sin descargas, sin registro y sin contraseñas.\n\nEl administrador sí accede a un panel web para cargar y actualizar la información de los equipos.',
-    chips: ['¿Qué es LubriPlan Card?', '¿Cuánto cuesta?', '¿Cuántos técnicos puedo agregar?'],
+    chips: ['¿Qué es LubriPlan Card?', '¿Cuántos técnicos puedo agregar?', '¿Qué incluye cada plan?'],
   },
   '¿Incluye historial?': {
     text: 'No. LubriPlan Card es visualización pura. El técnico puede ver qué lubricante usar, cuándo y cómo, pero no registra si la actividad fue realizada.\n\nEl historial de lubricación, rutas y alertas son funciones exclusivas de LubriPlan. Ambas plataformas se integran en el Plan Pro.',
-    chips: ['¿Qué es el plan Pro?', '¿Cuánto cuesta?', '¿Qué es LubriPlan Card?'],
+    chips: ['¿Qué es el plan Pro?', '¿Qué incluye cada plan?', '¿Qué es LubriPlan Card?'],
   },
   '¿Qué incluye el plan Estándar?': {
     text: 'El plan Estándar incluye:\n\n✓ Ficha digital vía QR\n✓ Placa QR metálica por equipo\n✓ Carta rígida a color\n✓ PDF por equipo\n✓ Técnicos ilimitados\n✓ Equipos ilimitados\n\nTambién ofrece mantenimiento anual opcional (20% del valor) que cubre actualización de fichas, reimpresión, altas/bajas, soporte WhatsApp y más.',
-    chips: ['¿Qué es el plan Pro?', '¿Qué incluye el mantenimiento?', '¿Cuánto cuesta?'],
+    chips: ['¿Qué es el plan Pro?', '¿Qué incluye el mantenimiento?', '¿Qué incluye el plan Estándar?'],
   },
   '¿Qué es el plan Pro?': {
     text: 'El plan Pro combina LubriPlan Card + la plataforma LubriPlan. Incluye todo lo del plan Estándar más:\n\n✓ Ficha sincronizada en tiempo real con LubriPlan\n✓ Historial de lubricación\n✓ Rutas y alertas automáticas\n✓ Dashboard analítico\n\nEl mantenimiento está incluido en la suscripción mensual de LubriPlan.',
-    chips: ['¿Cuánto cuesta?', '¿Qué incluye el plan Estándar?', '¿Incluye historial?'],
+    chips: ['¿Qué incluye el plan Estándar?', '¿Incluye historial?', '¿Necesita instalación?'],
   },
   '¿Qué incluye cada plan?': {
     text: 'Tenemos 4 planes:\n\n• Básico ($80/eq): QR digital, hasta 3 técnicos y 30 equipos\n• Estándar ($350/eq): placa metálica, carta rígida, PDF, ilimitado\n• Pro ($350/eq + LubriPlan): todo lo anterior + historial y rutas\n• Personalizado: 100+ equipos con precio especial\n\n¿Quieres que te explique alguno en detalle?',
-    chips: ['¿Qué incluye el plan Estándar?', '¿Qué es el plan Pro?', '¿Cuánto cuesta?'],
+    chips: ['¿Qué incluye el plan Estándar?', '¿Qué es el plan Pro?', '¿Necesita instalación?'],
   },
   '¿Qué incluye el mantenimiento?': {
     text: 'El mantenimiento anual del plan Estándar es opcional y cuesta el 20% del valor de implementación (~$70/eq/año). Incluye:\n\n✓ Actualización de fichas técnicas\n✓ Reimpresión de tarjetas físicas\n✓ Altas y bajas de equipos\n✓ Corrección de fichas\n✓ Actualizaciones de plataforma\n✓ Respaldo y recuperación de datos\n✓ Soporte WhatsApp y correo (respuesta 24–48 hrs)',
-    chips: ['¿Cuánto cuesta?', '¿Qué incluye el plan Estándar?', '¿Cuántos técnicos puedo agregar?'],
+    chips: ['¿Qué incluye el plan Estándar?', '¿Cuántos técnicos puedo agregar?', '¿Necesita instalación?'],
   },
   '¿Cuántos técnicos puedo agregar?': {
     text: 'Depende del plan:\n\n• Básico: hasta 3 técnicos\n• Estándar: técnicos ilimitados\n• Pro: técnicos ilimitados\n• Personalizado: ilimitados con gestión centralizada\n\nCada técnico accede con su PIN desde la app y puede consultar las fichas de los equipos que tenga asignados.',
-    chips: ['¿Cuánto cuesta?', '¿Necesita instalación?', '¿Qué es LubriPlan Card?'],
+    chips: ['¿Qué incluye cada plan?', '¿Necesita instalación?', '¿Qué es LubriPlan Card?'],
   },
 }
 
 const DEFAULT_RESPONSE = {
   text: 'Esa consulta la manejo mejor en directo. Te recomiendo contactarnos por WhatsApp o correo para que podamos ayudarte en detalle.',
-  chips: ['¿Qué es LubriPlan Card?', '¿Cuánto cuesta?', '¿Necesita instalación?'],
+  chips: ['¿Qué es LubriPlan Card?', '¿Necesita instalación?', '¿Qué incluye cada plan?'],
 }
 
 function findAnswer(text) {
