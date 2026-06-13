@@ -599,6 +599,16 @@ export default function LandingPage() {
           </div>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <a
+            href="https://www.lubriplan.com"
+            target="_blank"
+            rel="noreferrer"
+            style={{ padding: '8px 16px', background: 'rgba(129,140,248,0.06)', border: '1px solid rgba(129,140,248,0.20)', borderRadius: 8, color: '#94a3b8', fontSize: 13, cursor: 'pointer', fontFamily: FONT, fontWeight: 500, transition: 'border-color 0.15s, color 0.15s', textDecoration: 'none', display: 'inline-block' }}
+            onMouseEnter={e => { e.currentTarget.style.borderColor = 'rgba(129,140,248,0.50)'; e.currentTarget.style.color = '#a5b4fc' }}
+            onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(129,140,248,0.20)'; e.currentTarget.style.color = '#94a3b8' }}
+          >
+            ← LubriPlan
+          </a>
           <button
             onClick={() => scrollTo(pricingRef)}
             style={{ padding: '8px 16px', background: 'rgba(99,102,241,0.06)', border: '1px solid rgba(99,102,241,0.20)', borderRadius: 8, color: '#94a3b8', fontSize: 13, cursor: 'pointer', fontFamily: FONT, fontWeight: 500, transition: 'border-color 0.15s, color 0.15s' }}
