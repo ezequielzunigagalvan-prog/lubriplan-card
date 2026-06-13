@@ -24,6 +24,15 @@ function diasAtras(fecha) {
   return `Hace ${d} días`
 }
 
+function formatearFecha(fechaISO) {
+  if (!fechaISO) return '—'
+  const fecha = new Date(fechaISO)
+  const año = fecha.getFullYear()
+  const mes = String(fecha.getMonth() + 1).padStart(2, '0')
+  const día = String(fecha.getDate()).padStart(2, '0')
+  return `${año}-${mes}-${día}`
+}
+
 // ── Modales auxiliares ──────────────────────────────────────────────────────
 
 function CambiarCredencialesModal({ onClose, onSave }) {
@@ -385,7 +394,7 @@ export default function DashboardAdmin() {
                           {lub.equipoNombre} · {lub.puntoNombre}
                         </div>
                         <div style={{ color: '#4a5070', fontSize: 11, marginTop: 2 }}>
-                          {lub.tecnicoNombre || 'Técnico'} • {lub.fecha}
+                          {lub.tecnicoNombre || 'Técnico'} • {formatearFecha(lub.fecha)}
                         </div>
                       </div>
                       <div style={{ color: '#22C55E', fontWeight: 600, fontSize: 11 }}>

@@ -3,6 +3,15 @@ import AdminLayout from '../components/AdminLayout'
 import { useAdmin } from '../context/AdminContext'
 import { obtenerHistoricoEquipo, obtenerEstadisticasLubricacion } from '../../api/cardApi'
 
+function formatearFecha(fechaISO) {
+  if (!fechaISO) return '—'
+  const fecha = new Date(fechaISO)
+  const año = fecha.getFullYear()
+  const mes = String(fecha.getMonth() + 1).padStart(2, '0')
+  const día = String(fecha.getDate()).padStart(2, '0')
+  return `${año}-${mes}-${día}`
+}
+
 export default function HistoricoLubricaciones() {
   const { equipos } = useAdmin()
   const [equipoSeleccionado, setEquipoSeleccionado] = useState(null)
@@ -130,7 +139,7 @@ export default function HistoricoLubricaciones() {
                           opacity: 0.8,
                           transition: 'opacity 0.2s',
                         }}
-                        title={`${stat.fecha}: ${stat.totalLubricaciones} lubricaciones`}
+                        title={`${formatearFecha(stat.fecha)}: ${stat.totalLubricaciones} lubricaciones`}
                         onMouseEnter={(e) => e.currentTarget.style.opacity = '1'}
                         onMouseLeave={(e) => e.currentTarget.style.opacity = '0.8'}
                       />
@@ -196,7 +205,7 @@ export default function HistoricoLubricaciones() {
                             {hub.tecnicoNombre || '—'}
                           </td>
                           <td style={{ color: '#8892b0', padding: '10px 0' }}>
-                            {hub.fecha}
+                            {formatearFecha(hub.fecha)}
                           </td>
                           <td style={{ color: '#8892b0', padding: '10px 0' }}>
                             {hub.hora || '—'}
