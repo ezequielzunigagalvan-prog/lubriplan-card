@@ -35,7 +35,7 @@ function EquipoRow({ equipo, isLast, onEdit, onCarta, onDelete, onQR, isSelected
     <div
       style={{
         display: 'grid',
-        gridTemplateColumns: '28px 110px 1fr 140px 80px 90px auto',
+        gridTemplateColumns: '28px 110px 1fr 120px 80px 240px',
         alignItems: 'center',
         gap: 0,
         padding: '13px 20px',
@@ -83,7 +83,7 @@ function EquipoRow({ equipo, isLast, onEdit, onCarta, onDelete, onQR, isSelected
         {equipo.activo !== false ? 'Activo' : 'Inactivo'}
       </span>
 
-      <div style={{ gridColumn: '6', display: 'flex', gap: 6, justifyContent: 'flex-end' }}>
+      <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
         <ActionBtn color="#06B6D4" onClick={onQR}>QR</ActionBtn>
         <ActionBtn color="#3B82F6" onClick={onCarta}>Carta</ActionBtn>
         <ActionBtn color="#818cf8" onClick={onEdit}>Editar</ActionBtn>
@@ -96,7 +96,7 @@ function EquipoRow({ equipo, isLast, onEdit, onCarta, onDelete, onQR, isSelected
 function ColHeader({ onSelectAll, allSelected }) {
   return (
     <div style={{
-      display: 'grid', gridTemplateColumns: '28px 110px 1fr 140px 80px 90px auto',
+      display: 'grid', gridTemplateColumns: '28px 110px 1fr 120px 80px 240px',
       gap: 0, padding: '8px 20px',
       background: 'rgba(255,255,255,0.02)', borderBottom: '1px solid #2a2850',
     }}>
