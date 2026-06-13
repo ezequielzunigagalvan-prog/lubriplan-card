@@ -393,13 +393,31 @@ router.delete('/equipos/:id/imagenes/:imgId', requireAuth, async (req, res) => {
 
 // ── Histórico de Lubricaciones ────────────────────────────────────────────
 
-// Registrar lubricación — requiere auth
-router.post('/lubricaciones/registrar', requireAuth, async (req, res) => {
+// Registrar lubricación (técnico sin token admin)
+router.post('/lubricaciones/registrar', async (req, res) => {
   const { puntoId, equipoId, tecnicoId, notas } = req.body || {}
   if (!puntoId || !equipoId || !tecnicoId) {
     return res.status(400).json({ error: 'Faltan campos requeridos' })
   }
   try {
+    // Validar que el técnico existe
+    const tecCheck = await pool.query('SELECT id FROM tecnicos_card WHERE id=$1', [tecnicoId])
+    if (tecCheck.rows.length === 0) {
+      return res.status(400).json({ error: 'Técnico no válido' })
+    }
+
+    // Validar que el equipo existe
+    const eqCheck = await pool.query('SELECT id FROM equipos_card WHERE id=$1', [equipoId])
+    if (eqCheck.rows.length === 0) {
+      return res.status(400).json({ error: 'Equipo no válido' })
+    }
+
+    // Validar que el punto existe
+    const ptCheck = await pool.query('SELECT id FROM puntos_lubricacion_card WHERE id=$1', [puntoId])
+    if (ptCheck.rows.length === 0) {
+      return res.status(400).json({ error: 'Punto no válido' })
+    }
+
     const { rows } = await pool.query(
       `INSERT INTO lubricaciones_historial (punto_id, equipo_id, tecnico_id, notas)
        VALUES ($1,$2,$3,$4) RETURNING *`,
